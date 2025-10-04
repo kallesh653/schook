@@ -1,0 +1,153 @@
+/* Enhanced Mobile-First CSS for Student Dashboard */
+
+/* Base responsive styles */
+.student-dashboard {
+  padding: 8px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .student-dashboard {
+    padding: 4px;
+  }
+
+  .profile-card {
+    margin: 8px 0;
+    border-radius: 12px;
+  }
+
+  .marks-card {
+    margin: 4px 0;
+    padding: 12px;
+  }
+
+  .responsive-table {
+    font-size: 0.8rem;
+  }
+
+  .responsive-table th,
+  .responsive-table td {
+    padding: 8px 4px;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .student-dashboard {
+    padding: 16px;
+  }
+
+  .profile-card {
+    margin: 12px 0;
+  }
+}
+
+/* Desktop optimizations */
+@media (min-width: 1025px) {
+  .student-dashboard {
+    padding: 24px;
+  }
+}
+
+/* Animation classes */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Grade color indicators */
+.grade-a-plus {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+.grade-a {
+  background-color: #8bc34a !important;
+  color: white !important;
+}
+
+.grade-b-plus {
+  background-color: #ff9800 !important;
+  color: white !important;
+}
+
+.grade-b {
+  background-color: #ff5722 !important;
+  color: white !important;
+}
+
+.grade-c {
+  background-color: #f44336 !important;
+  color: white !important;
+}
+
+/* Loading spinner customization */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  flex-direction: column;
+}
+
+/* Hover effects */
+.interactive-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.2s ease-in-out;
+}
+
+/* Tab indicator */
+.tab-indicator {
+  background: linear-gradient(45deg, #2196F3 30%, #21CBF3 90%) !important;
+}
+
+/* Performance indicators */
+.performance-excellent {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.performance-good {
+  color: #8bc34a;
+  font-weight: bold;
+}
+
+.performance-average {
+  color: #ff9800;
+  font-weight: bold;
+}
+
+.performance-poor {
+  color: #f44336;
+  font-weight: bold;
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #2196F3 30%, #21CBF3 90%);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #1976d2;
+}

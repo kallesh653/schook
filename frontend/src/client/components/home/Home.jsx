@@ -1,0 +1,725 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Container, Typography, Grid, Card, CardContent, Box, Paper, 
+  Button, Chip, Avatar, IconButton, Fade, Zoom 
+} from '@mui/material';
+import { 
+  School as SchoolIcon, 
+  EmojiEvents as AwardIcon,
+  Groups as StudentsIcon,
+  MenuBook as BookIcon,
+  Star as StarIcon,
+  PlayArrow as PlayIcon,
+  ArrowForward as ArrowIcon
+} from '@mui/icons-material';
+import { styled, keyframes } from '@mui/material/styles';
+import Carousel from './carousel/Carousel';
+import ImageSlider from './ImageSlider';
+import axios from 'axios';
+import { baseUrl } from '../../../environment';
+
+// Advanced CSS animations
+const float = keyframes`
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+`;
+
+const slideInLeft = keyframes`
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+`;
+
+const slideInRight = keyframes`
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+`;
+
+const pulse = keyframes`
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+`;
+
+// Styled components with advanced CSS
+const StyledContainer = styled(Container)(({ theme }) => ({
+  background: '#fefefe',
+  minHeight: '100vh',
+  padding: 0,
+  maxWidth: 'none !important',
+  width: '100%'
+}));
+
+const HeroSection = styled(Box)(({ theme, primaryColor, secondaryColor }) => ({
+  background: primaryColor && secondaryColor
+    ? `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`
+    : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  minHeight: '100vh',
+  display: 'flex',
+  alignItems: 'center',
+  position: 'relative',
+  overflow: 'hidden',
+  color: 'white'
+}));
+
+const FloatingCard = styled(Card)(({ theme }) => ({
+  background: 'rgba(255, 255, 255, 0.95)',
+  backdropFilter: 'blur(10px)',
+  border: '1px solid rgba(255, 255, 255, 0.2)',
+  borderRadius: '20px',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  '&:hover': {
+    transform: 'translateY(-10px) scale(1.02)',
+    boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+    background: 'rgba(255, 255, 255, 1)'
+  }
+}));
+
+const GradientText = styled(Typography)(({ theme, isHero }) => ({
+  color: isHero ? 'white' : '#333',
+  fontWeight: 700
+}));
+
+const AnimatedSection = styled(Box)(({ theme }) => ({
+  animation: `${slideInLeft} 1s ease-out`
+}));
+
+const StatsCard = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(3),
+  textAlign: 'center',
+  background: '#fff',
+  color: '#333',
+  borderRadius: '15px',
+  border: '1px solid #e0e0e0',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-5px)',
+    boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
+  }
+}));
+
+const Home = () => {
+  const [schoolInfo, setSchoolInfo] = useState({
+    name: 'School Management System',
+    tagline: 'Nurturing Tomorrow\'s Leaders',
+    description: 'Empowering students with knowledge, values, and skills for a brighter future.',
+    established: '1995',
+    students: '2,500+',
+    teachers: '150+',
+    achievements: '50+'
+  });
+
+  const [media, setMedia] = useState({
+    logo: null,
+    heroImage: null,
+    aboutImage: null,
+    heroVideo: null,
+    promoVideo: null,
+    campusVideo: null,
+    virtualTour: null,
+    galleryImages: [],
+    sliderImages: []
+  });
+
+  const [theme, setTheme] = useState({
+    primaryColor: '#667eea',
+    secondaryColor: '#764ba2',
+    showStatistics: true,
+    showNews: true,
+    showPrograms: true,
+    showGallery: false,
+    showVideos: false
+  });
+
+  const [latestNews, setLatestNews] = useState([
+    {
+      id: 1,
+      title: 'Annual Sports Day 2024',
+      date: '2024-03-15',
+      description: 'Join us for an exciting day of sports and activities.',
+      image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400'
+    },
+    {
+      id: 2,
+      title: 'Science Fair Winners',
+      date: '2024-03-10',
+      description: 'Congratulations to our brilliant young scientists.',
+      image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=400'
+    },
+    {
+      id: 3,
+      title: 'New Library Opening',
+      date: '2024-03-05',
+      description: 'State-of-the-art library facility now open.',
+      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400'
+    }
+  ]);
+
+  const [sliderImages, setSliderImages] = useState([]);
+
+  // Function to fetch front page data
+  const fetchFrontPageData = async () => {
+      try {
+        // First, try to get a list of schools to find a valid school ID
+        let schoolId = null;
+
+        try {
+          // Try to get school list to find an active school
+          const schoolsResponse = await axios.get(`${baseUrl}/school/fetch-all`);
+          if (schoolsResponse.data.success && schoolsResponse.data.data.length > 0) {
+            schoolId = schoolsResponse.data.data[0]._id;
+            console.log('Found school ID from list:', schoolId);
+          }
+        } catch (schoolError) {
+          console.log('Could not fetch schools list:', schoolError.message);
+        }
+
+        // If we couldn't get a school ID from the list, try a fallback
+        if (!schoolId) {
+          // Check localStorage for logged in school ID
+          const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+          if (token) {
+            try {
+              // Try to get current school data from authenticated endpoint
+              const authResponse = await axios.get(`${baseUrl}/front-page/data`, {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+              if (authResponse.data.success) {
+                const data = authResponse.data.data;
+                console.log('Front page data from authenticated endpoint:', data);
+
+                if (data.schoolInfo) {
+                  setSchoolInfo(prev => ({ ...prev, ...data.schoolInfo }));
+                }
+                if (data.news && data.news.length > 0) {
+                  setLatestNews(data.news.filter(item => item.published));
+                }
+                if (data.media) {
+                  setMedia(prev => ({ ...prev, ...data.media }));
+                  if (data.media.sliderImages && data.media.sliderImages.length > 0) {
+                    setSliderImages(data.media.sliderImages.filter(slide => slide.active));
+                  }
+                }
+                if (data.theme) {
+                  setTheme(prev => ({ ...prev, ...data.theme }));
+                }
+                return; // Exit early if authenticated endpoint worked
+              }
+            } catch (authError) {
+              console.log('Could not fetch from authenticated endpoint:', authError.message);
+            }
+          }
+        }
+
+        // Try public endpoint with school ID
+        if (schoolId) {
+          console.log('Fetching public front page data for school:', schoolId);
+          const response = await axios.get(`${baseUrl}/front-page/public/${schoolId}`);
+
+          if (response.data.success && response.data.data) {
+            const data = response.data.data;
+            console.log('Front page data received from public endpoint:', data);
+
+            if (data.schoolInfo) {
+              setSchoolInfo(prev => ({ ...prev, ...data.schoolInfo }));
+            }
+            if (data.news && data.news.length > 0) {
+              setLatestNews(data.news.filter(item => item.published));
+            }
+            if (data.media) {
+              setMedia(prev => ({ ...prev, ...data.media }));
+              if (data.media.sliderImages && data.media.sliderImages.length > 0) {
+                setSliderImages(data.media.sliderImages.filter(slide => slide.active));
+              }
+            }
+            if (data.theme) {
+              setTheme(prev => ({ ...prev, ...data.theme }));
+            }
+          }
+        } else {
+          console.log('No school ID available, using default data');
+        }
+      } catch (error) {
+        console.error('Error fetching front page data:', error);
+        // Keep using default data if API fails
+      }
+    };
+
+  // Fetch front page data on mount and set up polling for updates
+  useEffect(() => {
+    fetchFrontPageData();
+
+    // Set up polling to check for updates every 30 seconds
+    const pollInterval = setInterval(() => {
+      fetchFrontPageData();
+    }, 30000);
+
+    // Listen for focus events to refresh when user returns to tab
+    const handleFocus = () => {
+      fetchFrontPageData();
+    };
+
+    window.addEventListener('focus', handleFocus);
+
+    // Listen for custom refresh event (can be triggered from admin panel)
+    const handleRefresh = () => {
+      fetchFrontPageData();
+    };
+
+    window.addEventListener('frontpage-refresh', handleRefresh);
+
+    return () => {
+      clearInterval(pollInterval);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('frontpage-refresh', handleRefresh);
+    };
+  }, []);
+
+  return (
+    <Box sx={{ width: '100%', overflow: 'hidden' }}>
+
+      {/* Hero Section */}
+      <HeroSection primaryColor={theme.primaryColor} secondaryColor={theme.secondaryColor}>
+        <Container maxWidth="lg">
+          <Grid container spacing={4} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <AnimatedSection>
+                <Fade in timeout={1000}>
+                  <Box>
+                    <GradientText variant="h2" fontWeight="bold" gutterBottom isHero>
+                      {schoolInfo.name}
+                    </GradientText>
+                    <Typography variant="h5" color="rgba(255,255,255,0.9)" gutterBottom sx={{ mb: 3 }}>
+                      {schoolInfo.tagline}
+                    </Typography>
+                    <Typography variant="body1" color="rgba(255,255,255,0.8)" sx={{ mb: 4, lineHeight: 1.8 }}>
+                      {schoolInfo.description}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                      <Button 
+                        variant="contained" 
+                        size="large"
+                        endIcon={<ArrowIcon />}
+                        sx={{ 
+                          background: '#495057',
+                          borderRadius: '8px',
+                          px: 4,
+                          '&:hover': { 
+                            background: '#343a40',
+                            transform: 'translateY(-2px)'
+                          }
+                        }}
+                      >
+                        Explore Programs
+                      </Button>
+                      <Button 
+                        variant="outlined" 
+                        size="large"
+                        startIcon={<PlayIcon />}
+                        sx={{ 
+                          color: '#333',
+                          borderColor: '#333',
+                          borderRadius: '8px',
+                          px: 4,
+                          '&:hover': { 
+                            backgroundColor: '#f8f9fa',
+                            borderColor: '#333'
+                          }
+                        }}
+                      >
+                        Watch Video
+                      </Button>
+                    </Box>
+                  </Box>
+                </Fade>
+              </AnimatedSection>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Zoom in timeout={1500}>
+                <Box sx={{ position: 'relative' }}>
+                  <ImageSlider images={sliderImages} />
+                </Box>
+              </Zoom>
+            </Grid>
+          </Grid>
+        </Container>
+      </HeroSection>
+
+      {/* Stats Section */}
+      {theme.showStatistics && (
+        <Box sx={{ py: 8, background: '#f8f9fa' }}>
+          <Container maxWidth="lg">
+            <Grid container spacing={4}>
+              {[
+                { icon: <SchoolIcon />, value: schoolInfo.established, label: 'Established' },
+                { icon: <StudentsIcon />, value: schoolInfo.students, label: 'Students' },
+                { icon: <BookIcon />, value: schoolInfo.teachers, label: 'Teachers' },
+                { icon: <AwardIcon />, value: schoolInfo.achievements, label: 'Achievements' }
+              ].map((stat, index) => (
+                <Grid item xs={6} md={3} key={index}>
+                  <Fade in timeout={1000 + index * 200}>
+                    <StatsCard elevation={3}>
+                      <Avatar sx={{
+                        bgcolor: '#f8f9fa',
+                        color: '#495057',
+                        mb: 2,
+                        mx: 'auto',
+                        width: 60,
+                        height: 60
+                      }}>
+                        {stat.icon}
+                      </Avatar>
+                      <Typography variant="h4" fontWeight="bold">
+                        {stat.value}
+                      </Typography>
+                      <Typography variant="body1">
+                        {stat.label}
+                      </Typography>
+                    </StatsCard>
+                  </Fade>
+                </Grid>
+              ))}
+            </Grid>
+          </Container>
+        </Box>
+      )}
+
+      {/* School Information Section */}
+      <Box sx={{ py: 8 }}>
+        <Container maxWidth="lg">
+          <Typography variant="h3" textAlign="center" gutterBottom sx={{ mb: 6 }}>
+            <GradientText>About Our School</GradientText>
+          </Typography>
+          <Grid container spacing={4} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <img
+                src={media.aboutImage || media.heroImage || "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=600&h=400&fit=crop"}
+                alt="School Campus"
+                style={{
+                  width: '100%',
+                  borderRadius: '15px',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                }}
+                onError={(e) => {
+                  e.target.src = "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=600&h=400&fit=crop";
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h4" gutterBottom color="primary">
+                Excellence in Education
+              </Typography>
+              <Typography variant="body1" paragraph sx={{ lineHeight: 1.8, color: 'text.secondary' }}>
+                For over 25 years, we have been committed to providing exceptional education 
+                that prepares students for success in an ever-changing world. Our innovative 
+                teaching methods and state-of-the-art facilities create an environment where 
+                every student can thrive.
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
+                {['STEM Programs', 'Arts & Culture', 'Sports Excellence', 'Global Perspective'].map((feature) => (
+                  <Chip 
+                    key={feature}
+                    label={feature}
+                    color="primary"
+                    variant="outlined"
+                    sx={{ borderRadius: '15px' }}
+                  />
+                ))}
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Latest News Section */}
+      {theme.showNews && (
+        <Box sx={{ py: 8, bgcolor: '#f8f9fa' }}>
+          <Container maxWidth="lg">
+            <Typography variant="h3" textAlign="center" gutterBottom sx={{ mb: 6 }}>
+              <GradientText>Latest News & Events</GradientText>
+            </Typography>
+            <Grid container spacing={4}>
+              {latestNews.map((news, index) => (
+                <Grid item xs={12} md={4} key={news._id || news.id}>
+                  <Fade in timeout={1000 + index * 300}>
+                    <FloatingCard>
+                      <Box sx={{ position: 'relative', overflow: 'hidden', borderRadius: '20px 20px 0 0' }}>
+                        <img
+                          src={news.image || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400"}
+                          alt={news.title}
+                          style={{
+                            width: '100%',
+                            height: '200px',
+                            objectFit: 'cover',
+                            transition: 'transform 0.3s ease'
+                          }}
+                          onError={(e) => {
+                            e.target.src = "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400";
+                          }}
+                        />
+                        <Box sx={{
+                          position: 'absolute',
+                          top: 10,
+                          right: 10,
+                          bgcolor: 'primary.main',
+                          color: 'white',
+                          px: 2,
+                          py: 0.5,
+                          borderRadius: '15px',
+                          fontSize: '0.8rem'
+                        }}>
+                          {new Date(news.date || news.createdAt).toLocaleDateString()}
+                        </Box>
+                      </Box>
+                      <CardContent sx={{ p: 3 }}>
+                        <Typography variant="h6" gutterBottom fontWeight="bold">
+                          {news.title}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                          {news.description}
+                        </Typography>
+                        <Button
+                          size="small"
+                          endIcon={<ArrowIcon />}
+                          sx={{ color: 'primary.main', fontWeight: 'bold' }}
+                        >
+                          Read More
+                        </Button>
+                      </CardContent>
+                    </FloatingCard>
+                  </Fade>
+                </Grid>
+              ))}
+            </Grid>
+          </Container>
+        </Box>
+      )}
+
+      {/* Video Section */}
+      {theme.showVideos && (media.heroVideo || media.promoVideo || media.campusVideo || media.virtualTour) && (
+        <Box sx={{ py: 8 }}>
+          <Container maxWidth="lg">
+            <Typography variant="h3" textAlign="center" gutterBottom sx={{ mb: 6 }}>
+              <GradientText>School Videos</GradientText>
+            </Typography>
+            <Grid container spacing={4}>
+              {media.heroVideo && (
+                <Grid item xs={12} md={6}>
+                  <Box sx={{ textAlign: 'center', mb: 4 }}>
+                    <Typography variant="h5" gutterBottom>Hero Video</Typography>
+                    <video
+                      controls
+                      style={{
+                        width: '100%',
+                        maxHeight: '300px',
+                        borderRadius: '15px',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      <source src={media.heroVideo} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </Box>
+                </Grid>
+              )}
+              {media.promoVideo && (
+                <Grid item xs={12} md={6}>
+                  <Box sx={{ textAlign: 'center', mb: 4 }}>
+                    <Typography variant="h5" gutterBottom>Promotional Video</Typography>
+                    <video
+                      controls
+                      style={{
+                        width: '100%',
+                        maxHeight: '300px',
+                        borderRadius: '15px',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      <source src={media.promoVideo} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </Box>
+                </Grid>
+              )}
+              {media.campusVideo && (
+                <Grid item xs={12} md={6}>
+                  <Box sx={{ textAlign: 'center', mb: 4 }}>
+                    <Typography variant="h5" gutterBottom>Campus Tour</Typography>
+                    <video
+                      controls
+                      style={{
+                        width: '100%',
+                        maxHeight: '300px',
+                        borderRadius: '15px',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      <source src={media.campusVideo} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </Box>
+                </Grid>
+              )}
+              {media.virtualTour && (
+                <Grid item xs={12} md={6}>
+                  <Box sx={{ textAlign: 'center', mb: 4 }}>
+                    <Typography variant="h5" gutterBottom>Virtual Tour</Typography>
+                    <iframe
+                      width="100%"
+                      height="300"
+                      src={media.virtualTour.replace('watch?v=', 'embed/')}
+                      frameBorder="0"
+                      allowFullScreen
+                      style={{
+                        borderRadius: '15px',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                      }}
+                    ></iframe>
+                  </Box>
+                </Grid>
+              )}
+            </Grid>
+          </Container>
+        </Box>
+      )}
+
+      {/* Gallery Section */}
+      {theme.showGallery && media.galleryImages && media.galleryImages.length > 0 && (
+        <Box sx={{ py: 8, bgcolor: '#f8f9fa' }}>
+          <Container maxWidth="lg">
+            <Typography variant="h3" textAlign="center" gutterBottom sx={{ mb: 6 }}>
+              <GradientText>School Gallery</GradientText>
+            </Typography>
+            <Grid container spacing={3}>
+              {media.galleryImages.slice(0, 12).map((image, index) => (
+                <Grid item xs={6} sm={4} md={3} key={index}>
+                  <Fade in timeout={800 + index * 100}>
+                    <Box
+                      sx={{
+                        position: 'relative',
+                        overflow: 'hidden',
+                        borderRadius: '15px',
+                        '&:hover img': {
+                          transform: 'scale(1.05)'
+                        }
+                      }}
+                    >
+                      <img
+                        src={image}
+                        alt={`Gallery ${index + 1}`}
+                        style={{
+                          width: '100%',
+                          height: '200px',
+                          objectFit: 'cover',
+                          transition: 'transform 0.3s ease'
+                        }}
+                        onError={(e) => {
+                          e.target.src = "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=200&fit=crop";
+                        }}
+                      />
+                    </Box>
+                  </Fade>
+                </Grid>
+              ))}
+            </Grid>
+          </Container>
+        </Box>
+      )}
+
+      {/* Programs Section */}
+      {theme.showPrograms && (
+        <Box sx={{ py: 8 }}>
+          <Container maxWidth="lg">
+            <Typography variant="h3" textAlign="center" gutterBottom sx={{ mb: 6 }}>
+              <GradientText>Our Programs</GradientText>
+            </Typography>
+          <Grid container spacing={4}>
+            {[
+              {
+                title: 'Elementary School',
+                description: 'Building strong foundations for lifelong learning',
+                icon: '🌱',
+                color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+              },
+              {
+                title: 'Middle School',
+                description: 'Developing critical thinking and creativity',
+                icon: '🚀',
+                color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+              },
+              {
+                title: 'High School',
+                description: 'Preparing for college and career success',
+                icon: '🎓',
+                color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+              }
+            ].map((program, index) => (
+              <Grid item xs={12} md={4} key={program.title}>
+                <Fade in timeout={1200 + index * 200}>
+                  <FloatingCard sx={{ height: '100%', textAlign: 'center' }}>
+                    <CardContent sx={{ p: 4 }}>
+                      <Box sx={{
+                        width: 80,
+                        height: 80,
+                        borderRadius: '50%',
+                        background: program.color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '2rem',
+                        mx: 'auto',
+                        mb: 3
+                      }}>
+                        {program.icon}
+                      </Box>
+                      <Typography variant="h5" gutterBottom fontWeight="bold">
+                        {program.title}
+                      </Typography>
+                      <Typography variant="body1" color="text.secondary">
+                        {program.description}
+                      </Typography>
+                    </CardContent>
+                  </FloatingCard>
+                </Fade>
+              </Grid>
+            ))}
+          </Grid>
+          </Container>
+        </Box>
+      )}
+
+      {/* Call to Action */}
+      <Box sx={{
+        py: 8,
+        background: `linear-gradient(135deg, ${theme.primaryColor} 0%, ${theme.secondaryColor} 100%)`,
+        textAlign: 'center'
+      }}>
+        <Container maxWidth="md">
+          <Typography variant="h3" color="white" gutterBottom fontWeight="bold">
+            Ready to Join Our Community?
+          </Typography>
+          <Typography variant="h6" color="rgba(255,255,255,0.9)" sx={{ mb: 4 }}>
+            Discover the difference quality education makes
+          </Typography>
+          <Button 
+            variant="contained"
+            size="large"
+            sx={{
+              background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+              borderRadius: '25px',
+              px: 6,
+              py: 2,
+              fontSize: '1.1rem',
+              '&:hover': { transform: 'scale(1.05)' }
+            }}
+          >
+            Apply Now
+          </Button>
+        </Container>
+      </Box>
+    </Box>
+  );
+};
+
+export default Home;

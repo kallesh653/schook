@@ -1,0 +1,95 @@
+# Dependencies
+node_modules/
+api/node_modules/
+frontend/node_modules/
+genapp/node_modules/
+
+# Environment Variables
+.env
+.env.local
+.env.production
+.env.development
+api/.env
+api/.env.local
+api/.env.production
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+genapp/.env
+
+# Build outputs
+frontend/dist/
+frontend/build/
+api/dist/
+api/build/
+genapp/dist/
+genapp/build/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+logs/
+*.log.*
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+nul
+
+# Package manager
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Optional (uncomment if needed)
+# .npmrc
+# .yarnrc
+
+# System files
+.cache/
+.parcel-cache/
+
+# PM2
+.pm2/
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Misc
+.vercel
+.netlify

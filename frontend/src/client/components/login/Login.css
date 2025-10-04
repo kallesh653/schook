@@ -1,0 +1,138 @@
+/* Login Container - Modern gradient background */
+.login-container {
+    width: 100%;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+}
+
+.login-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    pointer-events: none;
+}
+
+/* Login Content */
+.login-content {
+    width: 100%;
+    max-width: 450px;
+    z-index: 1;
+    position: relative;
+}
+
+/* Login Header */
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-title {
+    color: white !important;
+    font-weight: 700 !important;
+    margin-bottom: 8px !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.login-subtitle {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 1.1rem !important;
+    font-weight: 300 !important;
+}
+
+/* Login Form Paper */
+.login-form-paper {
+    padding: 40px !important;
+    border-radius: 20px !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Form Controls Styling */
+.login-form-paper .MuiFormControl-root {
+    margin-bottom: 20px;
+}
+
+.login-form-paper .MuiTextField-root {
+    margin-bottom: 20px;
+}
+
+.login-form-paper .MuiOutlinedInput-root {
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.login-form-paper .MuiOutlinedInput-root:hover {
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.login-form-paper .MuiOutlinedInput-root.Mui-focused {
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+}
+
+/* Button Styling */
+.login-form-paper .MuiButton-contained {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-radius: 12px !important;
+    padding: 12px 30px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    font-size: 1rem !important;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+.login-form-paper .MuiButton-contained:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(102, 126, 234, 0.4) !important;
+}
+
+/* Select Dropdown Styling */
+.login-form-paper .MuiSelect-outlined {
+    border-radius: 12px;
+}
+
+/* Error Messages */
+.login-form-paper p[style*="color: red"] {
+    color: #f44336 !important;
+    font-size: 0.875rem;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .login-content {
+        max-width: 100%;
+        padding: 0 10px;
+    }
+    
+    .login-form-paper {
+        padding: 30px 20px !important;
+        border-radius: 15px !important;
+    }
+    
+    .login-title {
+        font-size: 2rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-form-paper {
+        padding: 25px 15px !important;
+    }
+    
+    .login-title {
+        font-size: 1.75rem !important;
+    }
+}
