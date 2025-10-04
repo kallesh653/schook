@@ -31,7 +31,13 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
 const corsOptions = {
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:3000',
+    process.env.FRONTEND_URL || 'http://localhost:5173',
+    process.env.PRODUCTION_URL || 'http://localhost:5173'
+  ],
   credentials: true,
   exposedHeaders: ["Authorization"]
 }
