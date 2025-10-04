@@ -1,7 +1,9 @@
 {
-  "name": "school-management-system",
+  "name": "gentime",
   "private": true,
   "version": "2.0.0",
+  "description": "GenTime - School Management System Frontend by Kallesh SK",
+  "author": "Kallesh SK",
   "type": "module",
   "scripts": {
     "dev": "vite",
