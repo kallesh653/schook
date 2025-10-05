@@ -15,6 +15,7 @@ import {
 import { styled, keyframes } from '@mui/material/styles';
 import Carousel from './carousel/Carousel';
 import ImageSlider from './ImageSlider';
+import BeautifulSlider from './BeautifulSlider';
 import axios from 'axios';
 import { baseUrl } from '../../../environment';
 
@@ -279,72 +280,8 @@ const Home = () => {
   return (
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
 
-      {/* Hero Section */}
-      <HeroSection primaryColor={theme.primaryColor} secondaryColor={theme.secondaryColor}>
-        <Container maxWidth="lg">
-          <Grid container spacing={4} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <AnimatedSection>
-                <Fade in timeout={1000}>
-                  <Box>
-                    <GradientText variant="h2" fontWeight="bold" gutterBottom isHero>
-                      {schoolInfo.name}
-                    </GradientText>
-                    <Typography variant="h5" color="rgba(255,255,255,0.9)" gutterBottom sx={{ mb: 3 }}>
-                      {schoolInfo.tagline}
-                    </Typography>
-                    <Typography variant="body1" color="rgba(255,255,255,0.8)" sx={{ mb: 4, lineHeight: 1.8 }}>
-                      {schoolInfo.description}
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                      <Button 
-                        variant="contained" 
-                        size="large"
-                        endIcon={<ArrowIcon />}
-                        sx={{ 
-                          background: '#495057',
-                          borderRadius: '8px',
-                          px: 4,
-                          '&:hover': { 
-                            background: '#343a40',
-                            transform: 'translateY(-2px)'
-                          }
-                        }}
-                      >
-                        Explore Programs
-                      </Button>
-                      <Button 
-                        variant="outlined" 
-                        size="large"
-                        startIcon={<PlayIcon />}
-                        sx={{ 
-                          color: '#333',
-                          borderColor: '#333',
-                          borderRadius: '8px',
-                          px: 4,
-                          '&:hover': { 
-                            backgroundColor: '#f8f9fa',
-                            borderColor: '#333'
-                          }
-                        }}
-                      >
-                        Watch Video
-                      </Button>
-                    </Box>
-                  </Box>
-                </Fade>
-              </AnimatedSection>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Zoom in timeout={1500}>
-                <Box sx={{ position: 'relative' }}>
-                  <ImageSlider images={sliderImages} />
-                </Box>
-              </Zoom>
-            </Grid>
-          </Grid>
-        </Container>
-      </HeroSection>
+      {/* Beautiful Full-Width Slider with Images and Videos */}
+      <BeautifulSlider slides={sliderImages} />
 
       {/* Stats Section */}
       {theme.showStatistics && (
@@ -584,48 +521,201 @@ const Home = () => {
         </Box>
       )}
 
-      {/* Gallery Section */}
-      {theme.showGallery && media.galleryImages && media.galleryImages.length > 0 && (
-        <Box sx={{ py: 8, bgcolor: '#f8f9fa' }}>
-          <Container maxWidth="lg">
-            <Typography variant="h3" textAlign="center" gutterBottom sx={{ mb: 6 }}>
-              <GradientText>School Gallery</GradientText>
+      {/* Enhanced Gallery Section with HD Images */}
+      <Box sx={{ py: 10, bgcolor: '#f8f9fa' }}>
+        <Container maxWidth="lg">
+          <Box sx={{ textAlign: 'center', mb: 7 }}>
+            <Typography variant="h3" gutterBottom sx={{ fontWeight: 800, color: '#333' }}>
+              Explore Our Campus
             </Typography>
-            <Grid container spacing={3}>
-              {media.galleryImages.slice(0, 12).map((image, index) => (
-                <Grid item xs={6} sm={4} md={3} key={index}>
-                  <Fade in timeout={800 + index * 100}>
-                    <Box
-                      sx={{
-                        position: 'relative',
-                        overflow: 'hidden',
-                        borderRadius: '15px',
-                        '&:hover img': {
-                          transform: 'scale(1.05)'
+            <Typography variant="h6" color="text.secondary" sx={{ maxWidth: '600px', mx: 'auto' }}>
+              Take a visual journey through our world-class facilities and vibrant campus life
+            </Typography>
+          </Box>
+
+          <Grid container spacing={4}>
+            {/* Default HD school images when gallery is empty */}
+            {(!media.galleryImages || media.galleryImages.length === 0) && (
+              <>
+                {[
+                  {
+                    url: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1200&h=800&fit=crop',
+                    title: 'Modern Campus',
+                    description: 'State-of-the-art educational facilities'
+                  },
+                  {
+                    url: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&h=800&fit=crop',
+                    title: 'Smart Classrooms',
+                    description: 'Technology-enabled learning spaces'
+                  },
+                  {
+                    url: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=800&fit=crop',
+                    title: 'Library Resources',
+                    description: 'Extensive collection of books'
+                  },
+                  {
+                    url: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200&h=800&fit=crop',
+                    title: 'Sports Facilities',
+                    description: 'World-class athletic infrastructure'
+                  },
+                  {
+                    url: 'https://images.unsplash.com/photo-1577896851905-dc177a03b2e0?w=1200&h=800&fit=crop',
+                    title: 'Science Labs',
+                    description: 'Advanced laboratories'
+                  },
+                  {
+                    url: 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=1200&h=800&fit=crop',
+                    title: 'Arts & Culture',
+                    description: 'Creative spaces'
+                  }
+                ].map((image, index) => (
+                  <Grid item xs={12} sm={6} md={4} key={index}>
+                    <Fade in timeout={800 + index * 150}>
+                      <Box
+                        sx={{
+                          position: 'relative',
+                          overflow: 'hidden',
+                          borderRadius: '20px',
+                          boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                          cursor: 'pointer',
+                          height: '320px',
+                          transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                          '&:hover': {
+                            transform: 'translateY(-12px)',
+                            boxShadow: '0 16px 40px rgba(0,0,0,0.18)',
+                            '& img': {
+                              transform: 'scale(1.15)'
+                            },
+                            '& .gallery-overlay': {
+                              opacity: 1
+                            }
+                          }
+                        }}
+                      >
+                        <img
+                          src={image.url}
+                          alt={image.title}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            transition: 'transform 0.5s ease'
+                          }}
+                        />
+                        <Box
+                          className="gallery-overlay"
+                          sx={{
+                            position: 'absolute',
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            background: 'linear-gradient(transparent, rgba(0,0,0,0.9))',
+                            padding: '30px 20px 20px',
+                            opacity: 0,
+                            transition: 'opacity 0.4s ease',
+                            color: 'white'
+                          }}
+                        >
+                          <Typography variant="h5" fontWeight="bold" gutterBottom>
+                            {image.title}
+                          </Typography>
+                          <Typography variant="body2" sx={{ opacity: 0.95 }}>
+                            {image.description}
+                          </Typography>
+                        </Box>
+                        {/* HD Badge */}
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            top: 15,
+                            right: 15,
+                            backgroundColor: 'rgba(0,0,0,0.7)',
+                            backdropFilter: 'blur(10px)',
+                            color: 'white',
+                            padding: '8px 14px',
+                            borderRadius: '25px',
+                            fontSize: '0.75rem',
+                            fontWeight: 'bold',
+                            border: '1px solid rgba(255,255,255,0.3)'
+                          }}
+                        >
+                          HD
+                        </Box>
+                      </Box>
+                    </Fade>
+                  </Grid>
+                ))}
+              </>
+            )}
+
+            {/* User uploaded gallery images */}
+            {media.galleryImages && media.galleryImages.length > 0 && media.galleryImages.slice(0, 12).map((image, index) => (
+              <Grid item xs={6} sm={4} md={3} key={index}>
+                <Fade in timeout={800 + index * 100}>
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      overflow: 'hidden',
+                      borderRadius: '20px',
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                      cursor: 'pointer',
+                      height: '250px',
+                      transition: 'all 0.4s ease',
+                      '&:hover': {
+                        transform: 'translateY(-8px)',
+                        boxShadow: '0 12px 30px rgba(0,0,0,0.15)',
+                        '& img': {
+                          transform: 'scale(1.1)'
                         }
+                      }
+                    }}
+                  >
+                    <img
+                      src={image}
+                      alt={`Gallery ${index + 1}`}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        transition: 'transform 0.4s ease'
                       }}
-                    >
-                      <img
-                        src={image}
-                        alt={`Gallery ${index + 1}`}
-                        style={{
-                          width: '100%',
-                          height: '200px',
-                          objectFit: 'cover',
-                          transition: 'transform 0.3s ease'
-                        }}
-                        onError={(e) => {
-                          e.target.src = "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=200&fit=crop";
-                        }}
-                      />
-                    </Box>
-                  </Fade>
-                </Grid>
-              ))}
-            </Grid>
-          </Container>
-        </Box>
-      )}
+                      onError={(e) => {
+                        e.target.src = "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&h=400&fit=crop";
+                      }}
+                    />
+                  </Box>
+                </Fade>
+              </Grid>
+            ))}
+          </Grid>
+
+          {/* View More Button */}
+          <Box sx={{ textAlign: 'center', mt: 6 }}>
+            <Button
+              variant="contained"
+              size="large"
+              endIcon={<ArrowIcon />}
+              sx={{
+                background: `linear-gradient(135deg, ${theme.primaryColor} 0%, ${theme.secondaryColor} 100%)`,
+                borderRadius: '30px',
+                px: 6,
+                py: 1.8,
+                fontSize: '1.1rem',
+                fontWeight: 600,
+                textTransform: 'none',
+                boxShadow: '0 8px 20px rgba(102, 126, 234, 0.4)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-3px)',
+                  boxShadow: '0 12px 28px rgba(102, 126, 234, 0.5)'
+                }
+              }}
+            >
+              View Complete Gallery
+            </Button>
+          </Box>
+        </Container>
+      </Box>
 
       {/* Programs Section */}
       {theme.showPrograms && (
