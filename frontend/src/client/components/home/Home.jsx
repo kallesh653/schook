@@ -158,6 +158,7 @@ const Home = () => {
   ]);
 
   const [sliderImages, setSliderImages] = useState([]);
+  const [combinedSlides, setCombinedSlides] = useState([]);
 
   // Function to fetch front page data
   const fetchFrontPageData = async () => {
@@ -201,6 +202,51 @@ const Home = () => {
                   if (data.media.sliderImages && data.media.sliderImages.length > 0) {
                     setSliderImages(data.media.sliderImages.filter(slide => slide.active));
                   }
+
+                  // Combine slider images and videos for BeautifulSlider
+                  const slides = [];
+                  if (data.media.sliderImages && data.media.sliderImages.length > 0) {
+                    data.media.sliderImages.filter(slide => slide.active).forEach(slide => {
+                      slides.push({
+                        id: slide.id,
+                        type: 'image',
+                        url: slide.url,
+                        title: slide.title,
+                        description: slide.description
+                      });
+                    });
+                  }
+
+                  // Add videos to slider
+                  if (data.media.heroVideo) {
+                    slides.push({
+                      id: 'hero-video',
+                      type: 'video',
+                      url: data.media.heroVideo,
+                      title: 'Welcome to Our School',
+                      description: 'Experience our campus life'
+                    });
+                  }
+                  if (data.media.promoVideo) {
+                    slides.push({
+                      id: 'promo-video',
+                      type: 'video',
+                      url: data.media.promoVideo,
+                      title: 'School Promotional Video',
+                      description: 'Discover what makes us special'
+                    });
+                  }
+                  if (data.media.campusVideo) {
+                    slides.push({
+                      id: 'campus-video',
+                      type: 'video',
+                      url: data.media.campusVideo,
+                      title: 'Campus Tour',
+                      description: 'Take a virtual tour of our facilities'
+                    });
+                  }
+
+                  setCombinedSlides(slides);
                 }
                 if (data.theme) {
                   setTheme(prev => ({ ...prev, ...data.theme }));
@@ -233,6 +279,51 @@ const Home = () => {
               if (data.media.sliderImages && data.media.sliderImages.length > 0) {
                 setSliderImages(data.media.sliderImages.filter(slide => slide.active));
               }
+
+              // Combine slider images and videos for BeautifulSlider
+              const slides = [];
+              if (data.media.sliderImages && data.media.sliderImages.length > 0) {
+                data.media.sliderImages.filter(slide => slide.active).forEach(slide => {
+                  slides.push({
+                    id: slide.id,
+                    type: 'image',
+                    url: slide.url,
+                    title: slide.title,
+                    description: slide.description
+                  });
+                });
+              }
+
+              // Add videos to slider
+              if (data.media.heroVideo) {
+                slides.push({
+                  id: 'hero-video',
+                  type: 'video',
+                  url: data.media.heroVideo,
+                  title: 'Welcome to Our School',
+                  description: 'Experience our campus life'
+                });
+              }
+              if (data.media.promoVideo) {
+                slides.push({
+                  id: 'promo-video',
+                  type: 'video',
+                  url: data.media.promoVideo,
+                  title: 'School Promotional Video',
+                  description: 'Discover what makes us special'
+                });
+              }
+              if (data.media.campusVideo) {
+                slides.push({
+                  id: 'campus-video',
+                  type: 'video',
+                  url: data.media.campusVideo,
+                  title: 'Campus Tour',
+                  description: 'Take a virtual tour of our facilities'
+                });
+              }
+
+              setCombinedSlides(slides);
             }
             if (data.theme) {
               setTheme(prev => ({ ...prev, ...data.theme }));
@@ -281,7 +372,7 @@ const Home = () => {
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
 
       {/* Beautiful Full-Width Slider with Images and Videos */}
-      <BeautifulSlider slides={sliderImages} />
+      <BeautifulSlider slides={combinedSlides} />
 
       {/* Stats Section */}
       {theme.showStatistics && (
@@ -779,33 +870,234 @@ const Home = () => {
         </Box>
       )}
 
+      {/* Features/Facilities Section */}
+      <Box sx={{ py: 10 }}>
+        <Container maxWidth="lg">
+          <Box sx={{ textAlign: 'center', mb: 7 }}>
+            <Typography variant="h3" gutterBottom sx={{ fontWeight: 800, color: '#333' }}>
+              Why Choose Us
+            </Typography>
+            <Typography variant="h6" color="text.secondary">
+              Exceptional facilities and programs for holistic development
+            </Typography>
+          </Box>
+
+          <Grid container spacing={4}>
+            {[
+              {
+                icon: '🏫',
+                title: 'Modern Infrastructure',
+                description: 'State-of-the-art classrooms equipped with smart boards',
+                color: '#667eea'
+              },
+              {
+                icon: '👨‍🏫',
+                title: 'Expert Faculty',
+                description: 'Highly qualified teachers dedicated to student success',
+                color: '#764ba2'
+              },
+              {
+                icon: '🏆',
+                title: 'Sports Excellence',
+                description: 'World-class sports facilities with professional coaching',
+                color: '#f093fb'
+              },
+              {
+                icon: '🔬',
+                title: 'Advanced Labs',
+                description: 'Well-equipped labs for hands-on learning',
+                color: '#4facfe'
+              },
+              {
+                icon: '📚',
+                title: 'Rich Library',
+                description: 'Extensive digital and physical resources',
+                color: '#43e97b'
+              },
+              {
+                icon: '🎭',
+                title: 'Arts & Culture',
+                description: 'Programs in music, dance, drama, and arts',
+                color: '#fa709a'
+              }
+            ].map((feature, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <Fade in timeout={1000 + index * 200}>
+                  <FloatingCard sx={{
+                    height: '100%',
+                    textAlign: 'center',
+                    p: 4,
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: '4px',
+                      background: feature.color
+                    }
+                  }}>
+                    <Box sx={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: '50%',
+                      background: `linear-gradient(135deg, ${feature.color}22 0%, ${feature.color}44 100%)`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '2.5rem',
+                      mx: 'auto',
+                      mb: 3
+                    }}>
+                      {feature.icon}
+                    </Box>
+                    <Typography variant="h5" gutterBottom fontWeight="bold" color="primary">
+                      {feature.title}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      {feature.description}
+                    </Typography>
+                  </FloatingCard>
+                </Fade>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Testimonials Section */}
+      <Box sx={{ py: 10, bgcolor: '#f8f9fa' }}>
+        <Container maxWidth="lg">
+          <Box sx={{ textAlign: 'center', mb: 7 }}>
+            <Typography variant="h3" gutterBottom sx={{ fontWeight: 800, color: '#333' }}>
+              What Parents Say
+            </Typography>
+            <Typography variant="h6" color="text.secondary">
+              Hear from our satisfied parents
+            </Typography>
+          </Box>
+
+          <Grid container spacing={4}>
+            {[
+              {
+                name: 'Rajesh Kumar',
+                role: 'Parent of Grade 10 Student',
+                avatar: '👨',
+                text: 'The quality of education and personal attention my child receives is outstanding.',
+                rating: 5
+              },
+              {
+                name: 'Priya Sharma',
+                role: 'Parent of Grade 8 Student',
+                avatar: '👩',
+                text: 'Excellent infrastructure and perfect blend of academics and activities!',
+                rating: 5
+              },
+              {
+                name: 'Amit Patel',
+                role: 'Parent of Grade 6 Student',
+                avatar: '👨',
+                text: 'My daughter has grown tremendously. The holistic approach is remarkable.',
+                rating: 5
+              }
+            ].map((testimonial, index) => (
+              <Grid item xs={12} md={4} key={index}>
+                <Fade in timeout={1200 + index * 200}>
+                  <FloatingCard sx={{ height: '100%', p: 4 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                      <Avatar sx={{
+                        width: 60,
+                        height: 60,
+                        bgcolor: theme.primaryColor,
+                        fontSize: '2rem',
+                        mr: 2
+                      }}>
+                        {testimonial.avatar}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="h6" fontWeight="bold">
+                          {testimonial.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {testimonial.role}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Typography variant="body1" sx={{ mb: 2, fontStyle: 'italic', color: '#555' }}>
+                      "{testimonial.text}"
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <StarIcon key={i} sx={{ color: '#FFD700', fontSize: '1.2rem' }} />
+                      ))}
+                    </Box>
+                  </FloatingCard>
+                </Fade>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
       {/* Call to Action */}
       <Box sx={{
-        py: 8,
+        py: 10,
         background: `linear-gradient(135deg, ${theme.primaryColor} 0%, ${theme.secondaryColor} 100%)`,
         textAlign: 'center'
       }}>
         <Container maxWidth="md">
-          <Typography variant="h3" color="white" gutterBottom fontWeight="bold">
+          <Typography variant="h2" color="white" gutterBottom fontWeight="bold" sx={{ mb: 2 }}>
             Ready to Join Our Community?
           </Typography>
-          <Typography variant="h6" color="rgba(255,255,255,0.9)" sx={{ mb: 4 }}>
+          <Typography variant="h5" color="rgba(255,255,255,0.95)" sx={{ mb: 5 }}>
             Discover the difference quality education makes
           </Typography>
-          <Button 
-            variant="contained"
-            size="large"
-            sx={{
-              background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
-              borderRadius: '25px',
-              px: 6,
-              py: 2,
-              fontSize: '1.1rem',
-              '&:hover': { transform: 'scale(1.05)' }
-            }}
-          >
-            Apply Now
-          </Button>
+          <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Button
+              variant="contained"
+              size="large"
+              endIcon={<ArrowIcon />}
+              sx={{
+                background: 'white',
+                color: theme.primaryColor,
+                borderRadius: '30px',
+                px: 6,
+                py: 2,
+                fontSize: '1.1rem',
+                fontWeight: 600,
+                '&:hover': {
+                  background: '#f8f9fa',
+                  transform: 'translateY(-3px)'
+                }
+              }}
+            >
+              Apply Now
+            </Button>
+            <Button
+              variant="outlined"
+              size="large"
+              startIcon={<PlayIcon />}
+              sx={{
+                borderColor: 'white',
+                color: 'white',
+                borderRadius: '30px',
+                px: 6,
+                py: 2,
+                fontSize: '1.1rem',
+                fontWeight: 600,
+                borderWidth: '2px',
+                '&:hover': {
+                  borderColor: 'white',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  borderWidth: '2px'
+                }
+              }}
+            >
+              Schedule a Visit
+            </Button>
+          </Box>
         </Container>
       </Box>
     </Box>
