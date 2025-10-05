@@ -42,6 +42,63 @@ const pulse = keyframes`
   100% { transform: scale(1); }
 `;
 
+const fadeInUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const scaleIn = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+`;
+
+const bounceIn = keyframes`
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+`;
+
+const shimmer = keyframes`
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+`;
+
+const rotate = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`;
+
 // Styled components with advanced CSS
 const StyledContainer = styled(Container)(({ theme }) => ({
   background: '#fefefe',
@@ -101,6 +158,12 @@ const StatsCard = styled(Paper)(({ theme }) => ({
 }));
 
 const Home = () => {
+  const [animatedStats, setAnimatedStats] = useState({
+    students: 0,
+    teachers: 0,
+    achievements: 0
+  });
+
   const [schoolInfo, setSchoolInfo] = useState({
     name: 'School Management System',
     tagline: 'Nurturing Tomorrow\'s Leaders',
