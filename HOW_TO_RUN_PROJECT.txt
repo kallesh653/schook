@@ -1,0 +1,921 @@
+================================================================================
+    GENTIME - HOW TO RUN PROJECT AFTER SERVER START
+================================================================================
+
+Project: GenTime - School Management System
+Creator: Kallesh SK
+Version: 2.0.0
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+1. Understanding Server States
+2. After Fresh Server Boot/Restart
+3. Accessing Your Application
+4. First-Time Setup After Deployment
+5. Regular Usage - Daily Operations
+6. What Runs Automatically
+7. What You Need to Start Manually
+8. Common Scenarios and Commands
+9. Quick Reference Commands
+
+================================================================================
+1. UNDERSTANDING SERVER STATES
+================================================================================
+
+Your VPS server can be in different states:
+
+State 1: Fresh Boot (Server just restarted)
+-------------------------------------------
+What Happens Automatically:
+✅ Ubuntu operating system starts
+✅ Systemd loads all services
+✅ Nginx starts automatically
+✅ PM2 starts automatically
+✅ PM2 launches gentime-api automatically
+✅ Backend connects to MongoDB Atlas
+
+What You See:
+- Server is running
+- Application is accessible at http://72.60.202.218
+- Everything works without any manual intervention
+
+Time Taken: ~2-3 minutes after reboot
+
+
+State 2: Normal Running State
+-----------------------------
+What's Happening:
+✅ Nginx running (serving frontend)
+✅ PM2 running (managing backend)
+✅ Backend running (Node.js server)
+✅ MongoDB connected (cloud database)
+
+What You Can Do:
+- Visit website in browser
+- Login and use all features
+- No commands needed
+
+
+State 3: Server Stopped/Crashed
+-------------------------------
+What Happens:
+❌ Server offline
+❌ Application not accessible
+❌ SSH connection lost
+
+What To Do:
+1. Access Hostinger VPS panel
+2. Click "Start" or "Reboot"
+3. Wait 2-3 minutes
+4. Everything auto-starts
+5. Application accessible again
+
+================================================================================
+2. AFTER FRESH SERVER BOOT/RESTART
+================================================================================
+
+Scenario: You just rebooted the server
+---------------------------------------
+
+STEP 1: Wait for Boot Process
+------------------------------
+Time Required: 2-3 minutes
+
+What's Happening:
+- Ubuntu loads
+- System services start
+- Network initializes
+- Nginx starts
+- PM2 starts
+- Backend launches
+
+
+STEP 2: Connect via SSH (Optional - just to check)
+---------------------------------------------------
+Command:
+ssh root@72.60.202.218
+
+Enter your password when prompted.
+
+
+STEP 3: Verify Everything is Running
+-------------------------------------
+
+Check Backend Status:
+pm2 status
+
+Expected Output:
+┌────┬────────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┐
+│ id │ name           │ version │ mode    │ pid      │ uptime │ ↺    │ status    │
+├────┼────────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┤
+│ 0  │ gentime-api    │ 2.0.0   │ fork    │ 1234     │ 2m     │ 0    │ online    │
+└────┴────────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┘
+
+✅ Status: online = Backend running correctly
+
+
+Check Nginx Status:
+sudo systemctl status nginx
+
+Expected Output:
+Active: active (running)
+
+✅ Nginx is serving frontend
+
+
+Check Backend Logs:
+pm2 logs gentime-api --lines 5
+
+Expected Output:
+Server is running at port => 5000
+MongoDB Atlas is Connected Successfully.
+
+✅ Backend connected to database
+
+
+STEP 4: Test in Browser
+------------------------
+Open browser and go to:
+http://72.60.202.218
+
+Expected Result:
+✅ GenTime homepage loads
+✅ Can navigate to login page
+✅ Can login successfully
+
+If Everything Shows ✅ Above:
+🎉 YOUR APPLICATION IS RUNNING!
+No further action needed!
+
+
+STEP 5: You Can Logout from SSH
+--------------------------------
+Everything is running. You can safely logout:
+
+exit
+
+Your application will keep running in the background!
+
+================================================================================
+3. ACCESSING YOUR APPLICATION
+================================================================================
+
+3.1 From Web Browser
+--------------------
+
+Homepage:
+http://72.60.202.218
+
+Login Page:
+http://72.60.202.218/login
+
+Direct Access to Dashboards (requires login):
+http://72.60.202.218/school/dashboard    - Admin Dashboard
+http://72.60.202.218/student/dashboard   - Student Portal
+http://72.60.202.218/teacher/dashboard   - Teacher Portal
+
+
+3.2 From Mobile Devices
+-----------------------
+Same URLs work on mobile:
+- Open mobile browser
+- Go to: http://72.60.202.218
+- Application is responsive (works on mobile)
+
+
+3.3 API Testing (Developers Only)
+----------------------------------
+Test if API is responding:
+
+Using Browser:
+http://72.60.202.218/api/auth/check
+
+Expected Response:
+{"message":"No token, authorization denied"}
+(This is correct - no login token provided)
+
+
+Using Command Line (from VPS):
+curl http://localhost:5000/api/auth/check
+
+Same response expected.
+
+
+3.4 Sharing With Others
+------------------------
+Give this URL to anyone:
+http://72.60.202.218
+
+They can:
+- Visit website
+- Register account
+- Login
+- Use features based on their role
+
+
+If You Have a Domain Name:
+---------------------------
+After adding domain (e.g., gentime.com):
+http://gentime.com
+
+Much easier to remember and share!
+
+================================================================================
+4. FIRST-TIME SETUP AFTER DEPLOYMENT
+================================================================================
+
+When Application is Freshly Deployed:
+--------------------------------------
+
+STEP 1: Access Application
+---------------------------
+Browser: http://72.60.202.218
+
+
+STEP 2: Create School Admin Account
+------------------------------------
+1. Click "Login" or go to registration
+2. Register first admin user
+3. Or use existing admin credentials if already created
+
+
+STEP 3: Configure School Settings
+----------------------------------
+Login as admin and:
+1. Go to School Dashboard
+2. Setup school profile:
+   - School name
+   - Address
+   - Contact details
+   - Logo upload
+   - Academic year settings
+
+
+STEP 4: Add Classes
+--------------------
+1. Navigate to Classes section
+2. Add your school classes:
+   - Class 1
+   - Class 2
+   - ...
+   - Class 10 (or as needed)
+
+
+STEP 5: Add Subjects
+---------------------
+1. Navigate to Subjects section
+2. Add subjects for each class:
+   - Mathematics
+   - Science
+   - English
+   - etc.
+
+
+STEP 6: Add Teachers
+---------------------
+1. Navigate to Teachers section
+2. Add teacher profiles:
+   - Name
+   - Email
+   - Phone
+   - Subject specialization
+   - Upload photo
+
+
+STEP 7: Add Students
+---------------------
+1. Navigate to Students section
+2. Add student profiles:
+   - Name
+   - Roll number
+   - Class
+   - Contact details
+   - Upload photo
+
+
+STEP 8: Assign Teachers to Subjects
+------------------------------------
+1. Navigate to Subject-Teacher Assignment
+2. Assign teachers to subjects for each class
+
+
+STEP 9: Setup Timetable/Periods
+--------------------------------
+1. Navigate to Periods/Schedule
+2. Create time slots
+3. Assign subjects to periods
+
+
+STEP 10: Configure Features
+----------------------------
+Setup as needed:
+- Attendance system
+- Examination schedules
+- Fee structure
+- SMS notifications
+- Notice board
+
+
+NOW YOUR SCHOOL MANAGEMENT SYSTEM IS READY! ✅
+
+================================================================================
+5. REGULAR USAGE - DAILY OPERATIONS
+================================================================================
+
+As School Admin:
+----------------
+
+Morning:
+1. Login at http://72.60.202.218/login
+2. Go to Dashboard
+3. Check today's schedule
+4. Review attendance reports
+5. Check notices
+
+During Day:
+1. Mark attendance (or let teachers do it)
+2. Manage student/teacher queries
+3. Post notices/announcements
+4. Check SMS logs
+5. Monitor fee payments
+
+Evening:
+1. Review day's attendance
+2. Generate reports if needed
+3. Plan for next day
+4. Logout
+
+
+As Teacher:
+-----------
+
+Daily Tasks:
+1. Login to Teacher Portal
+2. View today's schedule
+3. Mark attendance for classes
+4. Enter examination marks
+5. Post notices for students
+6. Check class performance
+7. Logout
+
+
+As Student:
+-----------
+
+Daily Tasks:
+1. Login to Student Portal
+2. View attendance record
+3. Check examination schedule
+4. View marks/results
+5. Read notices
+6. Check class schedule
+7. Logout
+
+
+As Parent:
+----------
+
+Using Student Credentials:
+1. Login with student account
+2. View child's attendance
+3. Check marks
+4. See schedule
+5. Read notices from school
+
+================================================================================
+6. WHAT RUNS AUTOMATICALLY
+================================================================================
+
+After Server Boot, These Start Automatically:
+----------------------------------------------
+
+1. Operating System (Ubuntu)
+   ✅ Loads in ~1 minute
+   ✅ Initializes all system services
+
+2. Nginx Web Server
+   ✅ Starts automatically via systemd
+   ✅ Listens on port 80
+   ✅ Serves frontend files from /var/www/gentime
+   ✅ Proxies /api requests to backend
+
+3. PM2 Process Manager
+   ✅ Starts automatically via systemd
+   ✅ Reads saved process list
+   ✅ Launches gentime-api
+
+4. Backend Application (gentime-api)
+   ✅ Launched by PM2
+   ✅ Loads environment variables from .env
+   ✅ Connects to MongoDB Atlas
+   ✅ Starts listening on port 5000
+   ✅ All API routes active
+
+5. MongoDB Atlas Connection
+   ✅ Backend connects automatically
+   ✅ Database ready for queries
+   ✅ Cloud-hosted (always available)
+
+
+You Don't Need to Run ANY Commands!
+Everything starts automatically! 🎉
+
+================================================================================
+7. WHAT YOU NEED TO START MANUALLY
+================================================================================
+
+NOTHING! ✅
+
+Everything is configured to auto-start.
+
+But If You Want to Start Manually (e.g., after stopping):
+----------------------------------------------------------
+
+Start Backend (if stopped):
+pm2 start gentime-api
+# OR if deleted from PM2:
+cd /root/gentime/api
+pm2 start server.js --name gentime-api
+
+Start Nginx (if stopped):
+sudo systemctl start nginx
+
+Start Both:
+pm2 start gentime-api && sudo systemctl start nginx
+
+
+When You DON'T Need to Start Manually:
+---------------------------------------
+❌ After server reboot (auto-starts)
+❌ After server crash (PM2 auto-restarts)
+❌ After logout from SSH (keeps running)
+❌ After closing terminal (keeps running)
+❌ After network disconnect (keeps running)
+
+
+When You MIGHT Need to Restart Manually:
+-----------------------------------------
+✅ After code changes (need to restart to apply)
+✅ After configuration changes (need to reload)
+✅ If app crashes multiple times (PM2 gives up after 15 crashes)
+✅ If you manually stopped services (need to start again)
+
+================================================================================
+8. COMMON SCENARIOS AND COMMANDS
+================================================================================
+
+Scenario 1: Server Just Rebooted
+---------------------------------
+Do This:
+1. Wait 2-3 minutes
+2. Test in browser: http://72.60.202.218
+3. If working, you're done! ✅
+
+If Not Working:
+ssh root@72.60.202.218
+pm2 status  # Check if backend running
+sudo systemctl status nginx  # Check if Nginx running
+
+
+Scenario 2: Updated Code on GitHub
+-----------------------------------
+Do This:
+ssh root@72.60.202.218
+cd /root/gentime
+git pull origin main
+
+# Update backend
+cd api
+npm install  # If package.json changed
+pm2 restart gentime-api
+
+# Update frontend
+cd ../frontend
+npm install  # If package.json changed
+npm run build
+sudo cp -r dist/* /var/www/gentime/
+
+
+Scenario 3: Application Not Accessible
+---------------------------------------
+Do This:
+ssh root@72.60.202.218
+
+# Check backend
+pm2 status
+
+# If offline:
+pm2 restart gentime-api
+
+# Check Nginx
+sudo systemctl status nginx
+
+# If not running:
+sudo systemctl start nginx
+
+# Check logs
+pm2 logs gentime-api --err
+sudo tail -f /var/log/nginx/error.log
+
+
+Scenario 4: Users Report Login Issues
+--------------------------------------
+Do This:
+# Check backend logs
+pm2 logs gentime-api --lines 50
+
+# Check MongoDB connection
+pm2 logs gentime-api | grep "MongoDB"
+
+# Should see: "MongoDB Atlas is Connected Successfully."
+
+# If not connected:
+pm2 restart gentime-api
+
+# Test API
+curl http://localhost:5000/api/auth/check
+
+
+Scenario 5: Want to See Live Traffic
+-------------------------------------
+Do This:
+# Watch Nginx access logs
+sudo tail -f /var/log/nginx/access.log
+
+# Watch backend logs
+pm2 logs gentime-api
+
+Press Ctrl+C to exit
+
+
+Scenario 6: High Server Load
+-----------------------------
+Do This:
+# Check resource usage
+pm2 monit
+# OR
+htop
+
+# See which process using resources
+top
+
+# If backend using too much memory
+pm2 restart gentime-api
+
+
+Scenario 7: Need to Stop Application
+-------------------------------------
+Do This:
+# Stop backend
+pm2 stop gentime-api
+
+# Stop Nginx (frontend)
+sudo systemctl stop nginx
+
+# Stop both
+pm2 stop gentime-api && sudo systemctl stop nginx
+
+To Start Again:
+pm2 start gentime-api && sudo systemctl start nginx
+
+
+Scenario 8: Need to View Database
+----------------------------------
+Do This:
+# Install MongoDB Shell
+npm install -g mongosh
+
+# Connect to database
+mongosh "mongodb+srv://schoolm2025:kallesh717@cluster0.ovqn73c.mongodb.net/school_management"
+
+# List collections
+show collections
+
+# Query students
+db.students.find()
+
+# Exit
+exit
+
+
+Scenario 9: Forgot PM2 Commands
+--------------------------------
+Do This:
+pm2 --help
+
+# OR see specific command help
+pm2 restart --help
+
+
+Scenario 10: Want to Monitor 24/7
+----------------------------------
+Options:
+
+Option 1: PM2 Plus (Official Monitoring)
+pm2 plus
+# Follow prompts to create account
+# Get free monitoring dashboard
+
+Option 2: Uptime Robot (External Monitoring)
+1. Sign up at https://uptimerobot.com
+2. Add monitor: http://72.60.202.218
+3. Get email alerts if site goes down
+
+Option 3: Simple Script
+Create file: /root/check-app.sh
+#!/bin/bash
+if ! curl -f http://localhost:5000/api/auth/check > /dev/null 2>&1; then
+    pm2 restart gentime-api
+fi
+
+Make executable:
+chmod +x /root/check-app.sh
+
+Add to crontab (run every 5 minutes):
+*/5 * * * * /root/check-app.sh
+
+================================================================================
+9. QUICK REFERENCE COMMANDS
+================================================================================
+
+Application Management:
+-----------------------
+Check status:              pm2 status
+View logs:                 pm2 logs gentime-api
+Restart backend:           pm2 restart gentime-api
+Stop backend:              pm2 stop gentime-api
+Start backend:             pm2 start gentime-api
+Delete from PM2:           pm2 delete gentime-api
+
+
+Nginx Management:
+-----------------
+Check status:              sudo systemctl status nginx
+Start Nginx:               sudo systemctl start nginx
+Stop Nginx:                sudo systemctl stop nginx
+Restart Nginx:             sudo systemctl restart nginx
+Reload config:             sudo systemctl reload nginx
+Test config:               sudo nginx -t
+
+
+Logs:
+-----
+Backend logs (live):       pm2 logs gentime-api
+Backend errors:            pm2 logs gentime-api --err
+Backend output:            pm2 logs gentime-api --out
+Last 50 lines:             pm2 logs gentime-api --lines 50
+Clear logs:                pm2 flush gentime-api
+
+Nginx access log:          sudo tail -f /var/log/nginx/access.log
+Nginx error log:           sudo tail -f /var/log/nginx/error.log
+
+
+Monitoring:
+-----------
+Real-time monitor:         pm2 monit
+List processes:            pm2 list
+Detailed info:             pm2 show gentime-api
+System resources:          htop
+Disk space:                df -h
+Memory usage:              free -h
+
+
+Testing:
+--------
+Test backend API:          curl http://localhost:5000/api/auth/check
+Test through Nginx:        curl http://72.60.202.218/api/auth/check
+Test MongoDB:              pm2 logs gentime-api | grep MongoDB
+Check open ports:          sudo netstat -tulpn
+
+
+Updates:
+--------
+Pull latest code:          git pull origin main
+Install dependencies:      npm install
+Build frontend:            npm run build
+Copy to production:        sudo cp -r dist/* /var/www/gentime/
+Restart backend:           pm2 restart gentime-api
+
+
+Maintenance:
+------------
+Update system:             sudo apt update && sudo apt upgrade -y
+Update Node.js:            nvm install --lts && nvm use --lts
+Update PM2:                npm install -g pm2@latest && pm2 update
+Reboot server:             sudo reboot
+Clear cache:               sudo apt clean
+
+
+Emergency:
+----------
+Kill process on port:      sudo kill -9 $(sudo lsof -t -i:5000)
+Force restart backend:     pm2 delete gentime-api && cd /root/gentime/api && pm2 start server.js --name gentime-api
+Restore PM2 processes:     pm2 resurrect
+Reset Nginx:               sudo systemctl restart nginx
+
+
+Backup:
+-------
+Backup code:               tar -czf gentime-backup.tar.gz /root/gentime
+Backup config:             sudo cp /etc/nginx/sites-available/gentime ~/backup-nginx.conf
+Save PM2 list:             pm2 save
+
+================================================================================
+DAILY WORKFLOW EXAMPLES
+================================================================================
+
+Example 1: Starting Your Day
+-----------------------------
+1. Open browser
+2. Go to http://72.60.202.218
+3. Login
+4. Start working
+
+That's it! No server commands needed.
+
+
+Example 2: After Making Code Changes
+-------------------------------------
+On local machine:
+git add .
+git commit -m "Fixed bug in attendance"
+git push origin main
+
+On server via SSH:
+cd /root/gentime
+git pull origin main
+cd api
+pm2 restart gentime-api
+
+Test in browser to confirm changes.
+
+
+Example 3: Weekly Maintenance
+------------------------------
+Every Sunday (example):
+ssh root@72.60.202.218
+
+# Check status
+pm2 status
+sudo systemctl status nginx
+
+# Check logs for errors
+pm2 logs gentime-api --err --lines 100
+
+# Check disk space
+df -h
+
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Restart if needed
+pm2 restart gentime-api
+
+# Done!
+exit
+
+
+Example 4: Troubleshooting User Issue
+--------------------------------------
+User reports: "Can't login"
+
+1. Check if site loads:
+   http://72.60.202.218
+   ✅ Loads = Frontend working
+
+2. Check backend:
+   ssh root@72.60.202.218
+   pm2 status
+   ✅ online = Backend working
+
+3. Check logs:
+   pm2 logs gentime-api --lines 50
+   Look for errors
+
+4. Test login yourself
+   ✅ Works = User error (wrong password)
+   ❌ Doesn't work = Real issue
+
+5. Check database:
+   pm2 logs gentime-api | grep MongoDB
+   ✅ Connected = Database OK
+
+6. If still issues:
+   pm2 restart gentime-api
+
+7. Test again
+   ✅ Now works = Problem solved
+
+================================================================================
+WHAT HAPPENS BEHIND THE SCENES
+================================================================================
+
+When You Visit http://72.60.202.218:
+-------------------------------------
+
+1. Browser sends HTTP request to 72.60.202.218:80
+   ↓
+2. Firewall (UFW) checks: Port 80 allowed? YES
+   ↓
+3. Nginx receives request
+   ↓
+4. Nginx checks: What file to serve?
+   ↓
+5. Nginx serves: /var/www/gentime/index.html
+   ↓
+6. Browser receives HTML
+   ↓
+7. Browser loads JavaScript and CSS
+   ↓
+8. React app starts in browser
+   ↓
+9. React Router shows correct page
+   ↓
+10. You see GenTime homepage! 🎉
+
+
+When You Login:
+---------------
+
+1. You enter email and password
+   ↓
+2. React form submits to: http://72.60.202.218/api/auth/login
+   ↓
+3. Browser sends POST request to Nginx
+   ↓
+4. Nginx sees /api in URL
+   ↓
+5. Nginx proxies to: http://localhost:5000/api/auth/login
+   ↓
+6. Express.js backend receives request
+   ↓
+7. Auth controller checks database
+   ↓
+8. MongoDB Atlas queries user collection
+   ↓
+9. User found, password matches
+   ↓
+10. Backend generates JWT token
+    ↓
+11. Backend sends response with token
+    ↓
+12. Nginx forwards response to browser
+    ↓
+13. Browser stores token in cookie
+    ↓
+14. React redirects to dashboard
+    ↓
+15. You're logged in! 🎉
+
+All This Happens in < 500ms! ⚡
+
+================================================================================
+REMEMBER: YOU DON'T NEED TO DO ANYTHING!
+================================================================================
+
+After Deployment is Complete:
+✅ Everything runs automatically
+✅ Auto-starts after reboot
+✅ Auto-recovers from crashes
+✅ No manual intervention needed
+
+Just Use Your Application:
+✅ Open browser
+✅ Go to http://72.60.202.218
+✅ Login and work
+✅ That's it!
+
+Only Run Commands:
+✅ When updating code
+✅ When troubleshooting issues
+✅ For maintenance tasks
+✅ For monitoring (optional)
+
+Your GenTime application is now a fully automated,
+production-ready system running 24/7! 🚀
+
+================================================================================
+SUPPORT
+================================================================================
+
+If Application Not Working:
+1. Check pm2 status
+2. Check sudo systemctl status nginx
+3. Check pm2 logs gentime-api --err
+4. Restart: pm2 restart gentime-api
+
+Still Issues?
+1. Review DEPLOYMENT_GUIDE.txt
+2. Review COMPLETE_DEPLOYMENT_SUMMARY.txt
+3. Check MongoDB Atlas dashboard
+4. Contact Hostinger support (server issues)
+
+Creator: Kallesh SK
+GitHub: https://github.com/kallesh653/gentime
+Application URL: http://72.60.202.218
+
+================================================================================
+END OF GUIDE
+================================================================================
