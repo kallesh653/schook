@@ -201,85 +201,69 @@ const Home = () => {
   const [sliderImages, setSliderImages] = useState([]);
   const [combinedSlides, setCombinedSlides] = useState([]);
 
-  // Function to fetch front page data - works for everyone
+  // Function to fetch PUBLIC home page data (NOT school-specific)
   const fetchFrontPageData = async () => {
     try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      let data = null;
+      // Fetch PUBLIC home page (shows "SCHOOL MANAGEMENT SYSTEM")
+      const publicResponse = await axios.get(`${baseUrl}/public-home/data`);
 
-      // Try authenticated endpoint first if logged in
-      if (token) {
-        try {
-          const authResponse = await axios.get(`${baseUrl}/front-page/data`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (authResponse.data.success) {
-            data = authResponse.data.data;
-            console.log('✅ Loaded school data (authenticated)');
-          }
-        } catch (authError) {
-          console.log('Auth endpoint failed, trying public...');
+      if (publicResponse.data.success) {
+        const data = publicResponse.data.data;
+        console.log('✅ Loaded PUBLIC home page data');
+
+        // Set school info from hero section and statistics
+        const stats = data.statistics?.stats || [];
+        setSchoolInfo({
+          name: data.header?.siteName || 'SCHOOL MANAGEMENT SYSTEM',
+          tagline: data.heroSection?.subtitle || 'Manage Your School Efficiently',
+          description: data.heroSection?.description || 'A comprehensive platform for managing students, teachers, classes, and more.',
+          established: stats.find(s => s.label === 'Schools')?.value || '100+',
+          students: stats.find(s => s.label === 'Students')?.value || '10,000+',
+          teachers: stats.find(s => s.label === 'Teachers')?.value || '1,000+',
+          achievements: stats.find(s => s.label === 'Success Rate')?.value || '95%'
+        });
+
+        // Set news from announcements
+        if (data.announcements?.items) {
+          setLatestNews(data.announcements.items.filter(item => item.published));
         }
-      }
 
-      // If not logged in OR auth failed, get first school's public data
-      if (!data) {
-        try {
-          const schoolsResponse = await axios.get(`${baseUrl}/school/fetch-all`);
-          if (schoolsResponse.data.success && schoolsResponse.data.data.length > 0) {
-            const schoolId = schoolsResponse.data.data[0]._id;
-            const publicResponse = await axios.get(`${baseUrl}/front-page/public/${schoolId}`);
-            if (publicResponse.data.success) {
-              data = publicResponse.data.data;
-              console.log('✅ Loaded school data (public)');
-            }
-          }
-        } catch (publicError) {
-          console.log('Public endpoint failed');
-        }
-      }
+        // Set media
+        setMedia(prev => ({
+          ...prev,
+          heroImage: data.heroSection?.backgroundImage,
+          logo: data.header?.logo
+        }));
 
-      // Apply data if we got any
-      if (data) {
-        if (data.schoolInfo) {
-          setSchoolInfo(prev => ({ ...prev, ...data.schoolInfo }));
-        }
-        if (data.news && data.news.length > 0) {
-          setLatestNews(data.news.filter(item => item.published));
-        }
-        if (data.media) {
-          setMedia(prev => ({ ...prev, ...data.media }));
-          if (data.media.sliderImages && data.media.sliderImages.length > 0) {
-            setSliderImages(data.media.sliderImages.filter(slide => slide.active));
-          }
+        // Set slider
+        if (data.slider?.slides) {
+          const activeSlides = data.slider.slides.filter(s => s.active);
+          setSliderImages(activeSlides);
 
-          // Combine slider images and videos
-          const slides = [];
-          if (data.media.sliderImages) {
-            data.media.sliderImages.filter(s => s.active).forEach(slide => {
-              slides.push({
-                id: slide.id,
-                type: slide.type || 'image', // Use slide's type (image or video)
-                url: slide.url,
-                title: slide.title,
-                description: slide.description
-              });
-            });
-          }
-
-          // Add videos
-          if (data.media.heroVideo) slides.push({ id: 'hero-video', type: 'video', url: data.media.heroVideo, title: 'Welcome', description: '' });
-          if (data.media.promoVideo) slides.push({ id: 'promo-video', type: 'video', url: data.media.promoVideo, title: 'Promo', description: '' });
-          if (data.media.campusVideo) slides.push({ id: 'campus-video', type: 'video', url: data.media.campusVideo, title: 'Campus Tour', description: '' });
+          // Prepare combined slides
+          const slides = activeSlides.map(slide => ({
+            id: slide.id,
+            type: slide.type || 'image',
+            url: slide.url,
+            title: slide.title,
+            description: slide.description
+          }));
 
           setCombinedSlides(slides);
         }
+
+        // Set theme
         if (data.theme) {
-          setTheme(prev => ({ ...prev, ...data.theme }));
+          setTheme(prev => ({
+            ...prev,
+            primaryColor: data.theme.primaryColor,
+            secondaryColor: data.theme.secondaryColor,
+            showStatistics: data.statistics?.showSection !== false
+          }));
         }
       }
     } catch (error) {
-      console.error('❌ Error fetching front page data:', error);
+      console.error('❌ Error fetching public home page data:', error);
     }
   };
 

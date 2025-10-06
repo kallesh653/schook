@@ -117,22 +117,37 @@ const PublicHomePageManagement = () => {
   const fetchPublicPageData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const response = await axios.get(`${baseUrl}/front-page/data`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // Fetch PUBLIC home page data (not school-specific)
+      const response = await axios.get(`${baseUrl}/public-home/data`);
 
       if (response.data.success) {
         const data = response.data.data;
-        setSchoolInfo(data.schoolInfo || {});
-        setSliderImages(data.media?.sliderImages || []);
-        setLatestNews(data.news || []);
+
+        // Set hero section
         setHeroSection({
-          title: data.schoolInfo?.name || '',
-          subtitle: data.schoolInfo?.tagline || '',
-          backgroundImage: data.media?.heroImage || null,
-          showStatistics: data.theme?.showStatistics !== false
+          title: data.heroSection?.title || 'SCHOOL MANAGEMENT SYSTEM',
+          subtitle: data.heroSection?.subtitle || 'Manage Your School Efficiently',
+          backgroundImage: data.heroSection?.backgroundImage || null,
+          showStatistics: data.statistics?.showSection !== false
         });
+
+        // Set school info from statistics
+        const stats = data.statistics?.stats || [];
+        setSchoolInfo({
+          name: data.header?.siteName || 'SCHOOL MANAGEMENT SYSTEM',
+          tagline: data.heroSection?.subtitle || '',
+          description: data.heroSection?.description || '',
+          established: stats.find(s => s.label === 'Schools')?.value || '100+',
+          students: stats.find(s => s.label === 'Students')?.value || '10,000+',
+          teachers: stats.find(s => s.label === 'Teachers')?.value || '1,000+',
+          achievements: stats.find(s => s.label === 'Success Rate')?.value || '95%'
+        });
+
+        // Set slider from public page
+        setSliderImages(data.slider?.slides || []);
+
+        // Set announcements from public page
+        setLatestNews(data.announcements?.items?.filter(item => item.published) || []);
       }
     } catch (error) {
       console.error('Error fetching public page data:', error);
@@ -150,19 +165,36 @@ const PublicHomePageManagement = () => {
     try {
       setSaving(true);
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      await axios.patch(`${baseUrl}/front-page/school-info`, schoolInfo, {
+
+      // Update PUBLIC home page statistics
+      await axios.patch(`${baseUrl}/public-home/statistics`, {
+        stats: [
+          { label: 'Schools', value: schoolInfo.established, icon: 'school' },
+          { label: 'Students', value: schoolInfo.students, icon: 'students' },
+          { label: 'Teachers', value: schoolInfo.teachers, icon: 'teachers' },
+          { label: 'Success Rate', value: schoolInfo.achievements, icon: 'success' }
+        ]
+      }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
+      // Update header site name
+      await axios.patch(`${baseUrl}/public-home/header`, {
+        siteName: schoolInfo.name
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
       setSnackbar({
         open: true,
-        message: 'School information updated successfully!',
+        message: 'Public home page information updated successfully!',
         severity: 'success'
       });
     } catch (error) {
       console.error('Error saving school info:', error);
       setSnackbar({
         open: true,
-        message: 'Error saving school information',
+        message: 'Error saving public page information',
         severity: 'error'
       });
     } finally {
@@ -175,33 +207,25 @@ const PublicHomePageManagement = () => {
       setSaving(true);
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
-      // Update school info
-      await axios.patch(`${baseUrl}/front-page/school-info`, {
-        name: heroSection.title,
-        tagline: heroSection.subtitle
+      // Update PUBLIC home page hero section
+      await axios.patch(`${baseUrl}/public-home/hero-section`, {
+        title: heroSection.title,
+        subtitle: heroSection.subtitle,
+        backgroundImage: heroSection.backgroundImage
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      // Update hero image
-      if (heroSection.backgroundImage) {
-        await axios.patch(`${baseUrl}/front-page/media`, {
-          heroImage: heroSection.backgroundImage
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      }
-
-      // Update theme settings
-      await axios.patch(`${baseUrl}/front-page/theme`, {
-        showStatistics: heroSection.showStatistics
+      // Update statistics visibility
+      await axios.patch(`${baseUrl}/public-home/statistics`, {
+        showSection: heroSection.showStatistics
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       setSnackbar({
         open: true,
-        message: 'Hero section updated successfully!',
+        message: 'Public home page hero section updated successfully!',
         severity: 'success'
       });
     } catch (error) {
@@ -235,15 +259,15 @@ const PublicHomePageManagement = () => {
       setSliderImages(updatedSlides);
 
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      await axios.patch(`${baseUrl}/front-page/media`, {
-        sliderImages: updatedSlides
+      await axios.patch(`${baseUrl}/public-home/slider`, {
+        slides: updatedSlides
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       setSnackbar({
         open: true,
-        message: 'Slide deleted successfully!',
+        message: 'Public page slide deleted successfully!',
         severity: 'success'
       });
     } catch (error) {
@@ -270,15 +294,15 @@ const PublicHomePageManagement = () => {
       setSliderImages(updatedSlides);
 
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      await axios.patch(`${baseUrl}/front-page/media`, {
-        sliderImages: updatedSlides
+      await axios.patch(`${baseUrl}/public-home/slider`, {
+        slides: updatedSlides
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       setSnackbar({
         open: true,
-        message: 'Slide saved successfully!',
+        message: 'Public page slide saved successfully!',
         severity: 'success'
       });
       setOpenSliderDialog(false);
@@ -296,23 +320,27 @@ const PublicHomePageManagement = () => {
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
+      let updatedNews;
       if (editingNews) {
-        await axios.patch(`${baseUrl}/front-page/news/${editingNews._id}`, newsData, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setLatestNews(prev =>
-          prev.map(item => (item._id === editingNews._id ? { ...newsData, _id: editingNews._id } : item))
-        );
+        // Find index and update
+        const index = latestNews.findIndex(item => item.title === editingNews.title);
+        updatedNews = [...latestNews];
+        updatedNews[index] = newsData;
       } else {
-        await axios.post(`${baseUrl}/front-page/news`, newsData, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        fetchPublicPageData();
+        updatedNews = [...latestNews, newsData];
       }
 
+      // Save to public home page
+      await axios.patch(`${baseUrl}/public-home/announcements`, {
+        items: updatedNews
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setLatestNews(updatedNews);
       setSnackbar({
         open: true,
-        message: 'News item saved successfully!',
+        message: 'Public page announcement saved successfully!',
         severity: 'success'
       });
       setOpenNewsDialog(false);
@@ -320,30 +348,34 @@ const PublicHomePageManagement = () => {
       console.error('Error saving news:', error);
       setSnackbar({
         open: true,
-        message: 'Error saving news item',
+        message: 'Error saving announcement',
         severity: 'error'
       });
     }
   };
 
-  const handleDeleteNews = async (newsId) => {
+  const handleDeleteNews = async (newsTitle) => {
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      await axios.delete(`${baseUrl}/front-page/news/${newsId}`, {
+      const updatedNews = latestNews.filter(item => item.title !== newsTitle);
+
+      await axios.patch(`${baseUrl}/public-home/announcements`, {
+        items: updatedNews
+      }, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      setLatestNews(prev => prev.filter(item => item._id !== newsId));
+      setLatestNews(updatedNews);
       setSnackbar({
         open: true,
-        message: 'News item deleted successfully!',
+        message: 'Public page announcement deleted successfully!',
         severity: 'success'
       });
     } catch (error) {
       console.error('Error deleting news:', error);
       setSnackbar({
         open: true,
-        message: 'Error deleting news item',
+        message: 'Error deleting announcement',
         severity: 'error'
       });
     }
@@ -793,7 +825,7 @@ const PublicHomePageManagement = () => {
                         <IconButton
                           size="small"
                           color="error"
-                          onClick={() => handleDeleteNews(newsItem._id)}
+                          onClick={() => handleDeleteNews(newsItem.title)}
                         >
                           <DeleteIcon />
                         </IconButton>

@@ -19,6 +19,7 @@ const noticeRoutes = require("./router/notice.router");
 const feesRoutes = require("./router/fees.router");
 const studentRecordRouter = require('./router/studentRecord.router');
 const frontPageRouter = require('./router/frontPage.router');
+const publicHomePageRouter = require('./router/publicHomePage.router');
 const marksheetRouter = require('./router/marksheet.router');
 const smsRouter = require('./router/sms.router');
 const authMiddleware = require("./auth/auth");
@@ -66,6 +67,7 @@ app.use('/api/notices', noticeRoutes)
 app.use('/api/fees', feesRoutes)
 app.use("/api/student-records", studentRecordRouter);
 app.use("/api/front-page", frontPageRouter);
+app.use("/api/public-home", publicHomePageRouter);
 app.use("/api/marksheets", marksheetRouter);
 app.use("/api/sms", smsRouter);
 
