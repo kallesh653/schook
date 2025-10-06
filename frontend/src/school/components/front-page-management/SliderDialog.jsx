@@ -10,7 +10,9 @@ import {
   Switch,
   FormControlLabel,
   Typography,
-  Avatar
+  Avatar,
+  ToggleButton,
+  ToggleButtonGroup
 } from '@mui/material';
 import { CloudUpload as UploadIcon } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
@@ -33,6 +35,7 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
     title: '',
     description: '',
     url: '',
+    type: 'image', // 'image' or 'video'
     active: true
   });
 
@@ -42,6 +45,7 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
         title: editingSlider.title || '',
         description: editingSlider.description || '',
         url: editingSlider.url || '',
+        type: editingSlider.type || 'image',
         active: editingSlider.active !== undefined ? editingSlider.active : true
       });
     } else {
@@ -49,6 +53,7 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
         title: '',
         description: '',
         url: '',
+        type: 'image',
         active: true
       });
     }
@@ -95,34 +100,63 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
       </DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
-          {/* Image Upload */}
+          {/* Type Selector */}
           <Box>
             <Typography variant="h6" gutterBottom>
-              Slide Image
+              Slide Type
             </Typography>
-            <UploadBox>
-              <input
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                id="slider-image-upload"
-                onChange={(e) => handleImageUpload(e.target.files[0])}
-              />
-              <label htmlFor="slider-image-upload">
-                <UploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-                <Typography>Upload Slide Image</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Recommended size: 800x500px
-                </Typography>
-              </label>
-              {formData.url && (
-                <Avatar 
-                  src={formData.url} 
-                  sx={{ width: 120, height: 80, mx: 'auto', mt: 2 }} 
-                  variant="rounded" 
+            <ToggleButtonGroup
+              value={formData.type}
+              exclusive
+              onChange={(e, newType) => {
+                if (newType) handleChange('type', newType);
+              }}
+              fullWidth
+            >
+              <ToggleButton value="image">Image</ToggleButton>
+              <ToggleButton value="video">Video</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
+          {/* Image/Video Upload */}
+          <Box>
+            <Typography variant="h6" gutterBottom>
+              {formData.type === 'image' ? 'Slide Image' : 'Video URL'}
+            </Typography>
+            {formData.type === 'image' ? (
+              <UploadBox>
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  id="slider-image-upload"
+                  onChange={(e) => handleImageUpload(e.target.files[0])}
                 />
-              )}
-            </UploadBox>
+                <label htmlFor="slider-image-upload">
+                  <UploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+                  <Typography>Upload Slide Image</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Recommended size: 1920x1080px
+                  </Typography>
+                </label>
+                {formData.url && (
+                  <Avatar
+                    src={formData.url}
+                    sx={{ width: 120, height: 80, mx: 'auto', mt: 2 }}
+                    variant="rounded"
+                  />
+                )}
+              </UploadBox>
+            ) : (
+              <TextField
+                fullWidth
+                label="Video URL"
+                value={formData.url}
+                onChange={(e) => handleChange('url', e.target.value)}
+                placeholder="Enter YouTube URL or video file URL"
+                helperText="YouTube, Vimeo, or direct video file URL"
+              />
+            )}
           </Box>
 
           {/* Title */}
@@ -171,15 +205,31 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
                   backgroundColor: '#f5f5f5'
                 }}
               >
-                <img
-                  src={formData.url}
-                  alt="Preview"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
-                />
+                {formData.type === 'image' ? (
+                  <img
+                    src={formData.url}
+                    alt="Preview"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      color: 'white'
+                    }}
+                  >
+                    <Typography variant="h5">🎥 Video Slide</Typography>
+                  </Box>
+                )}
                 <Box
                   sx={{
                     position: 'absolute',
