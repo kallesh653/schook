@@ -201,33 +201,18 @@ const Home = () => {
   const [sliderImages, setSliderImages] = useState([]);
   const [combinedSlides, setCombinedSlides] = useState([]);
 
-  // Function to fetch front page data
+  // Function to fetch front page data - ONLY from logged-in school
   const fetchFrontPageData = async () => {
       try {
-        // First, try to get a list of schools to find a valid school ID
-        let schoolId = null;
+        // Get token from localStorage
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
-        try {
-          // Try to get school list to find an active school
-          const schoolsResponse = await axios.get(`${baseUrl}/school/fetch-all`);
-          if (schoolsResponse.data.success && schoolsResponse.data.data.length > 0) {
-            schoolId = schoolsResponse.data.data[0]._id;
-            console.log('Found school ID from list:', schoolId);
-          }
-        } catch (schoolError) {
-          console.log('Could not fetch schools list:', schoolError.message);
-        }
-
-        // If we couldn't get a school ID from the list, try a fallback
-        if (!schoolId) {
-          // Check localStorage for logged in school ID
-          const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-          if (token) {
-            try {
-              // Try to get current school data from authenticated endpoint
-              const authResponse = await axios.get(`${baseUrl}/front-page/data`, {
-                headers: { Authorization: `Bearer ${token}` }
-              });
+        if (token) {
+          try {
+            // Fetch data from authenticated school's Front Page Management
+            const authResponse = await axios.get(`${baseUrl}/front-page/data`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
               if (authResponse.data.success) {
                 const data = authResponse.data.data;
                 console.log('Front page data from authenticated endpoint:', data);
@@ -292,86 +277,12 @@ const Home = () => {
                 if (data.theme) {
                   setTheme(prev => ({ ...prev, ...data.theme }));
                 }
-                return; // Exit early if authenticated endpoint worked
               }
-            } catch (authError) {
-              console.log('Could not fetch from authenticated endpoint:', authError.message);
-            }
-          }
-        }
-
-        // Try public endpoint with school ID
-        if (schoolId) {
-          console.log('Fetching public front page data for school:', schoolId);
-          const response = await axios.get(`${baseUrl}/front-page/public/${schoolId}`);
-
-          if (response.data.success && response.data.data) {
-            const data = response.data.data;
-            console.log('Front page data received from public endpoint:', data);
-
-            if (data.schoolInfo) {
-              setSchoolInfo(prev => ({ ...prev, ...data.schoolInfo }));
-            }
-            if (data.news && data.news.length > 0) {
-              setLatestNews(data.news.filter(item => item.published));
-            }
-            if (data.media) {
-              setMedia(prev => ({ ...prev, ...data.media }));
-              if (data.media.sliderImages && data.media.sliderImages.length > 0) {
-                setSliderImages(data.media.sliderImages.filter(slide => slide.active));
-              }
-
-              // Combine slider images and videos for BeautifulSlider
-              const slides = [];
-              if (data.media.sliderImages && data.media.sliderImages.length > 0) {
-                data.media.sliderImages.filter(slide => slide.active).forEach(slide => {
-                  slides.push({
-                    id: slide.id,
-                    type: 'image',
-                    url: slide.url,
-                    title: slide.title,
-                    description: slide.description
-                  });
-                });
-              }
-
-              // Add videos to slider
-              if (data.media.heroVideo) {
-                slides.push({
-                  id: 'hero-video',
-                  type: 'video',
-                  url: data.media.heroVideo,
-                  title: 'Welcome to Our School',
-                  description: 'Experience our campus life'
-                });
-              }
-              if (data.media.promoVideo) {
-                slides.push({
-                  id: 'promo-video',
-                  type: 'video',
-                  url: data.media.promoVideo,
-                  title: 'School Promotional Video',
-                  description: 'Discover what makes us special'
-                });
-              }
-              if (data.media.campusVideo) {
-                slides.push({
-                  id: 'campus-video',
-                  type: 'video',
-                  url: data.media.campusVideo,
-                  title: 'Campus Tour',
-                  description: 'Take a virtual tour of our facilities'
-                });
-              }
-
-              setCombinedSlides(slides);
-            }
-            if (data.theme) {
-              setTheme(prev => ({ ...prev, ...data.theme }));
-            }
+          } catch (authError) {
+            console.log('Could not fetch from authenticated endpoint:', authError.message);
           }
         } else {
-          console.log('No school ID available, using default data');
+          console.log('No token found - user must login to view home page');
         }
       } catch (error) {
         console.error('Error fetching front page data:', error);
