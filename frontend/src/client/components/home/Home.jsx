@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Container, Typography, Grid, Card, CardContent, Box, Paper, 
-  Button, Chip, Avatar, IconButton, Fade, Zoom 
+import {
+  Container, Typography, Grid, Card, CardContent, Box, Paper,
+  Button, Chip, Avatar, IconButton, Fade, Zoom
 } from '@mui/material';
-import { 
-  School as SchoolIcon, 
+import {
+  School as SchoolIcon,
   EmojiEvents as AwardIcon,
   Groups as StudentsIcon,
   MenuBook as BookIcon,
   Star as StarIcon,
   PlayArrow as PlayIcon,
-  ArrowForward as ArrowIcon
+  ArrowForward as ArrowIcon,
+  GetApp as DownloadIcon
 } from '@mui/icons-material';
 import { styled, keyframes } from '@mui/material/styles';
 import Carousel from './carousel/Carousel';
@@ -174,6 +175,10 @@ const Home = () => {
     achievements: ''
   });
 
+  // PWA Install State
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
+
   const [media, setMedia] = useState({
     logo: null,
     heroImage: null,
@@ -297,11 +302,97 @@ const Home = () => {
     };
   }, []);
 
+  // PWA Install Handler
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later
+      setDeferredPrompt(e);
+      // Show install button
+      setShowInstallButton(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    // Check if app is already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setShowInstallButton(false);
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  // Handle PWA Install
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) {
+      // Fallback for iOS or already installed
+      alert('To install GenTime:\n\niOS: Tap Share button → Add to Home Screen\n\nAndroid: This app is already installed or your browser does not support installation');
+      return;
+    }
+
+    // Show the install prompt
+    deferredPrompt.prompt();
+
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice;
+
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+    }
+
+    // Clear the deferred prompt
+    setDeferredPrompt(null);
+    setShowInstallButton(false);
+  };
+
   return (
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
 
       {/* Beautiful Full-Width Slider with Images and Videos */}
       <BeautifulSlider slides={combinedSlides} />
+
+      {/* Download App Button - Floating */}
+      {showInstallButton && (
+        <Zoom in timeout={1000}>
+          <Box
+            sx={{
+              position: 'fixed',
+              bottom: { xs: 20, md: 40 },
+              right: { xs: 20, md: 40 },
+              zIndex: 1000,
+            }}
+          >
+            <Button
+              variant="contained"
+              size="large"
+              onClick={handleInstallClick}
+              startIcon={<DownloadIcon />}
+              sx={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                borderRadius: '50px',
+                px: 4,
+                py: 1.5,
+                fontSize: '1.1rem',
+                fontWeight: 600,
+                textTransform: 'none',
+                boxShadow: '0 8px 25px rgba(102, 126, 234, 0.5)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-3px) scale(1.05)',
+                  boxShadow: '0 12px 35px rgba(102, 126, 234, 0.6)',
+                  background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+                },
+                animation: `${pulse} 2s infinite`,
+              }}
+            >
+              Download App
+            </Button>
+          </Box>
+        </Zoom>
+      )}
 
       {/* Stats Section */}
       {theme.showStatistics && (

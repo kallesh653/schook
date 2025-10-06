@@ -1,0 +1,1051 @@
+================================================================================
+        HOW TO DEPLOY CODE CHANGES TO SERVER - STEP BY STEP GUIDE
+================================================================================
+
+📌 PROJECT: GenTime School Management System
+📌 AUTHOR: Kallesh SK
+📌 UPDATED: October 2025
+
+================================================================================
+        OVERVIEW - WHAT THIS GUIDE DOES
+================================================================================
+
+When you edit code in VSCode and want to deploy to your live server, you need
+to follow specific steps. This guide shows you EXACTLY what to do.
+
+THE PROCESS:
+1. Save changes in VSCode
+2. Commit to Git (save snapshot)
+3. Push to GitHub (backup online)
+4. Pull on server (download latest code)
+5. Restart services (apply changes)
+6. Test in browser (verify it works)
+
+================================================================================
+        STEP 1: COMMIT YOUR CHANGES LOCALLY
+================================================================================
+
+WHAT IS COMMIT?
+- A commit is like taking a snapshot of your code
+- Git saves what changed, when, and why
+- You can rollback to any previous commit if needed
+
+---------------------------------------------------------------------------
+COMMAND 1: Check What Files Changed
+---------------------------------------------------------------------------
+
+git status
+
+WHAT THIS DOES:
+- Shows which files you modified
+- Shows new files you created
+- Shows deleted files
+- Red = not staged, Green = staged for commit
+
+EXAMPLE OUTPUT:
+On branch main
+Changes not staged for commit:
+  modified:   frontend/src/App.jsx
+  modified:   api/controller/publicHomePage.controller.js
+
+Untracked files:
+  NewFile.jsx
+
+
+---------------------------------------------------------------------------
+COMMAND 2: Stage All Changes
+---------------------------------------------------------------------------
+
+git add .
+
+WHAT THIS DOES:
+- The dot (.) means "all files"
+- Moves changed files to "staging area"
+- Staging area = files ready to commit
+- Think of it as adding items to a shopping cart before checkout
+
+WHY NEEDED:
+- Git needs you to explicitly say which files to commit
+- Prevents accidentally committing wrong files
+- You can stage only specific files if needed
+
+ALTERNATIVE (stage specific file):
+git add frontend/src/App.jsx
+
+
+---------------------------------------------------------------------------
+COMMAND 3: Commit Changes
+---------------------------------------------------------------------------
+
+git commit -m "Describe what you changed"
+
+WHAT THIS DOES:
+- Creates a permanent snapshot of staged files
+- -m means "message"
+- Message describes what changed and why
+- Saved in Git history forever
+
+EXAMPLE:
+git commit -m "Fix image upload bug and add compression"
+
+GOOD COMMIT MESSAGES:
+✅ "Add user profile page"
+✅ "Fix login authentication error"
+✅ "Update slider to support video uploads"
+
+BAD COMMIT MESSAGES:
+❌ "changes"
+❌ "update"
+❌ "fix bug"
+
+WHY GOOD MESSAGES MATTER:
+- You'll understand what changed when looking at history
+- Other developers know what you did
+- Easy to find specific changes later
+
+EXAMPLE OUTPUT:
+[main a1b2c3d] Fix image upload bug and add compression
+ 2 files changed, 45 insertions(+), 12 deletions(-)
+
+
+---------------------------------------------------------------------------
+COMMAND 4: Verify Commit
+---------------------------------------------------------------------------
+
+git log --oneline -5
+
+WHAT THIS DOES:
+- Shows last 5 commits
+- --oneline = one line per commit
+- Confirms your commit was saved
+
+EXAMPLE OUTPUT:
+a1b2c3d Fix image upload bug and add compression
+b2c3d4e Add video upload feature
+c3d4e5f Update navigation menu
+d4e5f6g Initial commit
+
+================================================================================
+        STEP 2: PUSH TO GITHUB
+================================================================================
+
+WHAT IS PUSH?
+- Upload your commits to GitHub (cloud storage)
+- GitHub = online backup of your code
+- Server will pull from GitHub to get latest code
+
+---------------------------------------------------------------------------
+COMMAND: Push to GitHub
+---------------------------------------------------------------------------
+
+git push origin main
+
+WHAT THIS DOES:
+- "push" = upload commits
+- "origin" = your GitHub repository
+- "main" = the branch name
+
+WHY NEEDED:
+- Server can't access your local computer
+- GitHub acts as middle-man
+- You push to GitHub, server pulls from GitHub
+
+EXAMPLE OUTPUT:
+Enumerating objects: 10, done.
+Counting objects: 100% (10/10), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (6/6), done.
+Writing objects: 100% (6/6), 1.50 KiB | 1.50 MiB/s, done.
+Total 6 (delta 4), reused 0 (delta 0)
+To https://github.com/kallesh653/gentime.git
+   b2c3d4e..a1b2c3d  main -> main
+
+✅ SUCCESS: Your code is now on GitHub!
+
+
+---------------------------------------------------------------------------
+IF IT ASKS FOR USERNAME/PASSWORD:
+---------------------------------------------------------------------------
+
+Username: kallesh653
+Password: [YOUR GITHUB PERSONAL ACCESS TOKEN]
+
+⚠️ IMPORTANT: GitHub doesn't accept passwords anymore!
+You MUST use Personal Access Token
+
+HOW TO GET TOKEN:
+1. Go to: https://github.com/settings/tokens
+2. Click "Generate new token (classic)"
+3. Select "repo" permissions
+4. Copy the token (starts with ghp_)
+5. Use token as password
+
+TOKEN LOOKS LIKE:
+ghp_1234567890abcdefghijklmnopqrstuvwxyz1234
+
+SAVE TOKEN SOMEWHERE SAFE!
+You won't be able to see it again after first time.
+
+
+---------------------------------------------------------------------------
+COMMON ERRORS & SOLUTIONS:
+---------------------------------------------------------------------------
+
+ERROR 1: failed to push some refs
+
+WHAT IT MEANS:
+Someone else (or you on another computer) pushed changes to GitHub
+Your local code is behind
+
+SOLUTION:
+git pull origin main
+git push origin main
+
+EXPLANATION:
+- Pull downloads latest changes from GitHub
+- Merges with your changes
+- Then you can push
+
+
+ERROR 2: Authentication failed
+
+WHAT IT MEANS:
+- Wrong username or token
+- Token expired (they expire after set time)
+
+SOLUTION:
+- Generate new token from GitHub
+- Use token as password, not your GitHub password
+
+
+ERROR 3: Connection refused
+
+WHAT IT MEANS:
+- Internet connection issue
+- GitHub is down (rare)
+
+SOLUTION:
+- Check your internet
+- Try again in a few minutes
+- Check https://www.githubstatus.com
+
+================================================================================
+        STEP 3: DEPLOY BACKEND (IF YOU CHANGED BACKEND CODE)
+================================================================================
+
+WHAT IS BACKEND?
+- Backend = api/ folder
+- Contains server.js, controllers, models, routes
+- Runs on port 9000
+- Managed by PM2 (process manager)
+
+WHEN TO DEPLOY BACKEND:
+✅ Changed files in api/ folder
+✅ Changed server.js
+✅ Changed controllers, models, routes
+✅ Updated .env file (manually, not via Git)
+✅ Added new npm packages
+
+WHEN TO SKIP:
+❌ Only changed frontend code
+❌ Only changed HTML/CSS/JavaScript in frontend/
+
+
+---------------------------------------------------------------------------
+ONE COMMAND TO DEPLOY BACKEND:
+---------------------------------------------------------------------------
+
+ssh root@72.60.202.218 "cd /root/gentime/api && git pull origin main && PATH=/root/.nvm/versions/node/v22.20.0/bin:\$PATH pm2 restart gentime-api"
+
+WHAT THIS DOES (BROKEN DOWN):
+
+PART 1: ssh root@72.60.202.218
+- ssh = Secure Shell (remote connection)
+- root = username on server
+- 72.60.202.218 = your VPS IP address
+- This connects to your server
+
+PART 2: cd /root/gentime/api
+- cd = change directory
+- /root/gentime/api = backend folder on server
+- Navigates to backend code
+
+PART 3: git pull origin main
+- Downloads latest code from GitHub
+- Updates server code to match your latest commit
+- Same code you just pushed
+
+PART 4: PATH=/root/.nvm/versions/node/v22.20.0/bin:\$PATH
+- Sets Node.js path
+- Server uses NVM (Node Version Manager)
+- Node.js not in default PATH, must specify
+
+PART 5: pm2 restart gentime-api
+- PM2 = process manager (keeps backend running 24/7)
+- restart = stops and starts backend
+- gentime-api = name of your backend process
+- This applies the new code changes
+
+EXAMPLE OUTPUT:
+root@72.60.202.218's password: [type-password]
+Already up to date.
+[PM2] Applying action restartProcessId on app [gentime-api](ids: [ 0 ])
+[PM2] [gentime-api](0) ✓
+┌────┬──────────────┬─────────┬─────────┬──────┬────────┐
+│ id │ name         │ status  │ cpu     │ mem  │ uptime │
+├────┼──────────────┼─────────┼─────────┼──────┼────────┤
+│ 0  │ gentime-api  │ online  │ 0%      │ 50MB │ 0s     │
+└────┴──────────────┴─────────┴─────────┴──────┴────────┘
+
+✅ SUCCESS: Backend deployed and restarted!
+
+
+---------------------------------------------------------------------------
+CHECK IF BACKEND DEPLOYED SUCCESSFULLY:
+---------------------------------------------------------------------------
+
+ssh root@72.60.202.218 "PATH=/root/.nvm/versions/node/v22.20.0/bin:\$PATH pm2 logs gentime-api --lines 20 --nostream"
+
+WHAT THIS DOES:
+- Shows last 20 lines of backend logs
+- --nostream = don't follow (just show and exit)
+- Check for errors or "Server is running at port => 9000"
+
+GOOD OUTPUT:
+MongoDB Atlas is Connected Successfully.
+Server is running at port => 9000
+
+BAD OUTPUT (ERRORS):
+Error: Cannot find module 'express'
+MongooseError: Could not connect to MongoDB
+
+IF YOU SEE ERRORS:
+- Read the error message carefully
+- Usually means missing npm packages
+- Solution: SSH to server and run: npm install
+
+
+---------------------------------------------------------------------------
+BACKEND DEPLOYMENT - STEP BY STEP (ALTERNATIVE):
+---------------------------------------------------------------------------
+
+If the one-command method doesn't work, do it step by step:
+
+STEP 1: Connect to server
+ssh root@72.60.202.218
+
+STEP 2: Navigate to backend
+cd /root/gentime/api
+
+STEP 3: Check current code
+git status
+
+STEP 4: Pull latest code
+git pull origin main
+
+STEP 5: Install new packages (if package.json changed)
+npm install
+
+STEP 6: Restart backend
+PATH=/root/.nvm/versions/node/v22.20.0/bin:$PATH pm2 restart gentime-api
+
+STEP 7: Check logs
+PATH=/root/.nvm/versions/node/v22.20.0/bin:$PATH pm2 logs gentime-api
+
+STEP 8: Exit server
+exit
+
+================================================================================
+        STEP 4: DEPLOY FRONTEND (IF YOU CHANGED FRONTEND CODE)
+================================================================================
+
+WHAT IS FRONTEND?
+- Frontend = frontend/ folder
+- Contains React code (src/ folder)
+- Runs in user's browser
+- Served by Nginx web server
+
+WHEN TO DEPLOY FRONTEND:
+✅ Changed files in frontend/src/ folder
+✅ Changed React components
+✅ Changed CSS/styling
+✅ Changed images or assets
+✅ Updated routes or navigation
+
+WHEN TO SKIP:
+❌ Only changed backend code
+
+
+---------------------------------------------------------------------------
+STEP 1: Build Frontend Locally
+---------------------------------------------------------------------------
+
+cd "d:\final project 1.1\gentime4\school management system\frontend"
+
+WHAT THIS DOES:
+- cd = change directory
+- Navigates to frontend folder on YOUR computer
+- Must have quotes because path has spaces
+
+THEN:
+
+npm run build
+
+WHAT THIS DOES:
+- npm run build = run the build script
+- Vite bundles all React code into optimized files
+- Creates dist/ folder with production-ready files
+- Minifies JavaScript (removes spaces, shortens variables)
+- Optimizes images and assets
+- Creates unique hash for cache-busting
+
+WHY BUILD LOCALLY (NOT ON SERVER):
+- Your computer is faster
+- Server has limited resources
+- Reduces server load
+- Faster deployment
+
+BUILD PROCESS TAKES 1-2 MINUTES
+
+EXAMPLE OUTPUT:
+vite v5.4.2 building for production...
+transforming...
+✓ 12837 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                    0.51 kB │ gzip:   0.32 kB
+dist/assets/index-Ce9npmXd.js   2,017.68 kB │ gzip: 604.95 kB
+dist/assets/index-CpkOjoXf.css     21.39 kB │ gzip:   4.04 kB
+✓ built in 1m 12s
+
+IMPORTANT: Look for the hash in index-XXXXXXXX.js
+Example above: Ce9npmXd
+This hash changes EVERY build!
+
+
+---------------------------------------------------------------------------
+STEP 2: Get the New Hash
+---------------------------------------------------------------------------
+
+ls dist/assets/index-*.js
+
+WHAT THIS DOES:
+- ls = list files
+- dist/assets/ = build output folder
+- index-*.js = find file starting with "index-" and ending with ".js"
+- * = wildcard (matches any characters)
+
+EXAMPLE OUTPUT:
+dist/assets/index-Ce9npmXd.js
+
+COPY THE HASH: Ce9npmXd
+
+YOU NEED THIS HASH FOR NEXT STEPS!
+
+
+---------------------------------------------------------------------------
+STEP 3: Upload Built File to Server
+---------------------------------------------------------------------------
+
+scp -r dist/assets/index-Ce9npmXd.js root@72.60.202.218:/var/www/gentime/assets/
+
+⚠️ REPLACE Ce9npmXd WITH YOUR ACTUAL HASH!
+
+WHAT THIS DOES (BROKEN DOWN):
+
+PART 1: scp
+- scp = Secure Copy Protocol
+- Copies files over SSH (encrypted)
+- Like drag-and-drop but via command line
+
+PART 2: -r
+- -r = recursive
+- Needed for folders (but works for files too)
+- Ensures all contents copied
+
+PART 3: dist/assets/index-Ce9npmXd.js
+- Source file (on YOUR computer)
+- The built JavaScript bundle
+
+PART 4: root@72.60.202.218
+- root = server username
+- 72.60.202.218 = server IP
+
+PART 5: :/var/www/gentime/assets/
+- Destination folder (on SERVER)
+- /var/www/gentime/ = where Nginx serves files from
+- assets/ = where JavaScript/CSS files go
+
+EXAMPLE OUTPUT:
+root@72.60.202.218's password: [type-password]
+index-Ce9npmXd.js            100% 2017KB   1.5MB/s   00:01
+
+✅ SUCCESS: File uploaded to server!
+
+
+---------------------------------------------------------------------------
+STEP 4: Update index.html to Use New File
+---------------------------------------------------------------------------
+
+ssh root@72.60.202.218 "cd /var/www/gentime && sed -i 's/index-[^.]*\.js/index-Ce9npmXd.js/g' index.html"
+
+⚠️ REPLACE Ce9npmXd WITH YOUR ACTUAL HASH!
+
+WHAT THIS DOES (BROKEN DOWN):
+
+PART 1: ssh root@72.60.202.218
+- Connect to server
+
+PART 2: cd /var/www/gentime
+- Go to frontend folder
+
+PART 3: sed -i
+- sed = Stream Editor (text replacement tool)
+- -i = in-place (modify file directly)
+
+PART 4: 's/index-[^.]*\.js/index-Ce9npmXd.js/g'
+- s/ = substitute (find and replace)
+- index-[^.]*.js = pattern to find
+  - index- = literal text
+  - [^.]* = any characters except dot
+  - \.js = literal .js
+- /index-Ce9npmXd.js/ = replacement text
+- /g = global (replace all occurrences)
+
+PART 5: index.html
+- File to modify
+
+WHAT IT ACTUALLY DOES:
+BEFORE: <script src="/assets/index-OLD123.js"></script>
+AFTER:  <script src="/assets/index-Ce9npmXd.js"></script>
+
+WHY NEEDED:
+- Browser loads JavaScript file from index.html
+- index.html must reference the NEW file
+- If not updated, browser loads old code
+
+
+---------------------------------------------------------------------------
+STEP 5: Verify Update
+---------------------------------------------------------------------------
+
+ssh root@72.60.202.218 "cat /var/www/gentime/index.html | grep 'index-'"
+
+WHAT THIS DOES:
+- cat = show file contents
+- | = pipe (send output to next command)
+- grep 'index-' = find lines containing "index-"
+
+EXAMPLE OUTPUT:
+<script type="module" crossorigin src="/assets/index-Ce9npmXd.js"></script>
+
+✅ CONFIRM: Should show YOUR hash (Ce9npmXd or whatever yours is)
+
+================================================================================
+        STEP 5: TEST IN BROWSER
+================================================================================
+
+---------------------------------------------------------------------------
+STEP 1: Open Website
+---------------------------------------------------------------------------
+
+Go to: https://gentime.in
+
+
+---------------------------------------------------------------------------
+STEP 2: Hard Refresh (VERY IMPORTANT!)
+---------------------------------------------------------------------------
+
+WINDOWS:
+Ctrl + Shift + R
+
+MAC:
+Cmd + Shift + R
+
+WHAT THIS DOES:
+- Normal refresh (F5) uses cached files
+- Hard refresh forces browser to download new files
+- Clears cache for this page
+- Without this, you'll see old code!
+
+WHY NEEDED:
+- Browsers cache JavaScript files for speed
+- Your browser might still have old version
+- Hard refresh bypasses cache
+
+
+---------------------------------------------------------------------------
+STEP 3: Test Your Changes
+---------------------------------------------------------------------------
+
+✅ Test the features you changed
+✅ Check if bug is fixed
+✅ Verify new features work
+✅ Test on mobile (responsive design)
+✅ Check browser console for errors (F12)
+
+
+---------------------------------------------------------------------------
+ALTERNATIVE: Use Incognito/Private Window
+---------------------------------------------------------------------------
+
+CHROME:
+Ctrl + Shift + N
+
+FIREFOX:
+Ctrl + Shift + P
+
+WHAT THIS DOES:
+- Opens browser without cache
+- Always loads fresh files
+- No hard refresh needed
+
+PERFECT FOR TESTING!
+
+================================================================================
+        COMMON DEPLOYMENT ERRORS & SOLUTIONS
+================================================================================
+
+---------------------------------------------------------------------------
+ERROR 1: Git push rejected - "failed to push some refs"
+---------------------------------------------------------------------------
+
+ERROR MESSAGE:
+! [rejected]        main -> main (fetch first)
+error: failed to push some refs
+
+WHAT IT MEANS:
+- Server has commits you don't have locally
+- Someone else pushed, or you pushed from another computer
+- Git won't let you overwrite
+
+SOLUTION:
+git pull origin main
+git push origin main
+
+EXPLANATION:
+- Pull downloads remote changes
+- Merges with your local changes
+- Then you can push
+
+IF YOU GET MERGE CONFLICTS:
+- VSCode will show conflicts
+- Choose which code to keep
+- Save file
+- git add .
+- git commit -m "Resolve merge conflict"
+- git push origin main
+
+
+---------------------------------------------------------------------------
+ERROR 2: SSH connection refused
+---------------------------------------------------------------------------
+
+ERROR MESSAGE:
+ssh: connect to host 72.60.202.218 port 22: Connection refused
+
+WHAT IT MEANS:
+- Server is down
+- Firewall blocking
+- Wrong IP address
+
+SOLUTION:
+1. Check if server is up:
+   ping 72.60.202.218
+
+2. Check in Hostinger panel if VPS is running
+
+3. Try again in a few minutes
+
+4. Contact Hostinger support if persists
+
+
+---------------------------------------------------------------------------
+ERROR 3: PM2 shows "errored" status
+---------------------------------------------------------------------------
+
+ERROR MESSAGE:
+│ gentime-api  │ errored  │ 1      │
+
+WHAT IT MEANS:
+- Backend crashed
+- Usually due to code error or missing dependency
+
+SOLUTION:
+1. Check logs:
+   ssh root@72.60.202.218 "PATH=/root/.nvm/versions/node/v22.20.0/bin:\$PATH pm2 logs gentime-api --lines 50"
+
+2. Common causes:
+   - Missing npm package → Run: npm install
+   - MongoDB connection failed → Check .env file
+   - Syntax error → Check your code
+
+3. Restart:
+   ssh root@72.60.202.218 "PATH=/root/.nvm/versions/node/v22.20.0/bin:\$PATH pm2 restart gentime-api"
+
+
+---------------------------------------------------------------------------
+ERROR 4: Frontend not updating (still seeing old code)
+---------------------------------------------------------------------------
+
+SYMPTOMS:
+- Deployed but changes not visible
+- Old version still showing
+
+SOLUTIONS:
+
+1. Hard refresh browser (Ctrl+Shift+R)
+
+2. Clear browser cache completely
+
+3. Try incognito/private window
+
+4. Verify file uploaded:
+   ssh root@72.60.202.218 "ls -lh /var/www/gentime/assets/ | grep index"
+
+5. Verify HTML updated:
+   ssh root@72.60.202.218 "cat /var/www/gentime/index.html | grep 'index-'"
+
+6. Check if you used correct hash
+
+
+---------------------------------------------------------------------------
+ERROR 5: 502 Bad Gateway
+---------------------------------------------------------------------------
+
+ERROR MESSAGE:
+502 Bad Gateway
+nginx/1.18.0
+
+WHAT IT MEANS:
+- Nginx (web server) running
+- But backend (PM2) not responding
+
+SOLUTION:
+1. Check PM2 status:
+   ssh root@72.60.202.218 "PATH=/root/.nvm/versions/node/v22.20.0/bin:\$PATH pm2 status"
+
+2. If offline, start it:
+   ssh root@72.60.202.218 "PATH=/root/.nvm/versions/node/v22.20.0/bin:\$PATH pm2 start /root/gentime/api/server.js --name gentime-api"
+
+3. Check logs:
+   ssh root@72.60.202.218 "PATH=/root/.nvm/versions/node/v22.20.0/bin:\$PATH pm2 logs gentime-api"
+
+
+---------------------------------------------------------------------------
+ERROR 6: npm run build fails
+---------------------------------------------------------------------------
+
+ERROR MESSAGE:
+Error: Cannot find module '@vitejs/plugin-react'
+
+WHAT IT MEANS:
+- Missing dependencies in node_modules/
+- node_modules/ deleted or corrupted
+
+SOLUTION:
+cd "d:\final project 1.1\gentime4\school management system\frontend"
+rm -rf node_modules package-lock.json
+npm install
+npm run build
+
+
+---------------------------------------------------------------------------
+ERROR 7: File upload fails with "Network Error"
+---------------------------------------------------------------------------
+
+SYMPTOMS:
+- Large images/videos fail to upload
+- "Network Error" in browser
+
+SOLUTIONS:
+1. File is larger than 80MB → Compress it
+
+2. Nginx body size limit → Already configured (100MB)
+
+3. Timeout → Already configured (2 minutes)
+
+4. Check PM2 logs for errors:
+   ssh root@72.60.202.218 "PATH=/root/.nvm/versions/node/v22.20.0/bin:\$PATH pm2 logs gentime-api"
+
+5. Check Nginx logs:
+   ssh root@72.60.202.218 "tail -50 /var/log/nginx/error.log"
+
+================================================================================
+        DEPLOYMENT CHECKLIST
+================================================================================
+
+BEFORE DEPLOYMENT:
+☐ Tested code locally (npm run dev)
+☐ No errors in browser console (F12)
+☐ No errors in terminal
+☐ All features working as expected
+
+DURING DEPLOYMENT:
+☐ git add .
+☐ git commit -m "descriptive message"
+☐ git push origin main
+☐ Backend deployed (if changed)
+☐ Frontend built (if changed)
+☐ Frontend uploaded (if changed)
+☐ index.html updated (if changed)
+
+AFTER DEPLOYMENT:
+☐ Hard refresh browser (Ctrl+Shift+R)
+☐ Test all changed features
+☐ Check browser console for errors
+☐ Test on mobile (if applicable)
+☐ Monitor PM2 logs for 5 minutes
+☐ Check for user complaints
+
+================================================================================
+        QUICK REFERENCE - COPY-PASTE COMMANDS
+================================================================================
+
+FULL DEPLOYMENT (BACKEND + FRONTEND):
+--------------------------------------
+
+# 1. Commit and push
+git add .
+git commit -m "Describe your changes"
+git push origin main
+
+# 2. Deploy backend
+ssh root@72.60.202.218 "cd /root/gentime/api && git pull origin main && PATH=/root/.nvm/versions/node/v22.20.0/bin:\$PATH pm2 restart gentime-api"
+
+# 3. Build frontend
+cd "d:\final project 1.1\gentime4\school management system\frontend"
+npm run build
+
+# 4. Get hash (note the hash from output)
+ls dist/assets/index-*.js
+
+# 5. Upload (REPLACE HASH!)
+scp -r dist/assets/index-YOURHASH.js root@72.60.202.218:/var/www/gentime/assets/
+
+# 6. Update HTML (REPLACE HASH!)
+ssh root@72.60.202.218 "cd /var/www/gentime && sed -i 's/index-[^.]*\.js/index-YOURHASH.js/g' index.html"
+
+# 7. Test
+# Open: https://gentime.in
+# Press: Ctrl+Shift+R
+
+
+BACKEND ONLY DEPLOYMENT:
+-------------------------
+
+git add .
+git commit -m "Backend changes"
+git push origin main
+ssh root@72.60.202.218 "cd /root/gentime/api && git pull origin main && PATH=/root/.nvm/versions/node/v22.20.0/bin:\$PATH pm2 restart gentime-api"
+
+
+FRONTEND ONLY DEPLOYMENT:
+--------------------------
+
+git add .
+git commit -m "Frontend changes"
+git push origin main
+cd "d:\final project 1.1\gentime4\school management system\frontend"
+npm run build
+scp -r dist/assets/index-HASH.js root@72.60.202.218:/var/www/gentime/assets/
+ssh root@72.60.202.218 "cd /var/www/gentime && sed -i 's/index-[^.]*\.js/index-HASH.js/g' index.html"
+
+
+CHECK BACKEND LOGS:
+-------------------
+
+ssh root@72.60.202.218 "PATH=/root/.nvm/versions/node/v22.20.0/bin:\$PATH pm2 logs gentime-api --lines 50 --nostream"
+
+
+CHECK PM2 STATUS:
+-----------------
+
+ssh root@72.60.202.218 "PATH=/root/.nvm/versions/node/v22.20.0/bin:\$PATH pm2 status"
+
+
+RESTART EVERYTHING (EMERGENCY):
+--------------------------------
+
+ssh root@72.60.202.218 "PATH=/root/.nvm/versions/node/v22.20.0/bin:\$PATH pm2 restart all && systemctl restart nginx"
+
+================================================================================
+        UNDERSTANDING THE WORKFLOW
+================================================================================
+
+YOUR COMPUTER (LOCAL)           GITHUB (CLOUD)              SERVER (VPS)
+─────────────────────          ───────────────          ───────────────
+
+1. Edit code in VSCode
+   ↓
+2. git commit (save)
+   ↓
+3. git push ────────────────→ Code stored ───────────→ git pull (download)
+                               in GitHub                   ↓
+                                                    4. PM2 restart (apply)
+                                                           ↓
+                                                    5. Nginx serves files
+                                                           ↓
+                                                    USER'S BROWSER
+
+
+WHY THIS WORKFLOW:
+- Can't directly access server from VSCode (security)
+- GitHub acts as central hub
+- Multiple developers can work together
+- Version history preserved
+- Can rollback if something breaks
+
+
+WHAT EACH COMMAND DOES:
+- git add = Prepare files for commit
+- git commit = Save snapshot locally
+- git push = Upload to GitHub
+- git pull = Download from GitHub (on server)
+- pm2 restart = Apply new code
+- npm run build = Create optimized files
+- scp = Upload files to server
+- sed = Update HTML file
+
+================================================================================
+        TIPS FOR FASTER DEPLOYMENT
+================================================================================
+
+TIP 1: Create keyboard shortcuts
+- Save commonly used commands in a file
+- Copy-paste instead of typing each time
+
+TIP 2: Use VSCode Source Control panel
+- Ctrl+Shift+G to open
+- Click + to stage files
+- Type message and Ctrl+Enter to commit
+- Click ... → Push to push
+
+TIP 3: Keep terminal open
+- Don't close terminal between deployments
+- Saves time reconnecting
+
+TIP 4: Deploy during low-traffic times
+- Nights/early mornings
+- Less user impact if something breaks
+- Easier to test without interruptions
+
+TIP 5: Deploy small changes frequently
+- Easier to find bugs
+- Less risk
+- Faster rollback if needed
+
+TIP 6: Always test locally first
+- Run: npm run dev
+- Test thoroughly
+- Only deploy when 100% working
+
+TIP 7: Monitor logs after deployment
+- Watch for errors
+- First 5 minutes most critical
+- Catch issues before users do
+
+================================================================================
+        WHAT TO DO IF DEPLOYMENT BREAKS WEBSITE
+================================================================================
+
+DON'T PANIC! Here's how to rollback:
+
+STEP 1: Find the last working commit
+git log --oneline -10
+
+STEP 2: Copy the hash of last working version
+Example: b2c3d4e
+
+STEP 3: Rollback on server
+ssh root@72.60.202.218 "cd /root/gentime/api && git reset --hard b2c3d4e && PATH=/root/.nvm/versions/node/v22.20.0/bin:\$PATH pm2 restart gentime-api"
+
+STEP 4: Rollback locally
+git reset --hard b2c3d4e
+
+STEP 5: Fix the bug locally
+
+STEP 6: Test thoroughly
+
+STEP 7: Deploy again
+
+⚠️ WARNING: git reset --hard DELETES changes permanently!
+Only use for emergency rollback.
+
+================================================================================
+        GETTING HELP
+================================================================================
+
+IF YOU'RE STUCK:
+
+1. Check error message carefully
+   - Read entire message
+   - Google the error
+   - Check documentation
+
+2. Check logs
+   - PM2 logs: pm2 logs gentime-api
+   - Nginx logs: tail /var/log/nginx/error.log
+   - Browser console: F12
+
+3. Try step-by-step deployment
+   - Don't use one-liner commands
+   - Do each step manually
+   - Identify which step fails
+
+4. Ask for help
+   - Provide full error message
+   - Share what you tried
+   - Share relevant logs
+
+USEFUL RESOURCES:
+- Git documentation: https://git-scm.com/doc
+- PM2 documentation: https://pm2.keymetrics.io/docs/
+- Nginx documentation: https://nginx.org/en/docs/
+- GitHub help: https://docs.github.com
+
+================================================================================
+        FINAL NOTES
+================================================================================
+
+REMEMBER:
+✅ Always test locally before deploying
+✅ Commit frequently with clear messages
+✅ Deploy during low-traffic times
+✅ Monitor logs after deployment
+✅ Keep backups (GitHub is your backup)
+✅ Hard refresh browser to see changes
+✅ Don't panic if something breaks - you can rollback
+
+DEPLOYMENT SHOULD TAKE:
+- Backend only: 1-2 minutes
+- Frontend only: 3-5 minutes
+- Both: 5-10 minutes
+
+IF IT TAKES LONGER:
+- Something might be wrong
+- Check for errors
+- Don't keep retrying the same failed command
+
+PRACTICE MAKES PERFECT:
+- First deployment: 30 minutes
+- After 5 deployments: 10 minutes
+- After 20 deployments: 5 minutes
+
+You'll get faster with experience!
+
+================================================================================
+        END OF GUIDE
+================================================================================
+
+Last Updated: October 2025
+Project: GenTime School Management System
+Author: Kallesh SK
+Version: 2.0
+
+For more detailed guides, check:
+- GIT_AND_SERVER_COMMANDS.md
+- COMPLETE_DEPLOYMENT_GUIDE.md
+- VSCODE_TO_GIT_AND_SERVER_GUIDE.md
+
+Good luck with your deployment! 🚀
