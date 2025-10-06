@@ -23,6 +23,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import DownloadIcon from '@mui/icons-material/Download';
 import { useSelector } from 'react-redux';
 import { useTheme } from '@emotion/react';
 import { AuthContext } from '../../../context/AuthContext';
@@ -158,7 +159,9 @@ function Navbar() {
     textColor: '#333'
   });
   const { authenticated, user } = React.useContext(AuthContext);
-  const  [dashboardLink, setDashboardLink] = React.useState('/')
+  const  [dashboardLink, setDashboardLink] = React.useState('/');
+  const [deferredPrompt, setDeferredPrompt] = React.useState(null);
+  const [showInstallButton, setShowInstallButton] = React.useState(false)
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
@@ -237,6 +240,39 @@ function Navbar() {
     };
   }, [fetchSchoolInfo]);
 
+  // PWA Install Handler
+  React.useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallButton(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setShowInstallButton(false);
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) {
+      alert('To install GenTime:\n\niOS: Tap Share button → Add to Home Screen\n\nAndroid: This app is already installed or your browser does not support installation');
+      return;
+    }
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+    }
+    setDeferredPrompt(null);
+    setShowInstallButton(false);
+  };
+
   const theme = useTheme();
 
   return (
@@ -269,69 +305,26 @@ function Navbar() {
           </Link>
 
 
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              keepMountedH
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{ display: { xs: 'block', md: 'none' } }}
-            >
-           
-
-            
-
-             {!authenticated && <>
-              {headerSettings.showRegisterButton && (
-                <MenuItem onClick={handleCloseNavMenu}>
-                  <Link to="/register" style={{ textDecoration: 'none' }}>
-                    <StyledButton>
-                      <PersonAddIcon />
-                      Register
-                    </StyledButton>
-                  </Link>
-                </MenuItem>
-              )}
-
-              {headerSettings.showLoginButton && (
-                <MenuItem onClick={handleCloseNavMenu}>
-                  <Link to="/login" style={{ textDecoration: 'none' }}>
-                    <StyledButton>
-                      <LoginIcon />
-                      Login
-                    </StyledButton>
-                  </Link>
-                </MenuItem>
-              )}
-            </>}
-             
-
-             
-
-            </Menu>
+          {/* Mobile - Login Button on LEFT */}
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1 }}>
+            {!authenticated && headerSettings.showLoginButton && (
+              <Link to="/login" style={{ textDecoration: 'none' }}>
+                <StyledButton size="small" sx={{
+                  minWidth: 'auto',
+                  px: 2,
+                  py: 1,
+                  fontSize: '0.875rem'
+                }}>
+                  <LoginIcon sx={{ fontSize: '1rem' }} />
+                  Login
+                </StyledButton>
+              </Link>
+            )}
           </Box>
 
+          {/* Mobile - Logo and Name on RIGHT */}
           <Link className="nav-list" to={'/'} style={{textDecoration:"none"}}>
-            <LogoContainer sx={{ display: { xs: 'flex', md: 'none' }, flexGrow: 1 }}>
+            <LogoContainer sx={{ display: { xs: 'flex', md: 'none' }, flexGrow: 1, justifyContent: 'flex-end' }}>
               {!headerSettings.showLogo && (
                 <SchoolIcon sx={{ fontSize: 30, color: headerSettings.textColor || '#333', mr: 1 }} />
               )}
@@ -403,6 +396,68 @@ function Navbar() {
           </Box>
         </Toolbar>
       </Container>
+
+      {/* Mobile Floating Action Buttons - Below Header */}
+      {!authenticated && (
+        <Box sx={{
+          display: { xs: 'flex', md: 'none' },
+          gap: 1,
+          px: 2,
+          py: 1,
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          {headerSettings.showLoginButton && (
+            <Link to="/login" style={{ textDecoration: 'none', flex: 1 }}>
+              <Button
+                variant="contained"
+                fullWidth
+                size="small"
+                sx={{
+                  background: '#fff',
+                  color: '#667eea',
+                  fontWeight: 600,
+                  py: 1,
+                  '&:hover': {
+                    background: '#f0f0f0',
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                  },
+                  transition: 'all 0.2s ease'
+                }}
+                startIcon={<LoginIcon />}
+              >
+                Login
+              </Button>
+            </Link>
+          )}
+          {showInstallButton && (
+            <Button
+              variant="contained"
+              size="small"
+              onClick={handleInstallClick}
+              sx={{
+                background: '#FFD700',
+                color: '#333',
+                fontWeight: 600,
+                py: 1,
+                flex: 1,
+                '&:hover': {
+                  background: '#FFC700',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                },
+                transition: 'all 0.2s ease'
+              }}
+              startIcon={<DownloadIcon />}
+            >
+              Download App
+            </Button>
+          )}
+        </Box>
+      )}
     </StyledAppBar>
   );
 }

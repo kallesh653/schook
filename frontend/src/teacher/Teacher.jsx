@@ -239,12 +239,12 @@ export default function Teacher() {
     const [open, setOpen] = React.useState(true); // Start open on desktop
     const [activeRoute, setActiveRoute] = React.useState(window.location.pathname);
     const [mobileOpen, setMobileOpen] = React.useState(false);
-    const [isMobile, setIsMobile] = React.useState(window.innerWidth < 960);
+    const [isMobile, setIsMobile] = React.useState(window.innerWidth < 900);
 
     // Handle window resize for responsive behavior
     React.useEffect(() => {
         const handleResize = () => {
-            const mobile = window.innerWidth < 960;
+            const mobile = window.innerWidth < 900; // Match MUI md breakpoint
             setIsMobile(mobile);
             if (mobile) {
                 setOpen(false); // Close desktop drawer on mobile

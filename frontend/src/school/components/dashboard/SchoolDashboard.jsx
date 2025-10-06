@@ -30,6 +30,24 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 
 import CustomizedSnackbars from "../../../basic utility components/CustomizedSnackbars";
 import { useDashboard } from '../../../context/DashboardContext';
+import { useNavigate } from "react-router-dom";
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import GroupIcon from '@mui/icons-material/Group';
+import GradingIcon from '@mui/icons-material/Grading';
+import HomeIcon from '@mui/icons-material/Home';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
+import RecentActorsIcon from '@mui/icons-material/RecentActors';
+import ExplicitIcon from '@mui/icons-material/Explicit';
+import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
+import LogoutIcon from '@mui/icons-material/Logout';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import WebIcon from '@mui/icons-material/Web';
+import PaymentIcon from '@mui/icons-material/Payment';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import SchoolIcon from '@mui/icons-material/School';
+import SmsIcon from '@mui/icons-material/Sms';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, ArcElement);
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -44,6 +62,7 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 const SchoolDashboard = () => {
+  const navigate = useNavigate();
   const { refreshTrigger } = useDashboard();
   const [totalStudents, setTotalStudents] = useState(0);
   const [totalTeachers, setTotalTeachers] = useState(0);
@@ -308,7 +327,60 @@ const SchoolDashboard = () => {
     // setImageUrl(null); // Clear the image preview
   };
 
-const handleSubmit = (e)=>{
+  const navArr = [
+    { link: "/school", component: "Dashboard", icon: DashboardIcon },
+    { link: "/school/front-page", component: "Front Page", icon: WebIcon },
+    { link: "/school/public-home", component: "Public Home", icon: WebIcon },
+    { link: "/school/courses", component: "Courses", icon: SchoolIcon },
+    { link: "/school/class", component: "Classes", icon:FormatListNumberedIcon },
+    { link: "/school/subject", component: "Subjects", icon: MenuBookIcon },
+    { link: "/school/students", component: "Students", icon: GroupIcon },
+    { link: "/school/teachers", component: "Teachers", icon: GroupIcon },
+    { link: "/school/student-records", component: "Student Records", icon: AssignmentIndIcon },
+    { link: "/school/fees", component: "Fees Mgt", icon: PaymentIcon },
+    { link: "/school/periods", component: "Schedule", icon: CalendarMonthIcon },
+    { link: "/school/attendance", component: "Attendance", icon: RecentActorsIcon },
+    { link: "/school/attendance-report", component: "Attd. Reports", icon: AssessmentIcon },
+    { link: "/school/examinations", component: "Examinations", icon: ExplicitIcon },
+    { link: "/school/marksheets", component: "Marksheets", icon: GradingIcon },
+    { link: "/school/notice", component: "Notices", icon:CircleNotificationsIcon },
+    { link: "/school/sms", component: "SMS Mgt", icon:SmsIcon },
+    { link: "/logout", component: "Log Out", icon:LogoutIcon }
+  ];
+
+  const QuickAccessCard = ({ title, icon, link }) => (
+    <Grid2 size={{ xs: 12, sm: 6, md: 4, lg: 3 }} >
+      <Card 
+        sx={{ 
+          minHeight: 120, 
+          display: 'flex', 
+          flexDirection: 'column', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          textAlign: 'center',
+          background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+          boxShadow: '0 8px 32px rgba(102, 126, 234, 0.2)',
+          borderRadius: '20px',
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            transform: 'translateY(-5px)',
+            boxShadow: '0 12px 40px rgba(102, 126, 234, 0.3)',
+          }
+        }}
+        onClick={() => navigate(link)}
+      >
+        <CardContent>
+          <IconButton sx={{ fontSize: 40, color: '#667eea' }}>
+            {React.createElement(icon, { sx: { fontSize: 40 } })}
+          </IconButton>
+          <Typography variant="h6" sx={{ fontWeight: 600, mt: 1 }}>{title}</Typography>
+        </CardContent>
+      </Card>
+    </Grid2>
+  );
+
+  const handleSubmit = (e)=>{
     e.preventDefault();
     const fd = new FormData();
     fd.append("school_name", schoolName)
@@ -412,6 +484,17 @@ const handleSubmit = (e)=>{
           </IconButton>
         </Box>
       )}
+
+      <Box sx={{ my: 4 }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: '#667eea', textAlign: 'center', mb: 3 }}>
+          Quick Access
+        </Typography>
+        <Grid2 container spacing={3}>
+          {navArr.map((item, index) => (
+            <QuickAccessCard key={index} title={item.component} icon={item.icon} link={item.link} />
+          ))}
+        </Grid2>
+      </Box>
 
 
 

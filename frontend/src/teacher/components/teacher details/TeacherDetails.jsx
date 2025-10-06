@@ -24,6 +24,9 @@ import PeopleIcon from '@mui/icons-material/People';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import EditIcon from '@mui/icons-material/Edit';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import AnnouncementIcon from '@mui/icons-material/Announcement';
+import GradeIcon from '@mui/icons-material/Grade';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useNavigate } from 'react-router-dom';
 
 // Styled Components
@@ -84,6 +87,24 @@ const InfoChip = styled(Chip)(({ theme }) => ({
     height: 'auto',
     '& .MuiChip-icon': {
         fontSize: '1.2rem',
+    },
+}));
+
+const QuickAccessCard = styled(Card)(({ theme, bgGradient }) => ({
+    borderRadius: '16px',
+    padding: theme.spacing(2),
+    textAlign: 'center',
+    background: bgGradient || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+    '&:hover': {
+        transform: 'translateY(-8px)',
+        boxShadow: '0 8px 30px rgba(0,0,0,0.25)',
+    },
+    [theme.breakpoints.down('sm')]: {
+        padding: theme.spacing(1.5),
     },
 }));
 
@@ -341,6 +362,47 @@ export default function TeacherDetails() {
                     </Box>
                 </CardContent>
             </StyledHeaderCard>
+
+            {/* Quick Access Section */}
+            <Box sx={{ mb: 4 }}>
+                <Typography variant={isMobile ? "h6" : "h5"} sx={{ mb: 2, fontWeight: 600, color: '#333' }}>
+                    ⚡ Quick Access
+                </Typography>
+                <Grid container spacing={2}>
+                    <Grid item xs={6} sm={4} md={3}>
+                        <QuickAccessCard bgGradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)" onClick={() => navigate('/teacher/periods')}>
+                            <CalendarTodayIcon sx={{ fontSize: { xs: 40, md: 50 }, mb: 1 }} />
+                            <Typography variant={isMobile ? "body2" : "h6"} sx={{ fontWeight: 600 }}>
+                                My Schedule
+                            </Typography>
+                        </QuickAccessCard>
+                    </Grid>
+                    <Grid item xs={6} sm={4} md={3}>
+                        <QuickAccessCard bgGradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)" onClick={() => navigate('/teacher/attendance')}>
+                            <AssignmentIcon sx={{ fontSize: { xs: 40, md: 50 }, mb: 1 }} />
+                            <Typography variant={isMobile ? "body2" : "h6"} sx={{ fontWeight: 600 }}>
+                                Attendance
+                            </Typography>
+                        </QuickAccessCard>
+                    </Grid>
+                    <Grid item xs={6} sm={4} md={3}>
+                        <QuickAccessCard bgGradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)" onClick={() => navigate('/teacher/examinations')}>
+                            <GradeIcon sx={{ fontSize: { xs: 40, md: 50 }, mb: 1 }} />
+                            <Typography variant={isMobile ? "body2" : "h6"} sx={{ fontWeight: 600 }}>
+                                Examinations
+                            </Typography>
+                        </QuickAccessCard>
+                    </Grid>
+                    <Grid item xs={6} sm={4} md={3}>
+                        <QuickAccessCard bgGradient="linear-gradient(135deg, #fa709a 0%, #fee140 100%)" onClick={() => navigate('/teacher/notices')}>
+                            <AnnouncementIcon sx={{ fontSize: { xs: 40, md: 50 }, mb: 1 }} />
+                            <Typography variant={isMobile ? "body2" : "h6"} sx={{ fontWeight: 600 }}>
+                                Notices
+                            </Typography>
+                        </QuickAccessCard>
+                    </Grid>
+                </Grid>
+            </Box>
 
             {/* Dashboard Stats */}
             <Grid container spacing={3} sx={{ mb: 4 }}>
