@@ -82,18 +82,21 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
 
   const handleSubmit = () => {
     // Only URL is required, title and description are optional
-    if (!formData.url) {
+    if (!formData.url || formData.url.trim() === '') {
       alert('Please upload an image/video or provide a URL');
       return;
     }
 
     const slideData = {
-      ...formData,
-      title: formData.title.trim() || 'Untitled Slide',
-      description: formData.description.trim() || '',
-      id: editingSlider?.id || Date.now().toString()
+      id: editingSlider?.id || Date.now().toString(),
+      type: formData.type || 'image',
+      url: formData.url,
+      title: (formData.title || '').trim() || '',
+      description: (formData.description || '').trim() || '',
+      active: formData.active !== undefined ? formData.active : true
     };
 
+    console.log('SliderDialog - Submitting slide data:', slideData);
     onSave(slideData);
     onClose();
   };
@@ -287,10 +290,10 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button 
-          onClick={handleSubmit} 
+        <Button
+          onClick={handleSubmit}
           variant="contained"
-          disabled={!formData.title.trim() || !formData.description.trim() || !formData.url}
+          disabled={!formData.url}
         >
           {editingSlider ? 'Update Slide' : 'Add Slide'}
         </Button>
