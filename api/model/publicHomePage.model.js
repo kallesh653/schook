@@ -88,7 +88,7 @@ const publicHomePageSchema = new mongoose.Schema({
     }]
   },
 
-  // Features/Services Section
+  // Features/Services Section (Why Choose Us)
   features: {
     showSection: {
       type: Boolean,
@@ -96,13 +96,65 @@ const publicHomePageSchema = new mongoose.Schema({
     },
     sectionTitle: {
       type: String,
-      default: 'Key Features'
+      default: 'Why Choose Us'
     },
     items: [{
       icon: String,
       title: String,
       description: String,
       color: String
+    }]
+  },
+
+  // Programs Section (Our Programs)
+  programs: {
+    showSection: {
+      type: Boolean,
+      default: true
+    },
+    sectionTitle: {
+      type: String,
+      default: 'Our Programs'
+    },
+    items: [{
+      title: String,
+      description: String,
+      icon: String,
+      color: String
+    }]
+  },
+
+  // Campus Section (Explore Our Campus)
+  campus: {
+    showSection: {
+      type: Boolean,
+      default: true
+    },
+    sectionTitle: {
+      type: String,
+      default: 'Explore Our Campus'
+    },
+    description: String,
+    images: [{ type: String }],
+    videoUrl: String
+  },
+
+  // Testimonials Section (What Parents Say)
+  testimonials: {
+    showSection: {
+      type: Boolean,
+      default: true
+    },
+    sectionTitle: {
+      type: String,
+      default: 'What Parents Say'
+    },
+    items: [{
+      name: String,
+      role: String,
+      image: String,
+      text: String,
+      rating: { type: Number, default: 5 }
     }]
   },
 

@@ -289,3 +289,130 @@ exports.updateTheme = async (req, res) => {
     });
   }
 };
+
+// Update programs section
+exports.updatePrograms = async (req, res) => {
+  try {
+    const { showSection, sectionTitle, items } = req.body;
+
+    let publicPage = await PublicHomePage.findOne({ isSingleton: true });
+
+    if (!publicPage) {
+      publicPage = await PublicHomePage.create({ isSingleton: true });
+    }
+
+    if (showSection !== undefined) publicPage.programs.showSection = showSection;
+    if (sectionTitle !== undefined) publicPage.programs.sectionTitle = sectionTitle;
+    if (items !== undefined) publicPage.programs.items = items;
+
+    await publicPage.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Programs updated successfully',
+      data: publicPage
+    });
+  } catch (error) {
+    console.error('Error updating programs:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating programs'
+    });
+  }
+};
+
+// Update campus section
+exports.updateCampus = async (req, res) => {
+  try {
+    const { showSection, sectionTitle, description, images, videoUrl } = req.body;
+
+    let publicPage = await PublicHomePage.findOne({ isSingleton: true });
+
+    if (!publicPage) {
+      publicPage = await PublicHomePage.create({ isSingleton: true });
+    }
+
+    if (showSection !== undefined) publicPage.campus.showSection = showSection;
+    if (sectionTitle !== undefined) publicPage.campus.sectionTitle = sectionTitle;
+    if (description !== undefined) publicPage.campus.description = description;
+    if (images !== undefined) publicPage.campus.images = images;
+    if (videoUrl !== undefined) publicPage.campus.videoUrl = videoUrl;
+
+    await publicPage.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Campus section updated successfully',
+      data: publicPage
+    });
+  } catch (error) {
+    console.error('Error updating campus:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating campus section'
+    });
+  }
+};
+
+// Update testimonials section
+exports.updateTestimonials = async (req, res) => {
+  try {
+    const { showSection, sectionTitle, items } = req.body;
+
+    let publicPage = await PublicHomePage.findOne({ isSingleton: true });
+
+    if (!publicPage) {
+      publicPage = await PublicHomePage.create({ isSingleton: true });
+    }
+
+    if (showSection !== undefined) publicPage.testimonials.showSection = showSection;
+    if (sectionTitle !== undefined) publicPage.testimonials.sectionTitle = sectionTitle;
+    if (items !== undefined) publicPage.testimonials.items = items;
+
+    await publicPage.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Testimonials updated successfully',
+      data: publicPage
+    });
+  } catch (error) {
+    console.error('Error updating testimonials:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating testimonials'
+    });
+  }
+};
+
+// Update about section
+exports.updateAbout = async (req, res) => {
+  try {
+    const { title, description, image, features } = req.body;
+
+    let publicPage = await PublicHomePage.findOne({ isSingleton: true });
+
+    if (!publicPage) {
+      publicPage = await PublicHomePage.create({ isSingleton: true });
+    }
+
+    if (title !== undefined) publicPage.aboutSection.title = title;
+    if (description !== undefined) publicPage.aboutSection.description = description;
+    if (image !== undefined) publicPage.aboutSection.image = image;
+    if (features !== undefined) publicPage.aboutSection.features = features;
+
+    await publicPage.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'About section updated successfully',
+      data: publicPage
+    });
+  } catch (error) {
+    console.error('Error updating about section:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating about section'
+    });
+  }
+};

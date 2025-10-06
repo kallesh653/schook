@@ -14,5 +14,9 @@ router.patch('/features', auth(['SCHOOL']), publicHomePageController.updateFeatu
 router.patch('/announcements', auth(['SCHOOL']), publicHomePageController.updateAnnouncements);
 router.patch('/header', auth(['SCHOOL']), publicHomePageController.updateHeader);
 router.patch('/theme', auth(['SCHOOL']), publicHomePageController.updateTheme);
+router.patch('/programs', auth(['SCHOOL']), publicHomePageController.updatePrograms);
+router.patch('/campus', auth(['SCHOOL']), publicHomePageController.updateCampus);
+router.patch('/testimonials', auth(['SCHOOL']), publicHomePageController.updateTestimonials);
+router.patch('/about', auth(['SCHOOL']), publicHomePageController.updateAbout);
 
 module.exports = router;
