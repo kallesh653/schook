@@ -43,6 +43,7 @@ import NoticeTeacher from "./teacher/components/notice/Notice";
 import NoticeStudent from "./student/components/notice/NoticeStudent";
 import StudentRecords from "./school/components/student-records/StudentRecords";
 import FrontPageManagement from "./school/components/front-page-management/FrontPageManagement";
+import PublicHomePageManagement from "./school/components/public-home-management/PublicHomePageManagement";
 import FeesManagement from "./school/components/fees/FeesManagement";
 import MarkSheetGenerator from "./school/components/marksheet/MarkSheetGenerator";
 import SmsManagement from "./school/components/sms/SmsManagement";
@@ -64,6 +65,7 @@ function App() {
           <Route path="school"  element={<ProtectedRoute allowedRoles={['SCHOOL']}><School/></ProtectedRoute>}>
               <Route index element={<SchoolDashboard />} />
               <Route path="front-page" element={<FrontPageManagement />} />
+              <Route path="public-home" element={<PublicHomePageManagement />} />
               <Route path="courses" element={<Courses />} />
               <Route path="class" element={<Class />} />
               <Route path="class-details" element={<ClassDetails />} />
