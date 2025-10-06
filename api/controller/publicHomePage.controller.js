@@ -108,16 +108,32 @@ exports.updateSlider = async (req, res) => {
   try {
     const { showSlider, slides } = req.body;
 
+    console.log('📥 Received slider update request:', { showSlider, slidesCount: slides?.length });
+
     let publicPage = await PublicHomePage.findOne({ isSingleton: true });
 
     if (!publicPage) {
+      console.log('Creating new public page document...');
       publicPage = await PublicHomePage.create({ isSingleton: true });
     }
 
     if (showSlider !== undefined) publicPage.slider.showSlider = showSlider;
-    if (slides !== undefined) publicPage.slider.slides = slides;
+    if (slides !== undefined) {
+      // Ensure all slides have required fields
+      publicPage.slider.slides = slides.map(slide => ({
+        id: slide.id || Date.now().toString(),
+        type: slide.type || 'image',
+        url: slide.url,
+        title: slide.title || '',
+        description: slide.description || '',
+        order: slide.order || 0,
+        active: slide.active !== undefined ? slide.active : true
+      }));
+    }
 
     await publicPage.save();
+
+    console.log('✅ Slider updated successfully');
 
     res.status(200).json({
       success: true,
@@ -125,10 +141,11 @@ exports.updateSlider = async (req, res) => {
       data: publicPage
     });
   } catch (error) {
-    console.error('Error updating slider:', error);
+    console.error('❌ Error updating slider:', error);
+    console.error('Error details:', error.message);
     res.status(500).json({
       success: false,
-      message: 'Error updating slider'
+      message: error.message || 'Error updating slider'
     });
   }
 };

@@ -339,6 +339,8 @@ const PublicHomePageManagement = () => {
 
   const handleSaveSlide = async (slideData) => {
     try {
+      console.log('📤 Saving slide data:', slideData);
+
       let updatedSlides;
       if (editingSlider) {
         updatedSlides = sliderImages.map(slide =>
@@ -348,26 +350,34 @@ const PublicHomePageManagement = () => {
         updatedSlides = [...sliderImages, slideData];
       }
 
+      console.log('📊 Updated slides array:', updatedSlides);
+
       setSliderImages(updatedSlides);
 
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      await axios.patch(`${baseUrl}/public-home/slider`, {
+
+      console.log('🚀 Sending to API...');
+      const response = await axios.patch(`${baseUrl}/public-home/slider`, {
         slides: updatedSlides
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
+      console.log('✅ API Response:', response.data);
+
       setSnackbar({
         open: true,
-        message: 'Public page slide saved successfully!',
+        message: 'Slide saved successfully!',
         severity: 'success'
       });
       setOpenSliderDialog(false);
+      setEditingSlider(null);
     } catch (error) {
-      console.error('Error saving slide:', error);
+      console.error('❌ Error saving slide:', error);
+      console.error('Error details:', error.response?.data);
       setSnackbar({
         open: true,
-        message: 'Error saving slide',
+        message: error.response?.data?.message || 'Error saving slide. Check console for details.',
         severity: 'error'
       });
     }
