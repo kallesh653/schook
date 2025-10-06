@@ -165,13 +165,13 @@ const Home = () => {
   });
 
   const [schoolInfo, setSchoolInfo] = useState({
-    name: 'School Management System',
-    tagline: 'Nurturing Tomorrow\'s Leaders',
-    description: 'Empowering students with knowledge, values, and skills for a brighter future.',
-    established: '1995',
-    students: '2,500+',
-    teachers: '150+',
-    achievements: '50+'
+    name: '',
+    tagline: '',
+    description: '',
+    established: '',
+    students: '',
+    teachers: '',
+    achievements: ''
   });
 
   const [media, setMedia] = useState({
@@ -196,29 +196,7 @@ const Home = () => {
     showVideos: false
   });
 
-  const [latestNews, setLatestNews] = useState([
-    {
-      id: 1,
-      title: 'Annual Sports Day 2024',
-      date: '2024-03-15',
-      description: 'Join us for an exciting day of sports and activities.',
-      image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400'
-    },
-    {
-      id: 2,
-      title: 'Science Fair Winners',
-      date: '2024-03-10',
-      description: 'Congratulations to our brilliant young scientists.',
-      image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=400'
-    },
-    {
-      id: 3,
-      title: 'New Library Opening',
-      date: '2024-03-05',
-      description: 'State-of-the-art library facility now open.',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400'
-    }
-  ]);
+  const [latestNews, setLatestNews] = useState([]);
 
   const [sliderImages, setSliderImages] = useState([]);
   const [combinedSlides, setCombinedSlides] = useState([]);
