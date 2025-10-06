@@ -13,7 +13,8 @@ import {
   Avatar,
   ToggleButton,
   ToggleButtonGroup,
-  Divider
+  Divider,
+  CircularProgress
 } from '@mui/material';
 import { CloudUpload as UploadIcon, VideoLibrary } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
@@ -39,6 +40,7 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
     type: 'image', // 'image' or 'video'
     active: true
   });
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (editingSlider) {
@@ -67,31 +69,96 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
     }));
   };
 
-  const handleImageUpload = (file) => {
+  // Compress image before upload
+  const compressImage = (file, maxWidth = 1920, quality = 0.8) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // Scale down if image is too large
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Convert to base64 with compression
+          canvas.toBlob(
+            (blob) => {
+              const compressedReader = new FileReader();
+              compressedReader.onload = (event) => {
+                resolve(event.target.result);
+              };
+              compressedReader.onerror = reject;
+              compressedReader.readAsDataURL(blob);
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleImageUpload = async (file) => {
     if (!file) return;
 
-    // Check file size (80MB = 80 * 1024 * 1024 bytes)
-    const maxSize = 80 * 1024 * 1024; // 80MB
-    if (file.size > maxSize) {
-      alert(`File is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Maximum size is 80MB. Please compress the file or use a smaller one.`);
-      return;
-    }
+    setUploading(true);
 
-    console.log(`📁 File size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+    try {
+      console.log(`📁 Original file size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      console.log(`✅ File converted to base64 (length: ${e.target.result.length} characters)`);
+      let fileData;
+
+      // For images, compress them
+      if (file.type.startsWith('image/')) {
+        console.log('🔄 Compressing image...');
+        fileData = await compressImage(file);
+        console.log(`✅ Compressed image (base64 length: ${fileData.length} characters)`);
+      }
+      // For videos, check size and convert directly
+      else if (file.type.startsWith('video/')) {
+        const maxSize = 80 * 1024 * 1024; // 80MB
+        if (file.size > maxSize) {
+          alert(`Video is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Maximum size is 80MB. Please compress the video or use a smaller one.`);
+          setUploading(false);
+          return;
+        }
+
+        console.log('🔄 Converting video to base64...');
+        fileData = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        console.log(`✅ Video converted (base64 length: ${fileData.length} characters)`);
+      }
+
       setFormData(prev => ({
         ...prev,
-        url: e.target.result
+        url: fileData
       }));
-    };
-    reader.onerror = (error) => {
-      console.error('❌ Error reading file:', error);
-      alert('Error reading file. Please try again.');
-    };
-    reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('❌ Error processing file:', error);
+      alert('Error processing file. Please try again.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSubmit = () => {
@@ -155,13 +222,22 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
                   onChange={(e) => handleImageUpload(e.target.files[0])}
                 />
                 <label htmlFor="slider-image-upload">
-                  <UploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-                  <Typography>Upload Slide Image</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Recommended size: 1920x1080px
-                  </Typography>
+                  {uploading ? (
+                    <>
+                      <CircularProgress size={48} sx={{ mb: 1 }} />
+                      <Typography>Processing image...</Typography>
+                    </>
+                  ) : (
+                    <>
+                      <UploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+                      <Typography>Upload Slide Image</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Recommended size: 1920x1080px (auto-compressed)
+                      </Typography>
+                    </>
+                  )}
                 </label>
-                {formData.url && (
+                {formData.url && !uploading && (
                   <Avatar
                     src={formData.url}
                     sx={{ width: 120, height: 80, mx: 'auto', mt: 2 }}
@@ -190,13 +266,25 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
                     onChange={(e) => handleImageUpload(e.target.files[0])}
                   />
                   <label htmlFor="slider-video-upload">
-                    <VideoLibrary sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-                    <Typography>Upload Video File</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      MP4, WebM, or MOV (Max 80MB)
-                    </Typography>
+                    {uploading ? (
+                      <>
+                        <CircularProgress size={48} sx={{ mb: 1 }} />
+                        <Typography>Processing video...</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          This may take a moment for large files
+                        </Typography>
+                      </>
+                    ) : (
+                      <>
+                        <VideoLibrary sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+                        <Typography>Upload Video File</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          MP4, WebM, or MOV (Max 80MB)
+                        </Typography>
+                      </>
+                    )}
                   </label>
-                  {formData.url && formData.url.startsWith('data:video') && (
+                  {formData.url && formData.url.startsWith('data:video') && !uploading && (
                     <Typography variant="caption" color="success.main" sx={{ mt: 2, display: 'block' }}>
                       ✓ Video uploaded successfully
                     </Typography>
@@ -303,13 +391,14 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose} disabled={uploading}>Cancel</Button>
         <Button
           onClick={handleSubmit}
           variant="contained"
-          disabled={!formData.url}
+          disabled={!formData.url || uploading}
+          startIcon={uploading ? <CircularProgress size={20} /> : null}
         >
-          {editingSlider ? 'Update Slide' : 'Add Slide'}
+          {uploading ? 'Processing...' : (editingSlider ? 'Update Slide' : 'Add Slide')}
         </Button>
       </DialogActions>
     </Dialog>

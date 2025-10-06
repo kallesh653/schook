@@ -360,7 +360,13 @@ const PublicHomePageManagement = () => {
       const response = await axios.patch(`${baseUrl}/public-home/slider`, {
         slides: updatedSlides
       }, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 120000, // 2 minutes timeout for large files
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity
       });
 
       console.log('✅ API Response:', response.data);
