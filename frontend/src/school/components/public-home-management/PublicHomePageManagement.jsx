@@ -310,19 +310,6 @@ const PublicHomePageManagement = () => {
     }
   };
 
-  const handleFileUpload = (file, field) => {
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setHeroSection(prev => ({
-        ...prev,
-        [field]: e.target.result
-      }));
-    };
-    reader.readAsDataURL(file);
-  };
-
   const handleDeleteSlide = async (slideId) => {
     try {
       const updatedSlides = sliderImages.filter(slide => slide.id !== slideId);
