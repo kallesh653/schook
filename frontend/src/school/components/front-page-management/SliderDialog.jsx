@@ -81,12 +81,16 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
   };
 
   const handleSubmit = () => {
-    if (!formData.title.trim() || !formData.description.trim() || !formData.url) {
+    // Only URL is required, title and description are optional
+    if (!formData.url) {
+      alert('Please upload an image/video or provide a URL');
       return;
     }
 
     const slideData = {
       ...formData,
+      title: formData.title.trim() || 'Untitled Slide',
+      description: formData.description.trim() || '',
       id: editingSlider?.id || Date.now().toString()
     };
 
@@ -185,24 +189,26 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
             )}
           </Box>
 
-          {/* Title */}
+          {/* Title - Optional */}
           <TextField
             fullWidth
-            label="Slide Title"
+            label="Slide Title (Optional)"
             value={formData.title}
             onChange={(e) => handleChange('title', e.target.value)}
             placeholder="e.g., Our Beautiful Campus"
+            helperText="Optional - Leave blank if not needed"
           />
 
-          {/* Description */}
+          {/* Description - Optional */}
           <TextField
             fullWidth
             multiline
             rows={3}
-            label="Slide Description"
+            label="Slide Description (Optional)"
             value={formData.description}
             onChange={(e) => handleChange('description', e.target.value)}
             placeholder="e.g., State-of-the-art facilities designed for modern learning"
+            helperText="Optional - Leave blank if not needed"
           />
 
           {/* Active Toggle */}
