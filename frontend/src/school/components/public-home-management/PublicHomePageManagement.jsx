@@ -104,8 +104,8 @@ const PublicHomePageManagement = () => {
 
   // Hero Section
   const [heroSection, setHeroSection] = useState({
-    title: '',
-    subtitle: '',
+    title: 'GenTime',
+    subtitle: 'Modern School Management Platform',
     backgroundImage: null,
     showStatistics: true
   });
@@ -113,7 +113,7 @@ const PublicHomePageManagement = () => {
   // Header & Logo
   const [header, setHeader] = useState({
     logo: null,
-    siteName: 'SCHOOL MANAGEMENT SYSTEM',
+    siteName: 'GenTime',
     showLoginButton: true,
     showRegisterButton: true
   });

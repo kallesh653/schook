@@ -147,8 +147,8 @@ const BrandText = styled(Typography)(({ theme, textColor }) => ({
 function Navbar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-  const [schoolName, setSchoolName] = React.useState('SCHOOL MANAGEMENT SYSTEM');
-  const [schoolLogo, setSchoolLogo] = React.useState('./images/static/school_management_system.png');
+  const [schoolName, setSchoolName] = React.useState('GenTime');
+  const [schoolLogo, setSchoolLogo] = React.useState(null);
   const [headerSettings, setHeaderSettings] = React.useState({
     showLogo: true,
     showLoginButton: true,
@@ -174,51 +174,30 @@ function Navbar() {
     setAnchorElUser(null);
   };
 
-  // Function to fetch school info for header
+  // Function to fetch school info for header from PUBLIC HOME PAGE
   const fetchSchoolInfo = React.useCallback(async () => {
     try {
-      // First try to get the school ID from user context or localStorage
-      let schoolId = null;
+      // Fetch from PUBLIC HOME PAGE endpoint
+      const response = await axios.get(`${baseUrl}/public-home/data`);
 
-      try {
-        // Try to get school list to find an active school
-        const schoolsResponse = await axios.get(`${baseUrl}/school/fetch-all`);
-        if (schoolsResponse.data.success && schoolsResponse.data.data.length > 0) {
-          schoolId = schoolsResponse.data.data[0]._id;
-        }
-      } catch (schoolError) {
-        console.log('Could not fetch schools list:', schoolError.message);
-      }
+      if (response.data.success && response.data.data) {
+        const data = response.data.data;
 
-      // If we have a token, try authenticated endpoint first
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      if (token) {
-        try {
-          const authResponse = await axios.get(`${baseUrl}/front-page/data`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-
-          if (authResponse.data.success) {
-            const data = authResponse.data.data;
-            updateHeaderFromData(data);
-            return;
-          }
-        } catch (authError) {
-          console.log('Could not fetch from authenticated endpoint:', authError.message);
-        }
-      }
-
-      // Try public endpoint with school ID
-      if (schoolId) {
-        const response = await axios.get(`${baseUrl}/front-page/public/${schoolId}`);
-
-        if (response.data.success && response.data.data) {
-          const data = response.data.data;
-          updateHeaderFromData(data);
+        // Update header from public home page data
+        if (data.header) {
+          setSchoolName(data.header.siteName || 'GenTime');
+          setSchoolLogo(data.header.logo || null);
+          setHeaderSettings(prev => ({
+            ...prev,
+            showLoginButton: data.header.showLoginButton !== false,
+            showRegisterButton: data.header.showRegisterButton !== false,
+            backgroundColor: data.header.backgroundColor || '#fefefe',
+            textColor: data.header.textColor || '#333'
+          }));
         }
       }
     } catch (error) {
-      console.error('Error fetching school info for header:', error);
+      console.error('Error fetching public home page header:', error);
     }
   }, []);
 

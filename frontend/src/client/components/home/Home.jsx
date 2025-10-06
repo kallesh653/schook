@@ -204,7 +204,7 @@ const Home = () => {
   // Function to fetch PUBLIC home page data (NOT school-specific)
   const fetchFrontPageData = async () => {
     try {
-      // Fetch PUBLIC home page (shows "SCHOOL MANAGEMENT SYSTEM")
+      // Fetch PUBLIC home page (shows "GenTime")
       const publicResponse = await axios.get(`${baseUrl}/public-home/data`);
 
       if (publicResponse.data.success) {
@@ -214,8 +214,8 @@ const Home = () => {
         // Set school info from hero section and statistics
         const stats = data.statistics?.stats || [];
         setSchoolInfo({
-          name: data.header?.siteName || 'SCHOOL MANAGEMENT SYSTEM',
-          tagline: data.heroSection?.subtitle || 'Manage Your School Efficiently',
+          name: data.header?.siteName || 'GenTime',
+          tagline: data.heroSection?.subtitle || 'Modern School Management Platform',
           description: data.heroSection?.description || 'A comprehensive platform for managing students, teachers, classes, and more.',
           established: stats.find(s => s.label === 'Schools')?.value || '100+',
           students: stats.find(s => s.label === 'Students')?.value || '10,000+',

@@ -13,11 +13,11 @@ const publicHomePageSchema = new mongoose.Schema({
   heroSection: {
     title: {
       type: String,
-      default: 'SCHOOL MANAGEMENT SYSTEM'
+      default: 'GenTime'
     },
     subtitle: {
       type: String,
-      default: 'Manage Your School Efficiently'
+      default: 'Modern School Management Platform'
     },
     description: {
       type: String,
@@ -201,7 +201,7 @@ const publicHomePageSchema = new mongoose.Schema({
     },
     siteName: {
       type: String,
-      default: 'SCHOOL MANAGEMENT SYSTEM'
+      default: 'GenTime'
     },
     showLoginButton: {
       type: Boolean,
@@ -225,7 +225,7 @@ const publicHomePageSchema = new mongoose.Schema({
   footer: {
     copyrightText: {
       type: String,
-      default: '© 2024 School Management System. All rights reserved.'
+      default: '© 2024 GenTime. All rights reserved.'
     },
     socialLinks: [{
       platform: String,
