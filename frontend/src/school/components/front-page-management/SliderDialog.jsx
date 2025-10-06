@@ -69,13 +69,27 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
 
   const handleImageUpload = (file) => {
     if (!file) return;
-    
+
+    // Check file size (80MB = 80 * 1024 * 1024 bytes)
+    const maxSize = 80 * 1024 * 1024; // 80MB
+    if (file.size > maxSize) {
+      alert(`File is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Maximum size is 80MB. Please compress the file or use a smaller one.`);
+      return;
+    }
+
+    console.log(`📁 File size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+
     const reader = new FileReader();
     reader.onload = (e) => {
+      console.log(`✅ File converted to base64 (length: ${e.target.result.length} characters)`);
       setFormData(prev => ({
         ...prev,
         url: e.target.result
       }));
+    };
+    reader.onerror = (error) => {
+      console.error('❌ Error reading file:', error);
+      alert('Error reading file. Please try again.');
     };
     reader.readAsDataURL(file);
   };
@@ -179,7 +193,7 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
                     <VideoLibrary sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
                     <Typography>Upload Video File</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      MP4, WebM, or MOV (Max 50MB)
+                      MP4, WebM, or MOV (Max 80MB)
                     </Typography>
                   </label>
                   {formData.url && formData.url.startsWith('data:video') && (

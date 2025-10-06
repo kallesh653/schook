@@ -374,10 +374,24 @@ const PublicHomePageManagement = () => {
       setEditingSlider(null);
     } catch (error) {
       console.error('❌ Error saving slide:', error);
-      console.error('Error details:', error.response?.data);
+      console.error('Error response:', error.response);
+      console.error('Error message:', error.message);
+      console.error('Error status:', error.response?.status);
+      console.error('Error data:', error.response?.data);
+
+      let errorMessage = 'Error saving slide.';
+
+      if (error.response?.status === 413 || error.message?.includes('too large')) {
+        errorMessage = 'File is too large. Please use a smaller image/video (max 80MB).';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       setSnackbar({
         open: true,
-        message: error.response?.data?.message || 'Error saving slide. Check console for details.',
+        message: errorMessage,
         severity: 'error'
       });
     }
