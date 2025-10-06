@@ -12,9 +12,10 @@ import {
   Typography,
   Avatar,
   ToggleButton,
-  ToggleButtonGroup
+  ToggleButtonGroup,
+  Divider
 } from '@mui/material';
-import { CloudUpload as UploadIcon } from '@mui/icons-material';
+import { CloudUpload as UploadIcon, VideoLibrary } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 
 const UploadBox = styled(Box)(({ theme }) => ({
@@ -148,14 +149,39 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
                 )}
               </UploadBox>
             ) : (
-              <TextField
-                fullWidth
-                label="Video URL"
-                value={formData.url}
-                onChange={(e) => handleChange('url', e.target.value)}
-                placeholder="Enter YouTube URL or video file URL"
-                helperText="YouTube, Vimeo, or direct video file URL"
-              />
+              <Box>
+                <TextField
+                  fullWidth
+                  label="Video URL"
+                  value={formData.url}
+                  onChange={(e) => handleChange('url', e.target.value)}
+                  placeholder="Enter YouTube URL or video file URL"
+                  helperText="YouTube, Vimeo, or direct video file URL"
+                  sx={{ mb: 2 }}
+                />
+                <Divider sx={{ my: 2 }}>OR</Divider>
+                <UploadBox>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    style={{ display: 'none' }}
+                    id="slider-video-upload"
+                    onChange={(e) => handleImageUpload(e.target.files[0])}
+                  />
+                  <label htmlFor="slider-video-upload">
+                    <VideoLibrary sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+                    <Typography>Upload Video File</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      MP4, WebM, or MOV (Max 50MB)
+                    </Typography>
+                  </label>
+                  {formData.url && formData.url.startsWith('data:video') && (
+                    <Typography variant="caption" color="success.main" sx={{ mt: 2, display: 'block' }}>
+                      ✓ Video uploaded successfully
+                    </Typography>
+                  )}
+                </UploadBox>
+              </Box>
             )}
           </Box>
 
