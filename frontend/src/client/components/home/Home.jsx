@@ -259,7 +259,7 @@ const Home = () => {
             data.media.sliderImages.filter(s => s.active).forEach(slide => {
               slides.push({
                 id: slide.id,
-                type: 'image',
+                type: slide.type || 'image', // Use slide's type (image or video)
                 url: slide.url,
                 title: slide.title,
                 description: slide.description
