@@ -5,30 +5,51 @@ const Student = require("../model/student.model");
 const createCourse = async (req, res) => {
     try {
         const { courseName, courseCode, description, duration, category, totalFees, eligibilityCriteria, maxStudents } = req.body;
-        const schoolId = req.body.school;
+        // Get schoolId from authenticated user
+        const schoolId = req.body.school || req.user?.schoolId || req.user?.id;
 
-        // Check if course code already exists for this school
-        const existingCourse = await Course.findOne({ courseCode, school: schoolId });
-        if (existingCourse) {
-            return res.status(400).json({ message: "Course code already exists for this school" });
+        if (!schoolId) {
+            return res.status(401).json({ success: false, message: "School ID not found. Please login again." });
         }
 
-        const newCourse = new Course({
-            school: schoolId,
-            courseName,
-            courseCode,
-            description,
-            duration,
-            category,
-            totalFees,
-            eligibilityCriteria,
-            maxStudents
-        });
+        // Check if course code already exists for this school (only if courseCode is provided)
+        if (courseCode) {
+            const existingCourse = await Course.findOne({ courseCode, school: schoolId });
+            if (existingCourse) {
+                return res.status(400).json({ success: false, message: "Course code already exists for this school" });
+            }
+        }
 
+        // Build course data with only provided fields
+        const courseData = {
+            school: schoolId,
+            courseName
+        };
+
+        // Add optional fields only if they have actual values (not empty strings)
+        if (courseCode && courseCode.trim() !== '') {
+            courseData.courseCode = courseCode.trim().toUpperCase();
+        }
+        if (description && description.trim() !== '') {
+            courseData.description = description.trim();
+        }
+        if (duration) courseData.duration = duration;
+        if (category) courseData.category = category;
+        if (totalFees !== undefined && totalFees !== null && totalFees !== '') {
+            courseData.totalFees = Number(totalFees);
+        }
+        if (eligibilityCriteria && eligibilityCriteria.trim() !== '') {
+            courseData.eligibilityCriteria = eligibilityCriteria.trim();
+        }
+        if (maxStudents) courseData.maxStudents = parseInt(maxStudents);
+
+        const newCourse = new Course(courseData);
         const savedCourse = await newCourse.save();
-        res.status(201).json({ message: "Course created successfully", course: savedCourse });
+
+        res.status(201).json({ success: true, message: "Course created successfully", course: savedCourse });
     } catch (error) {
-        res.status(500).json({ message: "Error creating course", error: error.message });
+        console.log("Error creating course:", error);
+        res.status(500).json({ success: false, message: "Error creating course", error: error.message });
     }
 };
 
@@ -40,9 +61,10 @@ const getCourses = async (req, res) => {
             .populate('subjects', 'subject_name')
             .sort({ courseName: 1 });
 
-        res.status(200).json({ courses });
+        res.status(200).json({ success: true, courses });
     } catch (error) {
-        res.status(500).json({ message: "Error fetching courses", error: error.message });
+        console.log("Error fetching courses:", error);
+        res.status(500).json({ success: false, message: "Error fetching courses", error: error.message });
     }
 };
 
@@ -78,7 +100,7 @@ const updateCourse = async (req, res) => {
                 _id: { $ne: courseId }
             });
             if (existingCourse) {
-                return res.status(400).json({ message: "Course code already exists for this school" });
+                return res.status(400).json({ success: false, message: "Course code already exists for this school" });
             }
         }
 
@@ -89,12 +111,13 @@ const updateCourse = async (req, res) => {
         ).populate('subjects', 'subject_name');
 
         if (!updatedCourse) {
-            return res.status(404).json({ message: "Course not found" });
+            return res.status(404).json({ success: false, message: "Course not found" });
         }
 
-        res.status(200).json({ message: "Course updated successfully", course: updatedCourse });
+        res.status(200).json({ success: true, message: "Course updated successfully", course: updatedCourse });
     } catch (error) {
-        res.status(500).json({ message: "Error updating course", error: error.message });
+        console.log("Error updating course:", error);
+        res.status(500).json({ success: false, message: "Error updating course", error: error.message });
     }
 };
 
@@ -107,6 +130,7 @@ const deleteCourse = async (req, res) => {
         const enrolledStudents = await Student.countDocuments({ course: courseId });
         if (enrolledStudents > 0) {
             return res.status(400).json({
+                success: false,
                 message: `Cannot delete course. ${enrolledStudents} students are currently enrolled.`
             });
         }
@@ -118,12 +142,13 @@ const deleteCourse = async (req, res) => {
         );
 
         if (!course) {
-            return res.status(404).json({ message: "Course not found" });
+            return res.status(404).json({ success: false, message: "Course not found" });
         }
 
-        res.status(200).json({ message: "Course deleted successfully" });
+        res.status(200).json({ success: true, message: "Course deleted successfully" });
     } catch (error) {
-        res.status(500).json({ message: "Error deleting course", error: error.message });
+        console.log("Error deleting course:", error);
+        res.status(500).json({ success: false, message: "Error deleting course", error: error.message });
     }
 };
 

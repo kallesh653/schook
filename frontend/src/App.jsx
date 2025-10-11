@@ -86,9 +86,9 @@ function App() {
             </Route>
   
             <Route path="student"  element={<ProtectedRoute allowedRoles={['STUDENT']}><Student/></ProtectedRoute>}>
-              <Route index element={<StudentApp />}/>
-              <Route path="app" element={<StudentApp />} />
+              <Route index element={<StudentDetails />}/>
               <Route path="student-details" element={<StudentDetails />} />
+              <Route path="app" element={<StudentApp />} />
               <Route path="examinations" element={<StudentExaminations />} />
               <Route path='periods' element={<ScheduleStudent/>} />
               <Route path="attendance" element={<AttendanceStudent />} />

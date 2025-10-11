@@ -27,7 +27,7 @@ module.exports = {
                 filterQuery['student_class'] = req.query.student_class
             }
     
-            const filteredStudents = await Student.find(filterQuery).populate("student_class").populate("course");
+            const filteredStudents = await Student.find(filterQuery).populate("student_class");
             res.status(200).json({success:true, data:filteredStudents})
         } catch (error) {
             console.log("Error in fetching Student with query", error);
@@ -70,21 +70,31 @@ module.exports = {
                             feesData.paid_fees = Number(fields['fees[paid_fees]'][0]) || 0;
                         }
 
-                        const newStudent = new Student({
+                        const studentData = {
                             email: fields.email[0],
                             name: fields.name[0],
                             student_class:fields.student_class[0],
-                            course: fields.course ? fields.course[0] : undefined,
                             guardian:fields.guardian[0],
                             guardian_phone:fields.guardian_phone[0],
                             age: fields.age[0],
                             gender: fields.gender[0],
-                            fees: Object.keys(feesData).length > 0 ? feesData : undefined,
                             student_image: originalFileName,
                             password: hashPassword,
                             school:req.user.id
+                        };
 
-                        })
+                        // Only add optional fields if they exist
+                        if (fields.course && fields.course[0]) {
+                            studentData.course = fields.course[0];
+                        }
+                        if (fields.aadhaar_number && fields.aadhaar_number[0]) {
+                            studentData.aadhaar_number = fields.aadhaar_number[0];
+                        }
+                        if (Object.keys(feesData).length > 0) {
+                            studentData.fees = feesData;
+                        }
+
+                        const newStudent = new Student(studentData)
 
                         newStudent.save().then(savedData => {
                             console.log("Date saved", savedData);
@@ -140,7 +150,7 @@ module.exports = {
     getStudentWithId: async(req, res)=>{
         const id = req.params.id;
         const schoolId =  req.user.schoolId;
-        Student.findOne({_id:id, school:schoolId}).populate("student_class").populate("course").then(resp=>{
+        Student.findOne({_id:id, school:schoolId}).populate("student_class").then(resp=>{
             if(resp){
                 console.log("data",resp)
                 res.status(200).json({success:true, data:resp})
@@ -155,7 +165,7 @@ module.exports = {
      getOwnDetails: async(req, res)=>{
         const id = req.user.id;
         const schoolId =  req.user.schoolId;
-        Student.findOne({_id:id,school:schoolId}).populate("student_class").populate("course").then(resp=>{
+        Student.findOne({_id:id,school:schoolId}).populate("student_class").then(resp=>{
             if(resp){
                 console.log("data",resp)
                 res.status(200).json({success:true, data:resp})

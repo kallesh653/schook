@@ -3,30 +3,30 @@ const mongoose = require("mongoose");
 const courseSchema = new mongoose.Schema({
     school: { type: mongoose.Schema.ObjectId, ref: 'School', required: true },
     courseName: { type: String, required: true, trim: true },
-    courseCode: { type: String, required: true, trim: true, uppercase: true },
-    description: { type: String, trim: true },
+    courseCode: { type: String, required: false, trim: true, uppercase: true },
+    description: { type: String, trim: true, required: false },
     duration: {
         type: String,
-        required: true,
-        enum: ['1 Year', '2 Years', '3 Years', '4 Years', '5 Years', '6 Months', 'Other']
+        required: false,
+        enum: ['1 Year', '2 Years', '3 Years', '4 Years', '5 Years', '6 Months', 'Other', '']
     },
     category: {
         type: String,
-        required: true,
-        enum: ['Science', 'Commerce', 'Arts', 'Engineering', 'Medical', 'Vocational', 'Other']
+        required: false,
+        // Removed strict enum to allow custom categories
     },
-    totalFees: { type: Number, required: true, min: 0 },
+    totalFees: { type: Number, required: false, min: 0, default: 0 },
     subjects: [{ type: mongoose.Schema.ObjectId, ref: 'Subject' }],
-    eligibilityCriteria: { type: String, trim: true },
-    maxStudents: { type: Number, min: 1 },
+    eligibilityCriteria: { type: String, trim: true, required: false },
+    maxStudents: { type: Number, min: 1, required: false },
     currentEnrollment: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
 
-// Create compound index for course code and school
-courseSchema.index({ courseCode: 1, school: 1 }, { unique: true });
+// Sparse unique index - only enforces uniqueness when courseCode exists
+courseSchema.index({ courseCode: 1, school: 1 }, { unique: true, sparse: true });
 
 // Pre-save middleware to update the updatedAt field
 courseSchema.pre('save', function(next) {

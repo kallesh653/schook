@@ -19,10 +19,10 @@ import {
     Chip,
     IconButton,
     Alert,
-    Fab,
-    Tooltip,
-    Stack,
-    Divider
+    Snackbar,
+    CircularProgress,
+    Divider,
+    Stack
 } from '@mui/material';
 import {
     Add as AddIcon,
@@ -32,10 +32,10 @@ import {
     Category as CategoryIcon,
     AttachMoney as MoneyIcon,
     School as SchoolIcon,
-    Close as CloseIcon
+    Close as CloseIcon,
+    CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import { baseUrl } from '../../../environment';
 
 const Courses = () => {
@@ -43,8 +43,8 @@ const Courses = () => {
     const [open, setOpen] = useState(false);
     const [editingCourse, setEditingCourse] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [alert, setAlert] = useState({ show: false, message: '', type: 'success' });
-    const navigate = useNavigate();
+    const [pageLoading, setPageLoading] = useState(true);
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
     const [formData, setFormData] = useState({
         courseName: '',
@@ -63,10 +63,11 @@ const Courses = () => {
     ];
 
     const categoryOptions = [
-        'Science', 'Commerce', 'Arts', 'Engineering', 'Medical', 'Technology', 'Management', 'Vocational', 'Language', 'Creative Arts', 'Sports', 'Custom'
+        'Science', 'Commerce', 'Arts', 'Engineering', 'Medical', 'Technology',
+        'Management', 'Vocational', 'Language', 'Creative Arts', 'Sports', 'Custom'
     ];
 
-    // Different course templates for quick adding
+    // Course templates for quick adding
     const courseTemplates = [
         {
             name: 'Science Stream',
@@ -119,22 +120,49 @@ const Courses = () => {
         fetchCourses();
     }, []);
 
+    const getAuthHeaders = () => {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        return token ? { 'Authorization': token } : {};
+    };
+
+    const getSchoolId = () => {
+        // Try to get from localStorage first, then from sessionStorage
+        return localStorage.getItem('schoolId') || sessionStorage.getItem('schoolId');
+    };
+
     const fetchCourses = async () => {
         try {
-            setLoading(true);
-            const schoolId = localStorage.getItem('schoolId') || '66e0e5fcb543e2e1cb54df19';
-            const response = await axios.get(`${baseUrl}/course/school/${schoolId}`);
-            setCourses(response.data.courses);
+            setPageLoading(true);
+            const schoolId = getSchoolId();
+
+            if (!schoolId) {
+                showSnackbar('School ID not found. Please login again.', 'error');
+                return;
+            }
+
+            const headers = getAuthHeaders();
+            const response = await axios.get(`${baseUrl}/course/school/${schoolId}`, { headers });
+
+            if (response.data.success) {
+                setCourses(response.data.courses || []);
+            } else {
+                setCourses([]);
+            }
         } catch (error) {
-            showAlert('Error fetching courses', 'error');
+            console.error('Error fetching courses:', error);
+            showSnackbar(error.response?.data?.message || 'Error fetching courses', 'error');
+            setCourses([]);
         } finally {
-            setLoading(false);
+            setPageLoading(false);
         }
     };
 
-    const showAlert = (message, type = 'success') => {
-        setAlert({ show: true, message, type });
-        setTimeout(() => setAlert({ show: false, message: '', type: 'success' }), 3000);
+    const showSnackbar = (message, severity = 'success') => {
+        setSnackbar({ open: true, message, severity });
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbar({ ...snackbar, open: false });
     };
 
     const handleTemplateSelect = (template) => {
@@ -154,20 +182,24 @@ const Courses = () => {
 
     const handleSubmit = async () => {
         try {
-            setLoading(true);
-            const schoolId = localStorage.getItem('schoolId') || '66e0e5fcb543e2e1cb54df19';
+            if (!formData.courseName.trim()) {
+                showSnackbar('Course name is required', 'error');
+                return;
+            }
 
-            // Build course data with only provided fields
+            setLoading(true);
+            const headers = getAuthHeaders();
+
+            // Build course data - only include fields that have values
             const courseData = {
-                courseName: formData.courseName.trim(),
-                school: schoolId
+                courseName: formData.courseName.trim()
             };
 
             // Add optional fields only if they have values
-            if (formData.courseCode?.trim()) {
-                courseData.courseCode = formData.courseCode.trim();
+            if (formData.courseCode && formData.courseCode.trim()) {
+                courseData.courseCode = formData.courseCode.trim().toUpperCase();
             }
-            if (formData.description?.trim()) {
+            if (formData.description && formData.description.trim()) {
                 courseData.description = formData.description.trim();
             }
             if (formData.duration) {
@@ -179,26 +211,38 @@ const Courses = () => {
             if (formData.totalFees) {
                 courseData.totalFees = parseFloat(formData.totalFees);
             }
-            if (formData.eligibilityCriteria?.trim()) {
+            if (formData.eligibilityCriteria && formData.eligibilityCriteria.trim()) {
                 courseData.eligibilityCriteria = formData.eligibilityCriteria.trim();
             }
             if (formData.maxStudents) {
                 courseData.maxStudents = parseInt(formData.maxStudents);
             }
 
+            console.log('Submitting course data:', courseData);
+
             if (editingCourse) {
-                await axios.put(`${baseUrl}/course/${editingCourse._id}`, courseData);
-                showAlert('Course updated successfully');
+                const response = await axios.put(
+                    `${baseUrl}/course/${editingCourse._id}`,
+                    courseData,
+                    { headers }
+                );
+                showSnackbar(response.data.message || 'Course updated successfully', 'success');
             } else {
-                await axios.post(`${baseUrl}/course/create`, courseData);
-                showAlert('Course created successfully');
+                const response = await axios.post(
+                    `${baseUrl}/course/create`,
+                    courseData,
+                    { headers }
+                );
+                showSnackbar(response.data.message || 'Course created successfully', 'success');
             }
 
             setOpen(false);
             resetForm();
             fetchCourses();
         } catch (error) {
-            showAlert(error.response?.data?.message || 'Error saving course', 'error');
+            console.error('Error saving course:', error);
+            const errorMessage = error.response?.data?.message || error.response?.data?.error || 'Error saving course';
+            showSnackbar(errorMessage, 'error');
         } finally {
             setLoading(false);
         }
@@ -208,10 +252,10 @@ const Courses = () => {
         setEditingCourse(course);
         const isCustomCategory = course.category && !categoryOptions.slice(0, -1).includes(course.category);
         setFormData({
-            courseName: course.courseName,
-            courseCode: course.courseCode,
+            courseName: course.courseName || '',
+            courseCode: course.courseCode || '',
             description: course.description || '',
-            duration: course.duration,
+            duration: course.duration || '',
             category: isCustomCategory ? 'Custom' : (course.category || ''),
             customCategory: isCustomCategory ? course.category : '',
             totalFees: course.totalFees?.toString() || '',
@@ -222,17 +266,21 @@ const Courses = () => {
     };
 
     const handleDelete = async (courseId) => {
-        if (window.confirm('Are you sure you want to delete this course?')) {
-            try {
-                setLoading(true);
-                await axios.delete(`${baseUrl}/course/${courseId}`);
-                showAlert('Course deleted successfully');
-                fetchCourses();
-            } catch (error) {
-                showAlert(error.response?.data?.message || 'Error deleting course', 'error');
-            } finally {
-                setLoading(false);
-            }
+        if (!window.confirm('Are you sure you want to delete this course?')) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const headers = getAuthHeaders();
+            const response = await axios.delete(`${baseUrl}/course/${courseId}`, { headers });
+            showSnackbar(response.data.message || 'Course deleted successfully', 'success');
+            fetchCourses();
+        } catch (error) {
+            console.error('Error deleting course:', error);
+            showSnackbar(error.response?.data?.message || 'Error deleting course', 'error');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -256,16 +304,18 @@ const Courses = () => {
         resetForm();
     };
 
+    if (pageLoading) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+                <CircularProgress />
+            </Box>
+        );
+    }
+
     return (
         <Box sx={{ p: 3 }}>
-            {alert.show && (
-                <Alert severity={alert.type} sx={{ mb: 2 }}>
-                    {alert.message}
-                </Alert>
-            )}
-
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                <Typography variant="h4" gutterBottom>
+                <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: '#333' }}>
                     Course Management
                 </Typography>
                 <Button
@@ -273,15 +323,15 @@ const Courses = () => {
                     startIcon={<AddIcon />}
                     onClick={() => setOpen(true)}
                     sx={{
-                        background: 'linear-gradient(45deg, #4caf50 30%, #2e7d32 90%)',
+                        background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
                         color: 'white',
                         fontWeight: 600,
                         padding: '12px 24px',
                         borderRadius: '12px',
-                        boxShadow: '0 4px 15px rgba(76, 175, 80, 0.3)',
+                        boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
                         '&:hover': {
-                            background: 'linear-gradient(45deg, #43a047 30%, #1b5e20 90%)',
-                            boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)',
+                            background: 'linear-gradient(45deg, #5568d3 30%, #6a4093 90%)',
+                            boxShadow: '0 6px 20px rgba(102, 126, 234, 0.4)',
                             transform: 'translateY(-2px)',
                         }
                     }}
@@ -292,7 +342,7 @@ const Courses = () => {
 
             {/* Quick Course Templates */}
             <Box mb={4}>
-                <Typography variant="h6" gutterBottom>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
                     Quick Add - Course Templates
                 </Typography>
                 <Grid container spacing={2}>
@@ -302,21 +352,29 @@ const Courses = () => {
                                 sx={{
                                     cursor: 'pointer',
                                     transition: 'all 0.3s ease',
+                                    borderRadius: '16px',
                                     '&:hover': {
-                                        transform: 'translateY(-5px)',
-                                        boxShadow: 6
+                                        transform: 'translateY(-8px)',
+                                        boxShadow: 8
                                     }
                                 }}
                                 onClick={() => handleTemplateSelect(template)}
                             >
-                                <CardContent sx={{ textAlign: 'center', py: 2 }}>
-                                    <SchoolIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                                    <Typography variant="h6" sx={{ fontSize: '0.9rem', fontWeight: 600 }}>
+                                <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                                    <SchoolIcon sx={{ fontSize: 50, color: 'primary.main', mb: 2 }} />
+                                    <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600, mb: 1 }}>
                                         {template.name}
                                     </Typography>
-                                    <Typography variant="caption" color="text.secondary">
+                                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
                                         {template.duration}
                                     </Typography>
+                                    <Chip
+                                        label={template.category}
+                                        size="small"
+                                        sx={{ mt: 1 }}
+                                        color="primary"
+                                        variant="outlined"
+                                    />
                                 </CardContent>
                             </Card>
                         </Grid>
@@ -324,83 +382,147 @@ const Courses = () => {
                 </Grid>
             </Box>
 
-            <Divider sx={{ my: 3 }} />
+            <Divider sx={{ my: 4 }} />
 
             {/* Existing Courses */}
-            <Typography variant="h6" gutterBottom>
-                Existing Courses ({courses.length})
-            </Typography>
+            <Box mb={2}>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                    Existing Courses ({courses.length})
+                </Typography>
+            </Box>
 
-            <Grid container spacing={3}>
-                {courses.map((course) => (
-                    <Grid item xs={12} sm={6} md={4} key={course._id}>
-                        <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                            <CardContent sx={{ flexGrow: 1 }}>
-                                <Box display="flex" justifyContent="space-between" alignItems="start" mb={2}>
-                                    <Typography variant="h6" gutterBottom>
-                                        {course.courseName}
-                                    </Typography>
-                                    <Chip
-                                        label={course.courseCode}
-                                        size="small"
-                                        color="primary"
-                                        variant="outlined"
-                                    />
-                                </Box>
-
-                                <Stack spacing={1} mb={2}>
-                                    <Box display="flex" alignItems="center" gap={1}>
-                                        <CategoryIcon fontSize="small" color="action" />
-                                        <Typography variant="body2">
-                                            {course.category} • {course.duration}
+            {courses.length === 0 ? (
+                <Box
+                    sx={{
+                        textAlign: 'center',
+                        py: 8,
+                        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+                        borderRadius: '16px'
+                    }}
+                >
+                    <SchoolIcon sx={{ fontSize: 80, color: '#ccc', mb: 2 }} />
+                    <Typography variant="h5" gutterBottom color="text.secondary">
+                        No Courses Yet
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                        Start by adding a course using templates or create a custom course
+                    </Typography>
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => setOpen(true)}
+                        sx={{
+                            background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                        }}
+                    >
+                        Add Your First Course
+                    </Button>
+                </Box>
+            ) : (
+                <Grid container spacing={3}>
+                    {courses.map((course) => (
+                        <Grid item xs={12} sm={6} md={4} key={course._id}>
+                            <Card
+                                sx={{
+                                    height: '100%',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    borderRadius: '16px',
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                        boxShadow: 6,
+                                        transform: 'translateY(-4px)'
+                                    }
+                                }}
+                            >
+                                <CardContent sx={{ flexGrow: 1, pb: 1 }}>
+                                    <Box display="flex" justifyContent="space-between" alignItems="start" mb={2}>
+                                        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: '#333' }}>
+                                            {course.courseName}
                                         </Typography>
+                                        {course.courseCode && (
+                                            <Chip
+                                                label={course.courseCode}
+                                                size="small"
+                                                sx={{
+                                                    background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                                                    color: 'white',
+                                                    fontWeight: 600
+                                                }}
+                                            />
+                                        )}
                                     </Box>
 
-                                    <Box display="flex" alignItems="center" gap={1}>
-                                        <MoneyIcon fontSize="small" color="action" />
-                                        <Typography variant="body2">
-                                            ₹{course.totalFees.toLocaleString()}
-                                        </Typography>
-                                    </Box>
+                                    <Stack spacing={1.5} mb={2}>
+                                        {(course.category || course.duration) && (
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                <CategoryIcon fontSize="small" color="action" />
+                                                <Typography variant="body2" color="text.secondary">
+                                                    {course.category || 'N/A'} {course.duration && `• ${course.duration}`}
+                                                </Typography>
+                                            </Box>
+                                        )}
 
-                                    {course.maxStudents && (
-                                        <Box display="flex" alignItems="center" gap={1}>
-                                            <PeopleIcon fontSize="small" color="action" />
-                                            <Typography variant="body2">
-                                                {course.currentEnrollment || 0}/{course.maxStudents} students
-                                            </Typography>
-                                        </Box>
+                                        {course.totalFees > 0 && (
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                <MoneyIcon fontSize="small" color="action" />
+                                                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                                                    ₹{course.totalFees.toLocaleString('en-IN')}
+                                                </Typography>
+                                            </Box>
+                                        )}
+
+                                        {course.maxStudents && (
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                <PeopleIcon fontSize="small" color="action" />
+                                                <Typography variant="body2" color="text.secondary">
+                                                    {course.currentEnrollment || 0}/{course.maxStudents} students
+                                                </Typography>
+                                            </Box>
+                                        )}
+                                    </Stack>
+
+                                    {course.description && (
+                                        <Typography
+                                            variant="body2"
+                                            color="text.secondary"
+                                            sx={{
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 2,
+                                                WebkitBoxOrient: 'vertical',
+                                            }}
+                                        >
+                                            {course.description}
+                                        </Typography>
                                     )}
-                                </Stack>
+                                </CardContent>
 
-                                {course.description && (
-                                    <Typography variant="body2" color="text.secondary" paragraph>
-                                        {course.description}
-                                    </Typography>
-                                )}
-                            </CardContent>
-
-                            <CardActions>
-                                <Button
-                                    size="small"
-                                    startIcon={<EditIcon />}
-                                    onClick={() => handleEdit(course)}
-                                >
-                                    Edit
-                                </Button>
-                                <Button
-                                    size="small"
-                                    color="error"
-                                    startIcon={<DeleteIcon />}
-                                    onClick={() => handleDelete(course._id)}
-                                >
-                                    Delete
-                                </Button>
-                            </CardActions>
-                        </Card>
-                    </Grid>
-                ))}
-            </Grid>
+                                <CardActions sx={{ pt: 0, px: 2, pb: 2 }}>
+                                    <Button
+                                        size="small"
+                                        startIcon={<EditIcon />}
+                                        onClick={() => handleEdit(course)}
+                                        sx={{ color: '#667eea', fontWeight: 600 }}
+                                    >
+                                        Edit
+                                    </Button>
+                                    <Button
+                                        size="small"
+                                        color="error"
+                                        startIcon={<DeleteIcon />}
+                                        onClick={() => handleDelete(course._id)}
+                                        sx={{ fontWeight: 600 }}
+                                    >
+                                        Delete
+                                    </Button>
+                                </CardActions>
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
+            )}
 
             {/* Add/Edit Course Dialog */}
             <Dialog
@@ -410,27 +532,28 @@ const Courses = () => {
                 fullWidth
                 PaperProps={{
                     sx: {
-                        borderRadius: 2,
+                        borderRadius: 3,
                         boxShadow: 24
                     }
                 }}
             >
                 <DialogTitle sx={{
-                    background: 'linear-gradient(45deg, #4caf50 30%, #2e7d32 90%)',
+                    background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
                     color: 'white',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    fontWeight: 600
+                    fontWeight: 600,
+                    py: 2
                 }}>
                     {editingCourse ? 'Edit Course' : 'Add New Course'}
-                    <IconButton onClick={handleClose} sx={{ color: 'white' }}>
+                    <IconButton onClick={handleClose} sx={{ color: 'white' }} disabled={loading}>
                         <CloseIcon />
                     </IconButton>
                 </DialogTitle>
 
-                <DialogContent sx={{ mt: 2 }}>
-                    <Grid container spacing={2}>
+                <DialogContent sx={{ mt: 3 }}>
+                    <Grid container spacing={3}>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth
@@ -438,6 +561,8 @@ const Courses = () => {
                                 value={formData.courseName}
                                 onChange={(e) => setFormData({...formData, courseName: e.target.value})}
                                 required
+                                error={!formData.courseName}
+                                helperText={!formData.courseName ? "Required" : ""}
                             />
                         </Grid>
 
@@ -448,6 +573,7 @@ const Courses = () => {
                                 value={formData.courseCode}
                                 onChange={(e) => setFormData({...formData, courseCode: e.target.value.toUpperCase()})}
                                 placeholder="e.g., CSE, MBBS"
+                                helperText="Unique identifier for the course"
                             />
                         </Grid>
 
@@ -459,6 +585,7 @@ const Courses = () => {
                                     onChange={(e) => setFormData({...formData, duration: e.target.value})}
                                     label="Duration (Optional)"
                                 >
+                                    <MenuItem value="">None</MenuItem>
                                     {durationOptions.map((option) => (
                                         <MenuItem key={option} value={option}>
                                             {option}
@@ -478,6 +605,7 @@ const Courses = () => {
                                     }}
                                     label="Category (Optional)"
                                 >
+                                    <MenuItem value="">None</MenuItem>
                                     {categoryOptions.map((option) => (
                                         <MenuItem key={option} value={option}>
                                             {option}
@@ -488,7 +616,7 @@ const Courses = () => {
                         </Grid>
 
                         {formData.category === 'Custom' && (
-                            <Grid item xs={12} sm={6}>
+                            <Grid item xs={12}>
                                 <TextField
                                     fullWidth
                                     label="Custom Category"
@@ -509,7 +637,7 @@ const Courses = () => {
                                 onChange={(e) => setFormData({...formData, totalFees: e.target.value})}
                                 placeholder="Enter fees amount"
                                 InputProps={{
-                                    startAdornment: '₹'
+                                    startAdornment: <Typography sx={{ mr: 1 }}>₹</Typography>
                                 }}
                             />
                         </Grid>
@@ -517,11 +645,11 @@ const Courses = () => {
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth
-                                label="Max Students"
+                                label="Max Students (Optional)"
                                 type="number"
                                 value={formData.maxStudents}
                                 onChange={(e) => setFormData({...formData, maxStudents: e.target.value})}
-                                placeholder="Optional"
+                                placeholder="Maximum enrollment capacity"
                             />
                         </Grid>
 
@@ -551,22 +679,28 @@ const Courses = () => {
                     </Grid>
                 </DialogContent>
 
-                <DialogActions sx={{ p: 3 }}>
-                    <Button onClick={handleClose} disabled={loading}>
+                <DialogActions sx={{ p: 3, gap: 1 }}>
+                    <Button
+                        onClick={handleClose}
+                        disabled={loading}
+                        variant="outlined"
+                        sx={{ borderRadius: '8px' }}
+                    >
                         Cancel
                     </Button>
                     <Button
                         onClick={handleSubmit}
                         variant="contained"
                         disabled={loading || !formData.courseName}
+                        startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <CheckCircleIcon />}
                         sx={{
-                            background: 'linear-gradient(45deg, #4caf50 30%, #2e7d32 90%)',
+                            background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
                             color: 'white',
                             fontWeight: 600,
-                            padding: '10px 20px',
+                            padding: '10px 24px',
                             borderRadius: '8px',
                             '&:hover': {
-                                background: 'linear-gradient(45deg, #43a047 30%, #1b5e20 90%)',
+                                background: 'linear-gradient(45deg, #5568d3 30%, #6a4093 90%)',
                             },
                             '&:disabled': {
                                 background: '#cccccc',
@@ -578,6 +712,23 @@ const Courses = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Snackbar for notifications */}
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity={snackbar.severity}
+                    sx={{ width: '100%' }}
+                    variant="filled"
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

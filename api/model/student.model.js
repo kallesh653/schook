@@ -12,14 +12,16 @@ const studentSchema = new mongoose.Schema({
     guardian_phone:{type:String, required:true},
     aadhaar_number:{
         type:String,
-        required:true,
+        required:false,
         validate: {
             validator: function(v) {
+                if (!v) return true; // Allow empty/undefined
                 return /^\d{12}$/.test(v);
             },
             message: 'Aadhaar number must be exactly 12 digits'
         },
-        unique: true
+        unique: false,
+        sparse: true
     },
     student_image:{type:String,  required:true},
     createdAt:{type:Date, default: new Date()},
