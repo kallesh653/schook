@@ -36,10 +36,12 @@ const corsOptions = {
     'http://localhost:5173',
     'http://localhost:5174',
     'http://localhost:3000',
-    'http://www.gentime.in',
-    'https://www.gentime.in',
-    'http://gentime.in',
-    'https://gentime.in',
+    'http://schoolm.gentime.in',
+    'https://schoolm.gentime.in',
+    'http://www.schoolm.gentime.in',
+    'https://www.schoolm.gentime.in',
+    'http://api.gentime.in',
+    'https://api.gentime.in',
     'http://72.60.202.218',
     process.env.FRONTEND_URL || 'http://localhost:5173',
     process.env.PRODUCTION_URL || 'http://localhost:5173'
@@ -79,7 +81,7 @@ app.use("/api/sms", smsRouter);
 app.get('/api/auth/check',authCheck)
 
 
-const PORT = 9000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, ()=>{
     console.log("Server is running at port =>",PORT)
 })
