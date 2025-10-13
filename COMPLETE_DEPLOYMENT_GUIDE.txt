@@ -1,0 +1,1359 @@
+================================================================================
+    GENTIME SCHOOL MANAGEMENT SYSTEM - COMPLETE DEPLOYMENT GUIDE
+================================================================================
+
+PROJECT INFORMATION
+-------------------
+Project Name: GenTime School Management System
+Version: 2.0.0
+Tech Stack: MERN (MongoDB, Express.js, React, Node.js)
+Last Updated: October 12, 2025
+
+LIVE DEPLOYMENT URLS
+--------------------
+Frontend: https://www.schoolm.gentime.in
+Backend API: https://api.gentime.in/api
+VPS Server IP: 72.60.202.218
+
+TEST CREDENTIALS
+----------------
+Email: test@school.com
+Password: test123
+Role: School Owner
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+PART 1: PREREQUISITES & SERVER SETUP
+    1.1 VPS Requirements
+    1.2 Domain Configuration
+    1.3 SSH Access Setup
+
+PART 2: SERVER INITIAL CONFIGURATION
+    2.1 Update System Packages
+    2.2 Install Node.js
+    2.3 Install MongoDB Tools
+    2.4 Install PM2 Process Manager
+    2.5 Install Nginx Web Server
+    2.6 Install Certbot for SSL
+
+PART 3: PROJECT DEPLOYMENT
+    3.1 Create Project Directory
+    3.2 Transfer Project Files
+    3.3 Backend Setup
+    3.4 Frontend Setup
+    3.5 Environment Variables Configuration
+
+PART 4: PM2 CONFIGURATION
+    4.1 Create Ecosystem Config
+    4.2 Start Backend with PM2
+    4.3 Configure Auto-Startup
+    4.4 Monitor PM2 Processes
+
+PART 5: NGINX CONFIGURATION
+    5.1 Configure Frontend Server Block
+    5.2 Configure Backend Server Block
+    5.3 Enable Sites
+    5.4 Test and Reload Nginx
+
+PART 6: SSL CERTIFICATE INSTALLATION
+    6.1 Install SSL with Certbot
+    6.2 Verify SSL Configuration
+    6.3 Test HTTPS Access
+    6.4 Auto-Renewal Setup
+
+PART 7: DEPLOYMENT VERIFICATION
+    7.1 Backend Health Check
+    7.2 Frontend Access Test
+    7.3 Login Functionality Test
+    7.4 API Endpoint Tests
+
+PART 8: TROUBLESHOOTING
+    8.1 Common Issues and Solutions
+    8.2 Log File Locations
+    8.3 Debug Commands
+
+PART 9: MAINTENANCE & UPDATES
+    9.1 Updating Backend Code
+    9.2 Updating Frontend Code
+    9.3 Database Backups
+    9.4 SSL Certificate Renewal
+
+================================================================================
+PART 1: PREREQUISITES & SERVER SETUP
+================================================================================
+
+1.1 VPS REQUIREMENTS
+--------------------
+Minimum Specifications:
+- OS: Ubuntu 20.04 or higher (We use Ubuntu 24.04.3 LTS)
+- RAM: 2GB minimum (4GB recommended)
+- Storage: 20GB minimum
+- CPU: 1 core minimum (2 cores recommended)
+- Network: Public IP address
+
+Current VPS Details:
+- Provider: [Your VPS Provider]
+- IP Address: 72.60.202.218
+- OS: Ubuntu 24.04.3 LTS
+- Kernel: 6.8.0-79-generic
+
+
+1.2 DOMAIN CONFIGURATION
+------------------------
+Required DNS Records (Configure at your domain registrar):
+
+A Records:
+- www.schoolm     → 72.60.202.218
+- schoolm         → 72.60.202.218
+- api             → 72.60.202.218
+
+These records point your domains to your VPS server.
+
+DNS Propagation:
+- Wait 5-30 minutes after creating DNS records
+- Test with: nslookup www.schoolm.gentime.in
+- Verify: ping www.schoolm.gentime.in
+
+
+1.3 SSH ACCESS SETUP
+--------------------
+Connection Details:
+- Username: root
+- IP: 72.60.202.218
+- Password: [Your VPS Password]
+
+SSH Command:
+ssh root@72.60.202.218
+
+For Windows (PowerShell/Command Prompt):
+1. Open PowerShell or CMD
+2. Run: ssh root@72.60.202.218
+3. Enter password when prompted
+4. Type 'yes' to accept fingerprint on first connection
+
+
+================================================================================
+PART 2: SERVER INITIAL CONFIGURATION
+================================================================================
+
+2.1 UPDATE SYSTEM PACKAGES
+---------------------------
+Command:
+sudo apt update && sudo apt upgrade -y
+
+Purpose: Updates all system packages to latest versions
+Time: 2-5 minutes
+
+
+2.2 INSTALL NODE.JS
+-------------------
+Commands:
+# Install Node.js 18.x
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Verify installation
+node --version      # Should show v18.x.x
+npm --version       # Should show 9.x.x or higher
+
+Purpose: Node.js runtime for backend execution
+Current Version: v18.20.8
+
+
+2.3 INSTALL MONGODB TOOLS (OPTIONAL)
+-------------------------------------
+Note: We use MongoDB Atlas (cloud), so local MongoDB is not needed.
+But if you want local MongoDB tools:
+
+sudo apt-get install -y mongodb-clients
+
+Our MongoDB Connection:
+mongodb+srv://schoolm2025:kallesh717@cluster0.ovqn73c.mongodb.net/school_management
+
+
+2.4 INSTALL PM2 PROCESS MANAGER
+--------------------------------
+Commands:
+# Install PM2 globally
+sudo npm install -g pm2
+
+# Verify installation
+pm2 --version
+
+Purpose: Process manager to keep Node.js app running 24/7
+Features:
+- Auto-restart on crash
+- Load balancing
+- Log management
+- Startup script generation
+
+
+2.5 INSTALL NGINX WEB SERVER
+-----------------------------
+Commands:
+# Install Nginx
+sudo apt install -y nginx
+
+# Start Nginx
+sudo systemctl start nginx
+sudo systemctl enable nginx
+
+# Check status
+sudo systemctl status nginx
+
+# Verify installation
+nginx -v
+
+Purpose: Web server for serving frontend and reverse proxy for backend
+Current Version: nginx/1.24.0
+
+
+2.6 INSTALL CERTBOT FOR SSL
+----------------------------
+Commands:
+# Install Certbot and Nginx plugin
+sudo apt install -y certbot python3-certbot-nginx
+
+# Verify installation
+certbot --version
+
+Purpose: Free SSL certificates from Let's Encrypt
+Features:
+- Free SSL certificates
+- Auto-renewal every 90 days
+- Automatic Nginx configuration
+
+
+================================================================================
+PART 3: PROJECT DEPLOYMENT
+================================================================================
+
+3.1 CREATE PROJECT DIRECTORY
+-----------------------------
+Commands on VPS:
+# Create main directory
+sudo mkdir -p /var/www/schoolm
+cd /var/www/schoolm
+
+# Create subdirectories
+mkdir -p api frontend
+
+Purpose: Organized project structure on server
+
+
+3.2 TRANSFER PROJECT FILES
+---------------------------
+METHOD 1: Using SCP (Recommended for Windows)
+
+From your local Windows machine:
+
+# Transfer backend files
+scp -r "d:\gentime8\school management system\api" root@72.60.202.218:/var/www/schoolm/
+
+# Transfer frontend files
+scp -r "d:\gentime8\school management system\frontend" root@72.60.202.218:/var/www/schoolm/
+
+Note: Exclude node_modules folder to save time:
+# Create tar.gz excluding node_modules
+cd "d:\gentime8\school management system"
+tar -czf schoolm.tar.gz --exclude=node_modules api/ frontend/
+
+# Transfer and extract on server
+scp schoolm.tar.gz root@72.60.202.218:/var/www/schoolm/
+ssh root@72.60.202.218 "cd /var/www/schoolm && tar -xzf schoolm.tar.gz"
+
+
+METHOD 2: Using Git
+
+On VPS:
+cd /var/www/schoolm
+git clone https://github.com/your-repo/school-management-system.git .
+
+Note: Requires Git repository setup
+
+
+3.3 BACKEND SETUP
+-----------------
+Commands on VPS:
+
+# Navigate to backend directory
+cd /var/www/schoolm/api
+
+# Install dependencies
+npm install
+
+# This installs all packages from package.json:
+# - express (web framework)
+# - mongoose (MongoDB ODM)
+# - jsonwebtoken (JWT authentication)
+# - bcryptjs (password hashing)
+# - cors (CORS middleware)
+# - dotenv (environment variables)
+# - formidable (file uploads)
+# - cookie-parser (cookie handling)
+
+Time: 2-3 minutes
+
+
+3.4 FRONTEND SETUP
+------------------
+Commands on VPS:
+
+# Navigate to frontend directory
+cd /var/www/schoolm/frontend
+
+# Install dependencies
+npm install
+
+# This installs all packages from package.json:
+# - react (UI library)
+# - react-dom (React DOM renderer)
+# - react-router-dom (routing)
+# - @mui/material (Material-UI components)
+# - axios (HTTP client)
+# - formik (form handling)
+# - yup (form validation)
+
+Time: 3-5 minutes
+
+# Build production version
+npm run build
+
+# This creates optimized production build in /dist folder
+# - Minifies JavaScript
+# - Optimizes assets
+# - Creates static files for Nginx
+
+Time: 1-2 minutes
+
+
+3.5 ENVIRONMENT VARIABLES CONFIGURATION
+----------------------------------------
+
+BACKEND ENVIRONMENT (.env)
+
+Location: /var/www/schoolm/api/.env
+
+Create file:
+cd /var/www/schoolm/api
+nano .env
+
+Content:
+PORT=5000
+JWT_SECRET=LSKDFJDLSJWIEOFFJDSLKJFLJ328929FDOSKJFlsdkfjdslskdfj
+MONGODB_URI=mongodb+srv://schoolm2025:kallesh717@cluster0.ovqn73c.mongodb.net/school_management
+NODE_ENV=production
+
+Press Ctrl+X, then Y, then Enter to save
+
+
+FRONTEND ENVIRONMENT (.env.production)
+
+Location: /var/www/schoolm/frontend/.env.production
+
+Create file:
+cd /var/www/schoolm/frontend
+nano .env.production
+
+Content:
+VITE_API_URL=https://api.gentime.in/api
+
+Press Ctrl+X, then Y, then Enter to save
+
+IMPORTANT: After creating/updating .env files, rebuild frontend:
+cd /var/www/schoolm/frontend
+npm run build
+
+
+================================================================================
+PART 4: PM2 CONFIGURATION
+================================================================================
+
+4.1 CREATE ECOSYSTEM CONFIG
+----------------------------
+Location: /var/www/schoolm/ecosystem.config.js
+
+Create file:
+cd /var/www/schoolm
+nano ecosystem.config.js
+
+Content:
+module.exports = {
+  apps: [{
+    name: 'schoolm-api',
+    script: 'server.js',
+    cwd: '/var/www/schoolm/api',
+    instances: 1,
+    autorestart: true,
+    watch: false,
+    max_memory_restart: '1G',
+    env: {
+      NODE_ENV: 'production',
+      PORT: 5000,
+      MONGODB_URI: 'mongodb+srv://schoolm2025:kallesh717@cluster0.ovqn73c.mongodb.net/school_management',
+      JWT_SECRET: 'LSKDFJDLSJWIEOFFJDSLKJFLJ328929FDOSKJFlsdkfjdslskdfj'
+    }
+  }]
+};
+
+Press Ctrl+X, then Y, then Enter to save
+
+Explanation:
+- name: Process name in PM2
+- script: Entry point file (server.js)
+- cwd: Working directory
+- instances: Number of processes (1 = single instance)
+- autorestart: Auto-restart on crash
+- watch: File watching (disabled for production)
+- max_memory_restart: Restart if memory exceeds 1GB
+- env: Environment variables for the process
+
+
+4.2 START BACKEND WITH PM2
+---------------------------
+Commands:
+
+# Start application
+cd /var/www/schoolm
+pm2 start ecosystem.config.js
+
+# Check status
+pm2 status
+
+Expected Output:
+┌─────┬────────────────┬─────────┬─────────┬────────┬─────────┐
+│ id  │ name           │ mode    │ status  │ ↺      │ memory  │
+├─────┼────────────────┼─────────┼─────────┼────────┼─────────┤
+│ 0   │ schoolm-api    │ cluster │ online  │ 0      │ 125 MB  │
+└─────┴────────────────┴─────────┴─────────┴────────┴─────────┘
+
+# View logs
+pm2 logs schoolm-api
+
+Expected log output:
+Server is running at port => 5000
+MongoDB Atlas is Connected Successfully.
+
+# Other useful PM2 commands:
+pm2 restart schoolm-api    # Restart application
+pm2 stop schoolm-api        # Stop application
+pm2 delete schoolm-api      # Delete from PM2
+pm2 flush                   # Clear logs
+
+
+4.3 CONFIGURE AUTO-STARTUP
+---------------------------
+Purpose: Start PM2 automatically when server reboots
+
+Commands:
+# Generate startup script
+pm2 startup systemd
+
+# Copy and run the command it provides (example):
+sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u root --hp /root
+
+# Save current PM2 process list
+pm2 save
+
+Verification:
+# Reboot server to test
+sudo reboot
+
+# After reboot, SSH back in and check:
+pm2 list
+
+PM2 should automatically start your application.
+
+
+4.4 MONITOR PM2 PROCESSES
+--------------------------
+Commands:
+
+# Real-time monitoring
+pm2 monit
+
+# View logs (last 20 lines)
+pm2 logs schoolm-api --lines 20
+
+# View only error logs
+pm2 logs schoolm-api --err
+
+# View specific number of lines
+pm2 logs schoolm-api --lines 100
+
+# Tail logs in real-time
+pm2 logs schoolm-api
+
+Press Ctrl+C to exit log view
+
+
+================================================================================
+PART 5: NGINX CONFIGURATION
+================================================================================
+
+5.1 CONFIGURE FRONTEND SERVER BLOCK
+------------------------------------
+Location: /etc/nginx/sites-available/gentime-frontend
+
+Create file:
+sudo nano /etc/nginx/sites-available/gentime-frontend
+
+Initial Content (Before SSL):
+server {
+    listen 80;
+    server_name www.schoolm.gentime.in schoolm.gentime.in;
+    client_max_body_size 10M;
+
+    location / {
+        root /var/www/schoolm/frontend/dist;
+        try_files $uri $uri/ /index.html;
+        index index.html;
+    }
+
+    location /images {
+        alias /var/www/schoolm/api/images;
+        autoindex off;
+    }
+}
+
+Press Ctrl+X, then Y, then Enter to save
+
+Explanation:
+- listen 80: Listen on HTTP port 80
+- server_name: Domain names to respond to
+- client_max_body_size: Max upload size (10MB)
+- location /: Serve frontend static files
+- try_files: SPA routing support (all routes go to index.html)
+- location /images: Serve uploaded images from backend
+
+
+5.2 CONFIGURE BACKEND SERVER BLOCK
+-----------------------------------
+Location: /etc/nginx/sites-available/gentime-backend
+
+Create file:
+sudo nano /etc/nginx/sites-available/gentime-backend
+
+Initial Content (Before SSL):
+server {
+    listen 80;
+    server_name api.gentime.in;
+    client_max_body_size 10M;
+
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+Press Ctrl+X, then Y, then Enter to save
+
+Explanation:
+- proxy_pass: Forward requests to backend on localhost:5000
+- proxy_http_version: Use HTTP/1.1
+- proxy_set_header: Pass client information to backend
+- X-Real-IP: Client's real IP address
+- X-Forwarded-For: Proxy chain information
+- X-Forwarded-Proto: Original protocol (http/https)
+
+
+5.3 ENABLE SITES
+----------------
+Commands:
+
+# Create symbolic links to enable sites
+sudo ln -s /etc/nginx/sites-available/gentime-frontend /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/gentime-backend /etc/nginx/sites-enabled/
+
+# Remove default site (optional)
+sudo rm /etc/nginx/sites-enabled/default
+
+
+5.4 TEST AND RELOAD NGINX
+--------------------------
+Commands:
+
+# Test Nginx configuration
+sudo nginx -t
+
+Expected output:
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+
+# Reload Nginx
+sudo systemctl reload nginx
+
+# If reload doesn't work, restart:
+sudo systemctl restart nginx
+
+# Check Nginx status
+sudo systemctl status nginx
+
+Verification:
+# Test frontend (should show HTML)
+curl http://www.schoolm.gentime.in/
+
+# Test backend (should show JSON error since no auth)
+curl http://api.gentime.in/api/auth/check
+
+
+================================================================================
+PART 6: SSL CERTIFICATE INSTALLATION
+================================================================================
+
+6.1 INSTALL SSL WITH CERTBOT
+-----------------------------
+Commands:
+
+# Install SSL for both domains at once
+sudo certbot --nginx -d www.schoolm.gentime.in -d api.gentime.in --non-interactive --agree-tos --email admin@gentime.in --redirect
+
+Breakdown of command:
+- --nginx: Use Nginx plugin (auto-configures Nginx)
+- -d: Domain to certify (can specify multiple)
+- --non-interactive: Don't prompt for input
+- --agree-tos: Agree to Let's Encrypt Terms of Service
+- --email: Email for certificate expiry notifications
+- --redirect: Automatically redirect HTTP to HTTPS
+
+Expected output:
+Successfully received certificate.
+Certificate is saved at: /etc/letsencrypt/live/www.schoolm.gentime.in/fullchain.pem
+Key is saved at: /etc/letsencrypt/live/www.schoolm.gentime.in/privkey.pem
+This certificate expires on 2026-01-10.
+Certbot has set up a scheduled task to automatically renew this certificate.
+
+What Certbot does automatically:
+1. Obtains SSL certificate from Let's Encrypt
+2. Modifies Nginx config to use SSL
+3. Adds SSL certificate paths
+4. Sets up HTTP to HTTPS redirect
+5. Configures auto-renewal
+
+
+6.2 VERIFY SSL CONFIGURATION
+-----------------------------
+Commands:
+
+# View certificate details
+sudo certbot certificates
+
+Expected output:
+Certificate Name: www.schoolm.gentime.in
+  Domains: www.schoolm.gentime.in api.gentime.in
+  Expiry Date: 2026-01-10 12:35:21+00:00 (VALID: 89 days)
+  Certificate Path: /etc/letsencrypt/live/www.schoolm.gentime.in/fullchain.pem
+  Private Key Path: /etc/letsencrypt/live/www.schoolm.gentime.in/privkey.pem
+
+# Check frontend Nginx config after SSL
+cat /etc/nginx/sites-available/gentime-frontend
+
+New sections added by Certbot:
+- listen 443 ssl;
+- ssl_certificate paths
+- HTTP to HTTPS redirect server block
+
+# Check backend Nginx config after SSL
+cat /etc/nginx/sites-available/gentime-backend
+
+Same SSL additions as frontend
+
+
+6.3 TEST HTTPS ACCESS
+----------------------
+Commands from local machine:
+
+# Test HTTPS frontend
+curl -I https://www.schoolm.gentime.in/
+
+Expected output:
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+
+# Test HTTPS backend
+curl https://api.gentime.in/api/auth/check
+
+Expected output:
+{"message":"No token, authorization denied"}
+
+# Test HTTP to HTTPS redirect
+curl -I http://www.schoolm.gentime.in/
+
+Expected output:
+HTTP/1.1 301 Moved Permanently
+Location: https://www.schoolm.gentime.in/
+
+Browser Test:
+1. Open browser
+2. Visit: https://www.schoolm.gentime.in
+3. Check for padlock icon in address bar
+4. Click padlock → Certificate should show Let's Encrypt
+
+
+6.4 AUTO-RENEWAL SETUP
+-----------------------
+Certbot automatically sets up renewal timer.
+
+Verify auto-renewal:
+# Check renewal timer status
+sudo systemctl status certbot.timer
+
+# Test renewal (dry run)
+sudo certbot renew --dry-run
+
+Expected output:
+Congratulations, all simulated renewals succeeded
+
+# View renewal configuration
+cat /etc/letsencrypt/renewal/www.schoolm.gentime.in.conf
+
+Auto-renewal details:
+- Checks twice daily for expiring certificates
+- Renews certificates 30 days before expiry
+- Automatically reloads Nginx after renewal
+- Sends email notifications if renewal fails
+
+Manual renewal (if needed):
+sudo certbot renew
+
+
+================================================================================
+PART 7: DEPLOYMENT VERIFICATION
+================================================================================
+
+7.1 BACKEND HEALTH CHECK
+-------------------------
+Commands:
+
+# On VPS - Check PM2 status
+pm2 status
+
+Expected:
+- Status: online
+- Uptime: > 0s
+- Restart: Low number (should not keep restarting)
+
+# Check backend logs
+pm2 logs schoolm-api --lines 50
+
+Look for:
+- "Server is running at port => 5000"
+- "MongoDB Atlas is Connected Successfully."
+- No error messages
+
+# Test backend locally on VPS
+curl http://localhost:5000/api/auth/check
+
+Expected:
+{"message":"No token, authorization denied"}
+
+# Test backend through Nginx
+curl https://api.gentime.in/api/auth/check
+
+Expected:
+{"message":"No token, authorization denied"}
+
+# Check MongoDB connection
+pm2 logs schoolm-api | grep MongoDB
+
+Expected:
+"MongoDB Atlas is Connected Successfully."
+
+
+7.2 FRONTEND ACCESS TEST
+-------------------------
+From local machine:
+
+# Test HTTPS access
+curl -I https://www.schoolm.gentime.in/
+
+Expected:
+HTTP/1.1 200 OK
+Content-Type: text/html
+
+# Test if files are served
+curl https://www.schoolm.gentime.in/ | grep "GenTime"
+
+Expected: Should find "GenTime" in HTML
+
+# Browser test
+1. Open: https://www.schoolm.gentime.in
+2. Should see login page
+3. No SSL warnings
+4. Padlock icon visible
+
+# Check frontend dist folder
+ls -la /var/www/schoolm/frontend/dist/
+
+Expected files:
+- index.html
+- assets/ (folder with JS and CSS)
+- images/ (if any)
+
+
+7.3 LOGIN FUNCTIONALITY TEST
+-----------------------------
+From local machine:
+
+# Test login endpoint
+curl -X POST https://api.gentime.in/api/school/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@school.com","password":"test123"}' \
+  -v
+
+Expected output:
+HTTP/1.1 200 OK
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+{"success":true,"message":"Success Login","user":{...}}
+
+Browser test:
+1. Go to: https://www.schoolm.gentime.in
+2. Select "School Owner"
+3. Email: test@school.com
+4. Password: test123
+5. Click Submit
+6. Should redirect to dashboard
+7. User info should be displayed
+
+
+7.4 API ENDPOINT TESTS
+-----------------------
+Test various endpoints:
+
+# Auth check (should fail without token)
+curl https://api.gentime.in/api/auth/check
+
+Expected: {"message":"No token, authorization denied"}
+
+# Get all schools (public endpoint)
+curl https://api.gentime.in/api/school/all
+
+Expected: {"success":true,"message":"Success...","data":[...]}
+
+# Test CORS headers
+curl -H "Origin: https://www.schoolm.gentime.in" \
+  -H "Access-Control-Request-Method: POST" \
+  -H "Access-Control-Request-Headers: Content-Type" \
+  -X OPTIONS https://api.gentime.in/api/school/login \
+  -v
+
+Expected headers:
+Access-Control-Allow-Origin: https://www.schoolm.gentime.in
+Access-Control-Allow-Credentials: true
+Access-Control-Expose-Headers: Authorization
+
+
+================================================================================
+PART 8: TROUBLESHOOTING
+================================================================================
+
+8.1 COMMON ISSUES AND SOLUTIONS
+--------------------------------
+
+ISSUE 1: "Cannot connect to server"
+Symptoms:
+- Browser shows "Connection timed out"
+- Cannot SSH to server
+
+Solutions:
+1. Check if server is online:
+   ping 72.60.202.218
+
+2. Check VPS provider dashboard
+3. Reboot server from VPS control panel
+4. Contact VPS support
+
+
+ISSUE 2: "This site can't be reached" / DNS errors
+Symptoms:
+- Domain not resolving
+- DNS_PROBE_FINISHED_NXDOMAIN error
+
+Solutions:
+1. Check DNS records at domain registrar:
+   - A record: www.schoolm → 72.60.202.218
+   - A record: api → 72.60.202.218
+
+2. Wait for DNS propagation (5-30 minutes)
+
+3. Test DNS resolution:
+   nslookup www.schoolm.gentime.in
+
+4. Flush local DNS cache:
+   Windows: ipconfig /flushdns
+   Mac/Linux: sudo systemd-resolve --flush-caches
+
+
+ISSUE 3: Backend not starting / PM2 shows "errored"
+Symptoms:
+- pm2 status shows status: errored
+- Application keeps restarting
+
+Solutions:
+1. Check PM2 logs:
+   pm2 logs schoolm-api --err
+
+2. Common errors:
+
+   A. "JWT_SECRET is not defined"
+      Fix: Check /var/www/schoolm/api/.env
+      Ensure: JWT_SECRET=LSKDFJDLSJWIEOFFJDSLKJFLJ328929FDOSKJFlsdkfjdslskdfj
+
+   B. "Cannot connect to MongoDB"
+      Fix: Check MONGODB_URI in .env
+      Test: Try connecting to MongoDB Atlas dashboard
+
+   C. "Port 5000 already in use"
+      Fix:
+      - Find process: sudo lsof -i :5000
+      - Kill process: sudo kill -9 <PID>
+      - Restart PM2: pm2 restart schoolm-api
+
+3. Restart with fresh environment:
+   pm2 delete schoolm-api
+   pm2 start /var/www/schoolm/ecosystem.config.js
+   pm2 save
+
+
+ISSUE 4: Frontend shows blank page
+Symptoms:
+- White screen
+- No content loaded
+
+Solutions:
+1. Check if frontend is built:
+   ls -la /var/www/schoolm/frontend/dist/
+
+2. Rebuild frontend:
+   cd /var/www/schoolm/frontend
+   npm run build
+
+3. Check Nginx error logs:
+   sudo tail -f /var/log/nginx/error.log
+
+4. Verify Nginx config:
+   sudo nginx -t
+   sudo systemctl reload nginx
+
+
+ISSUE 5: Login not working / CORS errors
+Symptoms:
+- Login fails with network error
+- Console shows CORS error
+
+Solutions:
+1. Check backend CORS configuration in server.js:
+   Origin should include: https://www.schoolm.gentime.in
+
+2. Check frontend API URL:
+   cat /var/www/schoolm/frontend/.env.production
+   Should be: VITE_API_URL=https://api.gentime.in/api
+
+3. Rebuild frontend after .env change:
+   cd /var/www/schoolm/frontend
+   npm run build
+
+4. Restart backend:
+   pm2 restart schoolm-api
+
+
+ISSUE 6: SSL certificate errors
+Symptoms:
+- "Your connection is not private"
+- "NET::ERR_CERT_AUTHORITY_INVALID"
+
+Solutions:
+1. Check certificate status:
+   sudo certbot certificates
+
+2. Renew certificate manually:
+   sudo certbot renew
+
+3. Verify Nginx SSL configuration:
+   cat /etc/nginx/sites-available/gentime-frontend
+   Look for ssl_certificate lines
+
+4. Test SSL:
+   openssl s_client -connect www.schoolm.gentime.in:443
+
+
+ISSUE 7: 502 Bad Gateway
+Symptoms:
+- Nginx shows 502 error
+- Backend API not responding
+
+Solutions:
+1. Check if backend is running:
+   pm2 status
+
+2. Check backend port:
+   sudo netstat -tulpn | grep 5000
+
+3. Verify Nginx proxy_pass:
+   cat /etc/nginx/sites-available/gentime-backend
+   Should be: proxy_pass http://localhost:5000;
+
+4. Restart services:
+   pm2 restart schoolm-api
+   sudo systemctl restart nginx
+
+
+ISSUE 8: Images not loading
+Symptoms:
+- Uploaded images show 404
+- Image paths broken
+
+Solutions:
+1. Check image directory:
+   ls -la /var/www/schoolm/api/images/
+
+2. Check Nginx location block:
+   location /images {
+       alias /var/www/schoolm/api/images;
+       autoindex off;
+   }
+
+3. Set correct permissions:
+   sudo chmod -R 755 /var/www/schoolm/api/images
+   sudo chown -R www-data:www-data /var/www/schoolm/api/images
+
+
+8.2 LOG FILE LOCATIONS
+----------------------
+
+PM2 Logs:
+- All logs: /root/.pm2/logs/
+- Backend output: /root/.pm2/logs/schoolm-api-out-0.log
+- Backend errors: /root/.pm2/logs/schoolm-api-error-0.log
+
+View logs:
+pm2 logs schoolm-api
+pm2 logs schoolm-api --err
+pm2 logs schoolm-api --out
+
+Nginx Logs:
+- Access log: /var/log/nginx/access.log
+- Error log: /var/log/nginx/error.log
+
+View logs:
+sudo tail -f /var/log/nginx/access.log
+sudo tail -f /var/log/nginx/error.log
+
+SSL/Certbot Logs:
+- /var/log/letsencrypt/letsencrypt.log
+
+View logs:
+sudo tail -f /var/log/letsencrypt/letsencrypt.log
+
+System Logs:
+- /var/log/syslog
+
+View logs:
+sudo tail -f /var/log/syslog
+
+
+8.3 DEBUG COMMANDS
+------------------
+
+Check all service statuses:
+pm2 status                          # PM2 processes
+sudo systemctl status nginx         # Nginx
+sudo systemctl status certbot.timer # SSL renewal
+
+Check ports:
+sudo netstat -tulpn | grep 5000    # Backend port
+sudo netstat -tulpn | grep 80      # HTTP port
+sudo netstat -tulpn | grep 443     # HTTPS port
+
+Check processes:
+ps aux | grep node                 # Node.js processes
+ps aux | grep nginx                # Nginx processes
+
+Test connectivity:
+curl http://localhost:5000/api/auth/check    # Local backend
+curl https://api.gentime.in/api/auth/check   # Public backend
+curl https://www.schoolm.gentime.in/         # Frontend
+
+Check disk space:
+df -h
+
+Check memory:
+free -h
+
+Check system resources:
+top
+htop (if installed)
+
+
+================================================================================
+PART 9: MAINTENANCE & UPDATES
+================================================================================
+
+9.1 UPDATING BACKEND CODE
+--------------------------
+Steps:
+
+1. On local machine, make code changes
+
+2. Test locally:
+   cd "d:\gentime8\school management system\api"
+   npm start
+
+3. Transfer updated files to server:
+   scp -r "d:\gentime8\school management system\api" root@72.60.202.218:/var/www/schoolm/
+
+   OR if only specific files changed:
+   scp "d:\gentime8\school management system\api\controller\school.controller.js" root@72.60.202.218:/var/www/schoolm/api/controller/
+
+4. On VPS, restart backend:
+   ssh root@72.60.202.218
+   cd /var/www/schoolm/api
+   pm2 restart schoolm-api
+
+5. Verify:
+   pm2 logs schoolm-api --lines 20
+
+IMPORTANT NOTES:
+- Always test locally first
+- Backup database before major updates
+- For package.json changes, run: npm install
+- For environment variable changes, update ecosystem.config.js
+
+
+9.2 UPDATING FRONTEND CODE
+---------------------------
+Steps:
+
+1. On local machine, make code changes
+
+2. Test locally:
+   cd "d:\gentime8\school management system\frontend"
+   npm run dev
+
+3. Build production version locally (optional but recommended):
+   npm run build
+
+4. Transfer files:
+   Method A: Transfer built dist folder only:
+   scp -r "d:\gentime8\school management system\frontend\dist" root@72.60.202.218:/var/www/schoolm/frontend/
+
+   Method B: Transfer source and build on server:
+   scp -r "d:\gentime8\school management system\frontend\src" root@72.60.202.218:/var/www/schoolm/frontend/
+   ssh root@72.60.202.218
+   cd /var/www/schoolm/frontend
+   npm run build
+
+5. No restart needed - Nginx serves static files
+
+6. Verify:
+   Open browser with Ctrl+Shift+R (hard refresh)
+   Check: https://www.schoolm.gentime.in
+
+IMPORTANT NOTES:
+- Clear browser cache after updates
+- For package.json changes, run: npm install
+- For .env changes, rebuild: npm run build
+
+
+9.3 DATABASE BACKUPS
+--------------------
+Since we use MongoDB Atlas:
+
+1. Automatic backups are enabled by MongoDB Atlas
+2. Access backups from MongoDB Atlas dashboard
+3. Configure backup schedule in Atlas settings
+
+For manual export:
+1. Log in to MongoDB Atlas
+2. Go to Clusters → Browse Collections
+3. Export data as JSON or CSV
+
+For command-line backup:
+mongodump --uri="mongodb+srv://schoolm2025:kallesh717@cluster0.ovqn73c.mongodb.net/school_management" --out=/backup/mongodb-backup-$(date +%Y%m%d)
+
+Restore from backup:
+mongorestore --uri="mongodb+srv://schoolm2025:kallesh717@cluster0.ovqn73c.mongodb.net/school_management" /backup/mongodb-backup-20251012/
+
+
+9.4 SSL CERTIFICATE RENEWAL
+----------------------------
+Certificates auto-renew, but for manual renewal:
+
+# Test renewal
+sudo certbot renew --dry-run
+
+# Force renewal
+sudo certbot renew --force-renewal
+
+# Renew and reload Nginx
+sudo certbot renew --deploy-hook "systemctl reload nginx"
+
+Check renewal status:
+sudo certbot certificates
+
+Expected output should show expiry date and renewal status.
+
+
+================================================================================
+DEPLOYMENT ARCHITECTURE SUMMARY
+================================================================================
+
+Flow Diagram:
+
+User's Browser
+      ↓
+      ↓ HTTPS Request (443)
+      ↓
+DNS (gentime.in)
+      ↓
+      ↓ Resolves to 72.60.202.218
+      ↓
+VPS Server (Ubuntu 24.04.3)
+      ↓
+      ├─→ www.schoolm.gentime.in
+      │       ↓
+      │   Nginx (Web Server)
+      │       ↓
+      │   Static Files (/var/www/schoolm/frontend/dist/)
+      │       ↓
+      │   React App (Frontend)
+      │       │
+      │       │ Makes API calls to →
+      │       │
+      └─→ api.gentime.in/api
+              ↓
+          Nginx (Reverse Proxy)
+              ↓
+          localhost:5000
+              ↓
+          PM2 Process Manager
+              ↓
+          Node.js + Express.js (Backend)
+              ↓
+          MongoDB Atlas (Cloud Database)
+
+
+Technology Stack:
+
+Frontend:
+- React 18.2.0 (UI Framework)
+- Vite 5.4.2 (Build Tool)
+- Material-UI (Components)
+- Axios (HTTP Client)
+- React Router (Navigation)
+
+Backend:
+- Node.js 18.x (Runtime)
+- Express.js 4.18.2 (Web Framework)
+- Mongoose (MongoDB ODM)
+- JWT (Authentication)
+- PM2 (Process Manager)
+
+Infrastructure:
+- Ubuntu 24.04.3 LTS (Operating System)
+- Nginx 1.24.0 (Web Server / Reverse Proxy)
+- Let's Encrypt (SSL Certificates)
+- MongoDB Atlas (Cloud Database)
+
+Security:
+- HTTPS/SSL encryption
+- JWT token authentication
+- Password hashing (bcrypt)
+- CORS protection
+- Environment variables for secrets
+
+
+================================================================================
+QUICK REFERENCE COMMANDS
+================================================================================
+
+SSH Connection:
+ssh root@72.60.202.218
+
+PM2 Commands:
+pm2 status                           # View all processes
+pm2 logs schoolm-api                 # View logs
+pm2 restart schoolm-api              # Restart backend
+pm2 stop schoolm-api                 # Stop backend
+pm2 delete schoolm-api               # Remove from PM2
+pm2 save                             # Save process list
+pm2 flush                            # Clear logs
+
+Nginx Commands:
+sudo nginx -t                        # Test configuration
+sudo systemctl reload nginx          # Reload configuration
+sudo systemctl restart nginx         # Restart Nginx
+sudo systemctl status nginx          # Check status
+
+SSL Commands:
+sudo certbot certificates            # View certificates
+sudo certbot renew                   # Renew certificates
+sudo certbot renew --dry-run         # Test renewal
+
+File Locations:
+/var/www/schoolm/api/                # Backend code
+/var/www/schoolm/frontend/           # Frontend code
+/var/www/schoolm/frontend/dist/      # Built frontend
+/var/www/schoolm/ecosystem.config.js # PM2 config
+/etc/nginx/sites-available/          # Nginx configs
+/etc/letsencrypt/live/               # SSL certificates
+
+Testing URLs:
+https://www.schoolm.gentime.in       # Frontend
+https://api.gentime.in/api           # Backend API
+https://api.gentime.in/api/auth/check # Auth check endpoint
+
+
+================================================================================
+SUPPORT & DOCUMENTATION
+================================================================================
+
+Official Documentation:
+- Node.js: https://nodejs.org/docs/
+- Express.js: https://expressjs.com/
+- React: https://react.dev/
+- MongoDB: https://docs.mongodb.com/
+- Nginx: https://nginx.org/en/docs/
+- PM2: https://pm2.keymetrics.io/docs/
+- Let's Encrypt: https://letsencrypt.org/docs/
+
+Project Documentation:
+- README.md: Complete project overview
+- This file: Deployment guide
+
+For Issues:
+- Check logs: pm2 logs schoolm-api
+- Review troubleshooting section above
+- Check GitHub repository issues
+
+
+================================================================================
+END OF DEPLOYMENT GUIDE
+================================================================================
+
+Document Version: 1.0
+Last Updated: October 12, 2025
+Deployment Status: ✓ LIVE AND OPERATIONAL
+
+Live URLs:
+- Frontend: https://www.schoolm.gentime.in
+- Backend: https://api.gentime.in/api
+
+Test Credentials:
+- Email: test@school.com
+- Password: test123
+
+This guide covers the complete deployment process from scratch to a fully
+functional production environment with SSL certificates and auto-restart
+capabilities.
+
+================================================================================

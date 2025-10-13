@@ -11,7 +11,7 @@ exports.authCheck =(req, res) => {
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWTSECRET);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = decoded; 
      res.status(200).json({...decoded})
     } catch (error) {

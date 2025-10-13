@@ -5,7 +5,7 @@ const path = require("path");
 const bcrypt = require("bcryptjs")
 const jwt = require('jsonwebtoken');
 
-const jwtSecret = process.env.JWTSECRET;
+const jwtSecret = process.env.JWT_SECRET;
 
 const Student = require("../model/student.model");
 const Attendance = require('../model/attendance.model');

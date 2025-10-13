@@ -5,7 +5,7 @@ const path = require("path");
 const bcrypt = require("bcryptjs")
 const jwt = require('jsonwebtoken');
 
-const jwtSecret = process.env.JWTSECRET;
+const jwtSecret = process.env.JWT_SECRET;
 
 const User = require("../model/user.model");
 module.exports = {

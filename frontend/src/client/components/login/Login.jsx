@@ -56,21 +56,29 @@ export default function Login() {
                 url = `${baseUrl}/student/login`
                 navUrl='/student'
             }
-                axios.post(url, {...values}).then(resp=>{    
+                axios.post(url, {...values}, { withCredentials: true }).then(resp=>{
                     setMessage(resp.data.message)
                     setType("success")
-                    let token = resp.headers.get("Authorization");
+                    let token = resp.headers.authorization || resp.headers.Authorization;
                     if(resp.data.success){
-                        localStorage.setItem("token", token);
+                        if(token){
+                            localStorage.setItem("token", token);
+                        }
                         localStorage.setItem("user", JSON.stringify(resp.data.user));
                         navigate(navUrl)
                       login(resp.data.user)
                     }
                     Formik.resetForm();
                 }).catch(e=>{
-                    setMessage(e.response.data.message);
-                    setType("error")
-                    console.log("Error in  register submit", e.response.data.message)
+                    if(e.response){
+                        setMessage(e.response.data.message);
+                        setType("error")
+                        console.log("Error in login submit", e.response.data.message)
+                    } else {
+                        setMessage("Network error. Please check your connection.");
+                        setType("error")
+                        console.log("Network error in login", e.message)
+                    }
                 })
             
            

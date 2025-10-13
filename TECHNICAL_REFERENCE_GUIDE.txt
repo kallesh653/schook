@@ -1,0 +1,4233 @@
+================================================================================
+    TECHNICAL REFERENCE GUIDE - VPS, UBUNTU, GIT & TROUBLESHOOTING
+    GenTime School Management System
+================================================================================
+
+VERSION: 1.0
+LAST UPDATED: October 12, 2025
+PROJECT: GenTime School Management System
+TECH STACK: MERN (MongoDB, Express.js, React, Node.js)
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+SECTION A: VPS (VIRTUAL PRIVATE SERVER) COMPLETE GUIDE
+    A.1  What is VPS and How It Works
+    A.2  VPS Connection and Access
+    A.3  VPS Management Commands
+    A.4  VPS Security Best Practices
+    A.5  VPS Performance Monitoring
+    A.6  VPS Backup and Recovery
+    A.7  VPS Network Configuration
+    A.8  VPS Firewall Management
+
+SECTION B: UBUNTU/LINUX COMMANDS COMPLETE REFERENCE
+    B.1  File and Directory Operations
+    B.2  File Permissions and Ownership
+    B.3  Process Management
+    B.4  System Information Commands
+    B.5  Network Commands
+    B.6  Package Management (apt)
+    B.7  Service Management (systemctl)
+    B.8  Text Editing and File Viewing
+    B.9  Archive and Compression
+    B.10 User and Group Management
+
+SECTION C: GIT COMMANDS AND WORKFLOWS
+    C.1  Git Basics and Setup
+    C.2  Repository Operations
+    C.3  Branch Management
+    C.4  Commit Operations
+    C.5  Remote Repository Operations
+    C.6  Git Troubleshooting
+    C.7  Advanced Git Operations
+    C.8  Git Workflows for Deployment
+
+SECTION D: DEPLOYMENT PROBLEMS AND SOLUTIONS
+    D.1  Backend Deployment Issues
+    D.2  Frontend Deployment Issues
+    D.3  PM2 Process Manager Issues
+    D.4  Nginx Web Server Issues
+    D.5  SSL Certificate Issues
+    D.6  Network and Connectivity Issues
+    D.7  Performance Issues
+    D.8  Security Issues
+
+SECTION E: DATABASE PROBLEMS AND SOLUTIONS
+    E.1  MongoDB Connection Issues
+    E.2  Database Performance Issues
+    E.3  Data Integrity Issues
+    E.4  Backup and Recovery Issues
+    E.5  Migration Issues
+    E.6  Index Optimization
+    E.7  Query Optimization
+
+SECTION F: FUTURE PROBLEMS AND PREVENTIVE SOLUTIONS
+    F.1  Scalability Issues
+    F.2  Memory and CPU Issues
+    F.3  Storage Issues
+    F.4  Dependency Updates
+    F.5  Security Vulnerabilities
+    F.6  Monitoring and Alerting
+
+
+================================================================================
+SECTION A: VPS (VIRTUAL PRIVATE SERVER) COMPLETE GUIDE
+================================================================================
+
+A.1 WHAT IS VPS AND HOW IT WORKS
+---------------------------------
+
+What is VPS?
+------------
+VPS (Virtual Private Server) is a virtualized server that mimics a dedicated
+server within a shared hosting environment. It's like having your own computer
+in the cloud that runs 24/7.
+
+How VPS Works:
+--------------
+1. Physical Server: Large physical server in data center
+2. Hypervisor: Software that divides physical server into virtual servers
+3. Virtual Servers: Each VPS acts as independent server
+4. Dedicated Resources: Each VPS has allocated RAM, CPU, storage
+5. Operating System: Each VPS runs its own OS (Ubuntu in our case)
+
+Our VPS Details:
+----------------
+IP Address: 72.60.202.218
+Operating System: Ubuntu 24.04.3 LTS
+Location: [Your Data Center Location]
+RAM: [Your RAM Size]
+CPU: [Your CPU Cores]
+Storage: [Your Storage Size]
+Bandwidth: [Your Bandwidth]
+
+VPS vs Other Hosting:
+---------------------
+Shared Hosting: Multiple websites share same server resources
+    Pros: Cheap, Easy
+    Cons: Slow, Limited control, Security risks
+
+VPS Hosting: Your own virtual server with dedicated resources
+    Pros: Fast, Full control, Secure, Scalable
+    Cons: More expensive, Requires technical knowledge
+
+Dedicated Server: Entire physical server for you
+    Pros: Maximum resources, Ultimate control
+    Cons: Very expensive, Requires expert knowledge
+
+
+A.2 VPS CONNECTION AND ACCESS
+------------------------------
+
+SSH (Secure Shell) Connection
+------------------------------
+SSH is encrypted protocol for secure remote access to servers.
+
+Basic SSH Connection:
+ssh username@ip_address
+ssh root@72.60.202.218
+
+With Password:
+ssh root@72.60.202.218
+(Enter password when prompted)
+
+With SSH Key (More Secure):
+ssh -i /path/to/private_key.pem root@72.60.202.218
+
+SSH Connection from Different OS:
+----------------------------------
+
+Windows:
+1. Using PowerShell:
+   - Open PowerShell
+   - Run: ssh root@72.60.202.218
+   - Enter password
+
+2. Using PuTTY:
+   - Download PuTTY from putty.org
+   - Host Name: 72.60.202.218
+   - Port: 22
+   - Connection Type: SSH
+   - Click Open
+   - Enter username: root
+   - Enter password
+
+3. Using Windows Terminal:
+   - Open Windows Terminal
+   - Run: ssh root@72.60.202.218
+
+Mac/Linux:
+1. Open Terminal
+2. Run: ssh root@72.60.202.218
+3. Enter password
+
+SSH Connection Options:
+-----------------------
+ssh -p 22 root@72.60.202.218              # Specify port (default 22)
+ssh -v root@72.60.202.218                 # Verbose mode (debug)
+ssh -X root@72.60.202.218                 # Enable X11 forwarding
+ssh -L 8080:localhost:80 root@72.60.202.218  # Port forwarding
+
+Setting Up SSH Key Authentication:
+-----------------------------------
+More secure than password authentication
+
+1. Generate SSH Key Pair (on local machine):
+   ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+
+   Press Enter for default location: ~/.ssh/id_rsa
+   Enter passphrase (optional but recommended)
+
+2. Copy Public Key to VPS:
+   ssh-copy-id root@72.60.202.218
+
+   OR manually:
+   cat ~/.ssh/id_rsa.pub | ssh root@72.60.202.218 "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+
+3. Test SSH Key Login:
+   ssh root@72.60.202.218
+   (Should connect without password)
+
+4. Disable Password Authentication (Optional but recommended):
+   On VPS:
+   sudo nano /etc/ssh/sshd_config
+
+   Change:
+   PasswordAuthentication yes
+   To:
+   PasswordAuthentication no
+
+   Save and restart SSH:
+   sudo systemctl restart sshd
+
+
+A.3 VPS MANAGEMENT COMMANDS
+----------------------------
+
+System Information:
+-------------------
+# Check OS version
+uname -a                    # Kernel information
+cat /etc/os-release        # OS details
+lsb_release -a             # Ubuntu version
+
+# Check hostname
+hostname                    # Show hostname
+hostnamectl                # Detailed hostname info
+
+# Check system uptime
+uptime                      # System uptime and load
+uptime -p                  # Pretty uptime
+
+# Check logged in users
+who                         # Show logged in users
+w                          # Show who is logged in and what they're doing
+last                       # Show login history
+
+Resource Monitoring:
+--------------------
+# CPU Information
+lscpu                      # CPU architecture
+cat /proc/cpuinfo         # Detailed CPU info
+top                       # Real-time CPU usage
+htop                      # Better top (needs installation: apt install htop)
+
+# Memory Information
+free -h                    # RAM usage in human-readable format
+cat /proc/meminfo         # Detailed memory info
+vmstat                    # Virtual memory statistics
+vmstat 5                  # Update every 5 seconds
+
+# Disk Information
+df -h                      # Disk space usage
+df -i                     # Inode usage
+du -h /var/www           # Directory size
+du -sh /var/www          # Total directory size
+ncdu /var/www            # Interactive disk usage (needs: apt install ncdu)
+
+# Check disk I/O
+iostat                     # Disk I/O statistics
+iotop                     # Top for I/O (needs: apt install iotop)
+
+# List all block devices
+lsblk                      # List block devices
+blkid                     # Block device attributes
+
+Network Information:
+--------------------
+# Check network interfaces
+ip addr                    # Show IP addresses
+ifconfig                  # Network interfaces (older command)
+ip link show              # Show network devices
+
+# Check network connectivity
+ping google.com           # Test internet connectivity
+ping -c 4 google.com     # Send 4 packets only
+
+# Check open ports
+netstat -tulpn            # Show listening ports
+ss -tulpn                 # Modern netstat alternative
+lsof -i :5000            # Check specific port (5000)
+
+# Check routing
+ip route                   # Show routing table
+traceroute google.com     # Trace route to destination
+
+# DNS lookup
+nslookup www.gentime.in   # DNS lookup
+dig www.gentime.in        # Detailed DNS info
+host www.gentime.in       # Simple DNS lookup
+
+System Logs:
+------------
+# View system logs
+tail -f /var/log/syslog          # System log (real-time)
+tail -f /var/log/auth.log        # Authentication log
+tail -f /var/log/nginx/access.log # Nginx access log
+tail -f /var/log/nginx/error.log  # Nginx error log
+
+# Journal logs (systemd)
+journalctl                        # All logs
+journalctl -u nginx              # Nginx service logs
+journalctl -u nginx --since today # Today's logs
+journalctl -f                    # Follow logs (real-time)
+journalctl -p err                # Only error messages
+
+
+A.4 VPS SECURITY BEST PRACTICES
+--------------------------------
+
+1. Keep System Updated:
+-----------------------
+sudo apt update && sudo apt upgrade -y    # Update all packages
+sudo apt autoremove                       # Remove unused packages
+sudo apt autoclean                        # Clean package cache
+
+# Enable automatic security updates
+sudo apt install unattended-upgrades
+sudo dpkg-reconfigure unattended-upgrades
+
+2. Configure Firewall (UFW):
+-----------------------------
+# Install UFW (usually pre-installed)
+sudo apt install ufw
+
+# Check status
+sudo ufw status
+
+# Default policies
+sudo ufw default deny incoming    # Block all incoming by default
+sudo ufw default allow outgoing   # Allow all outgoing
+
+# Allow SSH (IMPORTANT: Do this before enabling firewall!)
+sudo ufw allow 22/tcp             # SSH
+sudo ufw allow OpenSSH            # Or use service name
+
+# Allow HTTP and HTTPS
+sudo ufw allow 80/tcp             # HTTP
+sudo ufw allow 443/tcp            # HTTPS
+sudo ufw allow 'Nginx Full'       # Or use Nginx profile
+
+# Enable firewall
+sudo ufw enable
+
+# Check rules
+sudo ufw status numbered
+
+# Delete rule
+sudo ufw delete 3                 # Delete rule number 3
+
+# Reset firewall (start over)
+sudo ufw reset
+
+3. Change SSH Port (Optional):
+-------------------------------
+# Edit SSH config
+sudo nano /etc/ssh/sshd_config
+
+# Change line:
+Port 22
+# To:
+Port 2222    # Use any port between 1024-65535
+
+# Save and restart SSH
+sudo systemctl restart sshd
+
+# Update firewall
+sudo ufw allow 2222/tcp
+sudo ufw delete allow 22/tcp
+
+# Connect with new port
+ssh -p 2222 root@72.60.202.218
+
+4. Disable Root Login (Recommended):
+-------------------------------------
+# Create non-root user first
+sudo adduser deployuser
+sudo usermod -aG sudo deployuser   # Add to sudo group
+
+# Copy SSH keys to new user
+sudo rsync --archive --chown=deployuser:deployuser ~/.ssh /home/deployuser
+
+# Test new user login (from local machine)
+ssh deployuser@72.60.202.218
+
+# If works, disable root login
+sudo nano /etc/ssh/sshd_config
+
+# Change:
+PermitRootLogin yes
+# To:
+PermitRootLogin no
+
+# Save and restart
+sudo systemctl restart sshd
+
+5. Install Fail2Ban (Protect against brute force):
+---------------------------------------------------
+# Install
+sudo apt install fail2ban
+
+# Configure
+sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+sudo nano /etc/fail2ban/jail.local
+
+# Add under [sshd]:
+enabled = true
+port = 22
+maxretry = 3
+bantime = 3600
+
+# Start and enable
+sudo systemctl start fail2ban
+sudo systemctl enable fail2ban
+
+# Check status
+sudo fail2ban-client status
+sudo fail2ban-client status sshd
+
+6. Monitor for Intrusions:
+--------------------------
+# Check failed login attempts
+sudo grep "Failed password" /var/log/auth.log
+
+# Check successful logins
+sudo grep "Accepted password" /var/log/auth.log
+
+# Check last logins
+last
+lastlog
+
+7. Secure Shared Memory:
+------------------------
+sudo nano /etc/fstab
+
+# Add at end:
+tmpfs /run/shm tmpfs defaults,noexec,nosuid 0 0
+
+# Apply
+sudo mount -o remount /run/shm
+
+
+A.5 VPS PERFORMANCE MONITORING
+-------------------------------
+
+Real-Time Monitoring Tools:
+---------------------------
+1. TOP (Basic monitoring)
+   top                    # Press q to quit
+
+   Useful keys in top:
+   - 1: Show individual CPU cores
+   - M: Sort by memory usage
+   - P: Sort by CPU usage
+   - k: Kill a process
+   - h: Help
+
+2. HTOP (Better than top)
+   sudo apt install htop
+   htop
+
+   Features:
+   - Color-coded display
+   - Mouse support
+   - Tree view of processes
+   - Easy to kill processes
+
+3. GLANCES (Comprehensive monitoring)
+   sudo apt install glances
+   glances
+
+   Shows:
+   - CPU, RAM, Disk, Network
+   - Processes, Alerts
+   - Docker containers (if installed)
+
+Performance Testing:
+--------------------
+# CPU stress test
+sudo apt install stress
+stress --cpu 4 --timeout 60s    # Stress 4 CPU cores for 60 seconds
+
+# Memory test
+stress --vm 2 --vm-bytes 1G --timeout 60s
+
+# Network speed test
+sudo apt install speedtest-cli
+speedtest-cli
+
+# Disk read/write speed
+sudo apt install hdparm
+sudo hdparm -Tt /dev/sda
+
+# Or use dd command
+dd if=/dev/zero of=/tmp/test bs=1G count=1 oflag=direct
+
+Memory Analysis:
+----------------
+# Detailed memory usage
+ps aux --sort=-%mem | head -20    # Top 20 memory-consuming processes
+ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head
+
+# Memory leak detection
+watch -n 5 free -m               # Watch memory every 5 seconds
+
+# Clear cache (if needed)
+sudo sync && sudo sysctl -w vm.drop_caches=3
+
+Disk Performance:
+-----------------
+# Check for large files
+sudo find / -type f -size +100M 2>/dev/null
+
+# Check for disk errors
+sudo smartctl -a /dev/sda        # Needs: apt install smartmontools
+
+# Check file system
+df -i                            # Check inode usage
+df -h                            # Check disk space
+
+# Clean up disk space
+sudo apt autoremove              # Remove unused packages
+sudo apt autoclean               # Clean package cache
+sudo journalctl --vacuum-time=7d # Clean old logs (keep 7 days)
+sudo find /tmp -type f -atime +7 -delete # Clean temp files
+
+
+A.6 VPS BACKUP AND RECOVERY
+----------------------------
+
+File Backup:
+------------
+1. Full System Backup (tar):
+   sudo tar -czf /backup/full-backup-$(date +%Y%m%d).tar.gz \
+     --exclude=/backup \
+     --exclude=/proc \
+     --exclude=/tmp \
+     --exclude=/mnt \
+     --exclude=/dev \
+     --exclude=/sys \
+     /
+
+2. Specific Directory Backup:
+   # Backup web files
+   sudo tar -czf /backup/www-backup-$(date +%Y%m%d).tar.gz /var/www/
+
+   # Backup with progress
+   sudo tar -czf - /var/www/ | pv > /backup/www-backup.tar.gz
+
+3. Incremental Backup (rsync):
+   sudo rsync -avz --delete /var/www/ /backup/www/
+
+   # Remote backup
+   sudo rsync -avz /var/www/ user@backup-server:/backup/www/
+
+4. Automated Backup Script:
+   Create /root/backup.sh:
+
+   #!/bin/bash
+   DATE=$(date +%Y%m%d_%H%M%S)
+   BACKUP_DIR="/backup"
+   SOURCE="/var/www/schoolm"
+
+   # Create backup
+   tar -czf "$BACKUP_DIR/schoolm-$DATE.tar.gz" "$SOURCE"
+
+   # Keep only last 7 days of backups
+   find $BACKUP_DIR -name "schoolm-*.tar.gz" -mtime +7 -delete
+
+   # Log
+   echo "Backup completed: $DATE" >> /var/log/backup.log
+
+   # Make executable
+   chmod +x /root/backup.sh
+
+   # Add to crontab (daily at 2 AM)
+   sudo crontab -e
+   0 2 * * * /root/backup.sh
+
+Database Backup:
+----------------
+# MongoDB Atlas (Cloud)
+# Backups are automatic in MongoDB Atlas
+# Access via Atlas dashboard
+
+# If using local MongoDB
+mongodump --uri="mongodb://localhost:27017/school_management" \
+  --out=/backup/mongodb-$(date +%Y%m%d)
+
+# Restore MongoDB
+mongorestore --uri="mongodb://localhost:27017/school_management" \
+  /backup/mongodb-20251012/
+
+PM2 Backup:
+-----------
+# Save PM2 process list
+pm2 save
+
+# Backup PM2 config
+cp /root/.pm2/dump.pm2 /backup/pm2-dump-$(date +%Y%m%d).pm2
+cp /var/www/schoolm/ecosystem.config.js /backup/
+
+Nginx Backup:
+-------------
+# Backup Nginx config
+sudo tar -czf /backup/nginx-config-$(date +%Y%m%d).tar.gz \
+  /etc/nginx/sites-available/ \
+  /etc/nginx/sites-enabled/ \
+  /etc/nginx/nginx.conf
+
+SSL Certificate Backup:
+------------------------
+# Backup Let's Encrypt certificates
+sudo tar -czf /backup/letsencrypt-$(date +%Y%m%d).tar.gz \
+  /etc/letsencrypt/
+
+Recovery Procedures:
+--------------------
+1. Full System Recovery:
+   # Extract backup
+   sudo tar -xzf /backup/full-backup-20251012.tar.gz -C /
+
+   # Reboot
+   sudo reboot
+
+2. Website Recovery:
+   # Stop services
+   pm2 stop all
+   sudo systemctl stop nginx
+
+   # Extract backup
+   sudo tar -xzf /backup/www-backup-20251012.tar.gz -C /
+
+   # Start services
+   pm2 start all
+   sudo systemctl start nginx
+
+3. Configuration Recovery:
+   # Nginx
+   sudo tar -xzf /backup/nginx-config-20251012.tar.gz -C /
+   sudo nginx -t
+   sudo systemctl reload nginx
+
+   # SSL
+   sudo tar -xzf /backup/letsencrypt-20251012.tar.gz -C /
+
+
+A.7 VPS NETWORK CONFIGURATION
+------------------------------
+
+Network Interface Configuration:
+---------------------------------
+# View network configuration
+ip addr show
+ip link show
+
+# View network statistics
+ip -s link
+
+# View routing table
+ip route show
+
+# Add static route
+sudo ip route add 192.168.1.0/24 via 192.168.1.1
+
+# Delete route
+sudo ip route del 192.168.1.0/24
+
+DNS Configuration:
+------------------
+# View DNS servers
+cat /etc/resolv.conf
+
+# Edit DNS servers
+sudo nano /etc/resolv.conf
+
+# Add Google DNS
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+
+# Or Cloudflare DNS
+nameserver 1.1.1.1
+nameserver 1.0.0.1
+
+# For permanent DNS (Ubuntu 18.04+)
+sudo nano /etc/netplan/00-installer-config.yaml
+
+network:
+  version: 2
+  ethernets:
+    eth0:
+      dhcp4: true
+      nameservers:
+        addresses: [8.8.8.8, 8.8.4.4]
+
+# Apply changes
+sudo netplan apply
+
+Network Testing:
+----------------
+# Test connectivity
+ping -c 4 google.com           # ICMP test
+curl -I https://google.com     # HTTP test
+wget --spider https://google.com # HTTP test with wget
+
+# Test port connectivity
+nc -zv google.com 443          # Test port 443
+telnet google.com 443          # Telnet test
+
+# Test DNS resolution
+nslookup google.com
+dig google.com
+host google.com
+
+# Trace network route
+traceroute google.com
+mtr google.com                 # Better traceroute (needs: apt install mtr)
+
+# Check network latency
+ping -c 100 google.com | tail -5
+
+Bandwidth Monitoring:
+---------------------
+# Install monitoring tools
+sudo apt install iftop nethogs nload
+
+# Monitor bandwidth by interface
+sudo iftop                     # Interface-wise bandwidth
+sudo iftop -i eth0            # Specific interface
+
+# Monitor bandwidth by process
+sudo nethogs                   # Process-wise bandwidth
+
+# Simple bandwidth monitor
+nload                         # Real-time bandwidth graph
+
+# Network statistics
+ifstat                        # Interface statistics
+netstat -i                    # Network interface statistics
+
+
+A.8 VPS FIREWALL MANAGEMENT
+----------------------------
+
+UFW (Uncomplicated Firewall):
+------------------------------
+# Status
+sudo ufw status verbose
+sudo ufw status numbered
+
+# Enable/Disable
+sudo ufw enable
+sudo ufw disable
+
+# Default policies
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# Allow services
+sudo ufw allow ssh             # Allow SSH
+sudo ufw allow 22/tcp         # Same as above
+sudo ufw allow http           # Allow HTTP
+sudo ufw allow https          # Allow HTTPS
+sudo ufw allow 'Nginx Full'   # Allow Nginx
+
+# Allow specific IP
+sudo ufw allow from 192.168.1.100
+sudo ufw allow from 192.168.1.100 to any port 22
+
+# Allow IP range
+sudo ufw allow from 192.168.1.0/24
+
+# Deny specific IP
+sudo ufw deny from 203.0.113.100
+
+# Delete rules
+sudo ufw status numbered
+sudo ufw delete 3             # Delete rule number 3
+sudo ufw delete allow 80/tcp  # Delete by specification
+
+# Reset firewall
+sudo ufw reset
+
+# Logging
+sudo ufw logging on
+sudo ufw logging medium       # Levels: off, low, medium, high, full
+tail -f /var/log/ufw.log     # View firewall logs
+
+Advanced UFW Rules:
+-------------------
+# Rate limiting (protect against brute force)
+sudo ufw limit ssh            # Limit SSH connections
+
+# Application profiles
+sudo ufw app list             # List available profiles
+sudo ufw allow 'Nginx Full'   # Use profile
+
+# Port ranges
+sudo ufw allow 6000:6007/tcp  # Allow port range
+
+# Complex rules
+sudo ufw allow proto tcp from 192.168.1.0/24 to any port 22
+
+IPTables (Advanced):
+--------------------
+Note: UFW is frontend for iptables. Use iptables for advanced rules.
+
+# View rules
+sudo iptables -L -v -n        # List all rules
+sudo iptables -L INPUT -v -n  # List INPUT chain
+
+# Save rules
+sudo iptables-save > /tmp/iptables-backup.rules
+
+# Restore rules
+sudo iptables-restore < /tmp/iptables-backup.rules
+
+# Block specific IP
+sudo iptables -A INPUT -s 203.0.113.100 -j DROP
+
+# Allow specific port
+sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+
+# Delete rule
+sudo iptables -D INPUT 3      # Delete rule 3 from INPUT chain
+
+
+================================================================================
+SECTION B: UBUNTU/LINUX COMMANDS COMPLETE REFERENCE
+================================================================================
+
+B.1 FILE AND DIRECTORY OPERATIONS
+----------------------------------
+
+Navigation:
+-----------
+pwd                           # Print working directory
+cd /path/to/directory        # Change directory
+cd ~                         # Go to home directory
+cd -                         # Go to previous directory
+cd ..                        # Go up one directory
+cd ../..                     # Go up two directories
+
+Listing Files:
+--------------
+ls                           # List files
+ls -l                        # Long format (detailed)
+ls -a                        # Show hidden files
+ls -lh                       # Human-readable sizes
+ls -lt                       # Sort by modification time
+ls -lS                       # Sort by size
+ls -R                        # Recursive listing
+ls -la                       # All files, long format
+ls -ltr                      # Sort by time, reverse (oldest first)
+ls *.txt                     # List only .txt files
+ls -d */                     # List only directories
+
+File Information:
+-----------------
+stat filename                # Detailed file information
+file filename                # Determine file type
+wc filename                  # Word count (lines, words, bytes)
+wc -l filename               # Count lines only
+wc -w filename               # Count words only
+
+Creating Files/Directories:
+----------------------------
+touch filename               # Create empty file
+touch file1 file2 file3     # Create multiple files
+mkdir dirname                # Create directory
+mkdir -p dir1/dir2/dir3     # Create nested directories
+mkdir dir1 dir2 dir3        # Create multiple directories
+
+Copying:
+--------
+cp source dest               # Copy file
+cp -r sourcedir destdir     # Copy directory recursively
+cp -p source dest           # Preserve permissions and timestamps
+cp -i source dest           # Interactive (prompt before overwrite)
+cp -u source dest           # Update (copy only if newer)
+cp file1 file2 file3 dir/   # Copy multiple files to directory
+
+Moving/Renaming:
+----------------
+mv source dest               # Move or rename file
+mv -i source dest           # Interactive mode
+mv -u source dest           # Update only if newer
+mv file1 file2 dir/         # Move multiple files
+
+Deleting:
+---------
+rm filename                  # Delete file
+rm -f filename              # Force delete (no prompt)
+rm -i filename              # Interactive (prompt)
+rm -r dirname               # Delete directory recursively
+rm -rf dirname              # Force delete directory (DANGEROUS!)
+rmdir dirname               # Delete empty directory
+
+IMPORTANT: Be extremely careful with 'rm -rf' - it permanently deletes!
+
+Finding Files:
+--------------
+find /path -name "filename"              # Find by name
+find /path -name "*.txt"                 # Find by pattern
+find /path -type f                       # Find files only
+find /path -type d                       # Find directories only
+find /path -size +100M                   # Files larger than 100MB
+find /path -mtime -7                     # Modified in last 7 days
+find /path -user username                # Files owned by user
+find /path -name "*.log" -delete        # Find and delete
+find /path -name "*.txt" -exec rm {} \; # Find and execute command
+
+# Locate (faster than find, uses database)
+locate filename              # Find file using database
+sudo updatedb               # Update locate database
+
+Searching in Files:
+-------------------
+grep "pattern" filename              # Search for pattern
+grep -r "pattern" /path             # Recursive search
+grep -i "pattern" filename          # Case-insensitive
+grep -n "pattern" filename          # Show line numbers
+grep -v "pattern" filename          # Invert match (exclude)
+grep -c "pattern" filename          # Count matches
+grep -l "pattern" *.txt            # List files with matches
+grep -A 5 "pattern" filename       # Show 5 lines after match
+grep -B 5 "pattern" filename       # Show 5 lines before match
+grep -C 5 "pattern" filename       # Show 5 lines context
+
+# Multiple patterns
+grep -E "pattern1|pattern2" filename # OR
+grep "pattern1" filename | grep "pattern2" # AND
+
+
+B.2 FILE PERMISSIONS AND OWNERSHIP
+-----------------------------------
+
+Understanding Permissions:
+--------------------------
+Permission format: drwxrwxrwx
+- First character: d (directory) or - (file)
+- Next 3: Owner permissions (rwx)
+- Next 3: Group permissions (rwx)
+- Last 3: Others permissions (rwx)
+
+r = read (4)
+w = write (2)
+x = execute (1)
+
+Viewing Permissions:
+--------------------
+ls -l filename               # View permissions
+stat filename                # Detailed information
+
+Changing Permissions (chmod):
+------------------------------
+# Numeric mode
+chmod 755 filename           # rwxr-xr-x
+chmod 644 filename           # rw-r--r--
+chmod 777 filename           # rwxrwxrwx (NOT recommended)
+chmod 600 filename           # rw-------
+
+# Symbolic mode
+chmod u+x filename           # Add execute for user
+chmod g-w filename           # Remove write for group
+chmod o+r filename           # Add read for others
+chmod a+x filename           # Add execute for all
+chmod u=rwx,g=rx,o=r filename # Set specific permissions
+
+# Recursive
+chmod -R 755 directory       # Apply to directory and contents
+
+Common Permission Sets:
+-----------------------
+644  rw-r--r--   Files (owner can write, others read)
+755  rwxr-xr-x   Directories and executables
+600  rw-------   Private files (only owner can access)
+777  rwxrwxrwx   All permissions (AVOID - security risk)
+
+Changing Ownership (chown):
+----------------------------
+sudo chown user filename              # Change owner
+sudo chown user:group filename        # Change owner and group
+sudo chown -R user:group directory    # Recursive
+sudo chown :group filename            # Change group only
+
+# Examples
+sudo chown www-data:www-data /var/www/html
+sudo chown -R deployuser:deployuser /home/deployuser
+
+Changing Group (chgrp):
+-----------------------
+sudo chgrp group filename             # Change group
+sudo chgrp -R group directory         # Recursive
+
+Special Permissions:
+--------------------
+# SUID (Set User ID)
+chmod u+s filename           # File executes with owner's permissions
+chmod 4755 filename          # Same using numeric
+
+# SGID (Set Group ID)
+chmod g+s dirname            # Files created inherit directory's group
+chmod 2755 dirname           # Same using numeric
+
+# Sticky Bit
+chmod +t dirname             # Only owner can delete files in directory
+chmod 1755 dirname           # Same using numeric
+# Example: /tmp has sticky bit
+
+
+B.3 PROCESS MANAGEMENT
+----------------------
+
+Viewing Processes:
+------------------
+ps                           # Show current user's processes
+ps aux                       # Show all processes
+ps aux | grep nginx         # Find specific process
+ps -ef                      # Full format listing
+ps -e --forest              # Tree view
+ps -u username              # Processes by user
+ps -p 1234                  # Process by PID
+
+# Real-time monitoring
+top                         # Basic process monitor
+htop                        # Better process monitor (needs install)
+atop                        # Advanced monitor (needs install)
+
+# Process tree
+pstree                      # Show process tree
+pstree -p                   # With PIDs
+
+Background and Foreground:
+--------------------------
+command &                    # Run in background
+jobs                        # List background jobs
+fg                          # Bring to foreground
+fg %1                       # Bring job 1 to foreground
+bg                          # Resume in background
+bg %1                       # Resume job 1 in background
+
+# Ctrl+Z                    # Suspend current process
+
+Killing Processes:
+------------------
+kill PID                     # Graceful shutdown (SIGTERM)
+kill -9 PID                 # Force kill (SIGKILL)
+kill -15 PID                # Same as 'kill PID'
+killall processname         # Kill all processes by name
+pkill processname           # Kill processes by name pattern
+
+# Kill by port
+sudo lsof -ti:5000 | xargs kill -9
+
+# Examples
+kill 1234                   # Kill process 1234
+killall node                # Kill all node processes
+pkill -9 -f "node server"  # Force kill node server
+
+Process Priority (nice):
+------------------------
+nice -n 10 command          # Start with priority 10 (lower priority)
+renice -n 5 -p 1234        # Change priority of running process
+
+# Priority range: -20 (highest) to 19 (lowest)
+# Default: 0
+
+Process Information:
+--------------------
+# Detailed process info
+cat /proc/1234/status       # Process status
+cat /proc/1234/cmdline     # Command line
+cat /proc/1234/environ     # Environment variables
+
+# Process limits
+ulimit -a                   # Show all limits
+ulimit -n 10000            # Set open files limit
+
+
+B.4 SYSTEM INFORMATION COMMANDS
+--------------------------------
+
+System Info:
+------------
+uname -a                    # All system info
+uname -r                    # Kernel version
+uname -m                    # Architecture
+hostname                    # System hostname
+hostnamectl                 # Detailed hostname info
+
+# OS Information
+cat /etc/os-release        # OS details
+lsb_release -a             # Ubuntu version
+
+# System dates
+date                        # Current date and time
+timedatectl                # System time info
+uptime                     # System uptime
+
+Hardware Info:
+--------------
+# CPU
+lscpu                       # CPU information
+cat /proc/cpuinfo          # Detailed CPU info
+nproc                      # Number of processing units
+
+# Memory
+free -h                     # Memory usage
+cat /proc/meminfo          # Detailed memory info
+
+# Disk
+lsblk                      # Block devices
+fdisk -l                   # Disk partitions (needs sudo)
+df -h                      # Disk space usage
+df -i                      # Inode usage
+
+# Hardware
+lshw                       # Hardware info (needs sudo)
+lshw -short                # Short summary
+dmidecode                  # DMI/SMBIOS info (needs sudo)
+
+# USB devices
+lsusb                      # USB devices
+lsusb -v                   # Verbose
+
+# PCI devices
+lspci                      # PCI devices
+lspci -v                   # Verbose
+
+System Resources:
+-----------------
+# Load average
+uptime                     # Show load averages
+cat /proc/loadavg          # Load average file
+
+# Running processes
+ps aux | wc -l             # Count processes
+
+# Open files
+lsof                       # List open files
+lsof -u username           # Files by user
+lsof -i :80               # Files using port 80
+lsof -p 1234              # Files by process
+
+Kernel Information:
+-------------------
+uname -r                    # Kernel version
+dmesg                      # Kernel messages
+dmesg | tail               # Recent kernel messages
+dmesg | grep -i error     # Kernel errors
+
+# Kernel modules
+lsmod                      # List loaded modules
+modinfo modulename         # Module information
+
+
+B.5 NETWORK COMMANDS
+--------------------
+
+Network Configuration:
+----------------------
+# Show IP addresses
+ip addr                     # Modern command
+ip addr show               # Same as above
+ifconfig                   # Older command (may need net-tools)
+
+# Show network interfaces
+ip link                     # Show network devices
+ip link show               # Same as above
+
+# Show routing table
+ip route                    # Routing table
+route -n                   # Numeric format
+
+Network Testing:
+----------------
+# Connectivity tests
+ping google.com            # Test connectivity
+ping -c 4 google.com      # Send 4 packets
+ping -i 2 google.com      # 2 second interval
+
+# Trace route
+traceroute google.com      # Trace network path
+tracepath google.com       # Similar, no root needed
+mtr google.com            # Better traceroute (needs install)
+
+# DNS lookup
+nslookup google.com        # DNS query
+dig google.com            # Detailed DNS query
+dig +short google.com     # Short answer
+host google.com           # Simple DNS lookup
+
+Network Statistics:
+-------------------
+# Show connections
+netstat -tuln              # All listening connections
+netstat -tun               # All established connections
+netstat -tunap             # All connections with programs
+ss -tuln                   # Modern netstat
+
+# Show specific port
+netstat -tuln | grep :80   # Check port 80
+ss -tuln | grep :80        # Same with ss
+
+# Connection statistics
+netstat -s                 # Network statistics
+ss -s                      # Summary statistics
+
+Port Scanning:
+--------------
+# Check if port is open
+nc -zv hostname 80         # Check port 80
+telnet hostname 80         # Telnet test
+nmap hostname              # Scan ports (needs install)
+nmap -p 80,443 hostname   # Scan specific ports
+
+Bandwidth Monitoring:
+---------------------
+# Real-time bandwidth
+iftop                      # Interface bandwidth (needs install)
+iftop -i eth0             # Specific interface
+nethogs                    # Per-process bandwidth (needs install)
+nload                      # Simple bandwidth monitor
+
+# Interface statistics
+ifstat                     # Interface statistics
+netstat -i                 # Network interface table
+
+Download/Upload:
+----------------
+# Download files
+wget URL                   # Download file
+wget -c URL                # Continue download
+wget -O filename URL       # Save as filename
+curl -O URL                # Download with curl
+curl URL -o filename       # Save as filename
+
+# Test connection speed
+curl -O http://speedtest.wdc01.softlayer.com/downloads/test10.zip
+
+Network Configuration Files:
+----------------------------
+# Important config files
+/etc/hosts                 # Host name resolution
+/etc/hostname              # System hostname
+/etc/resolv.conf          # DNS servers
+/etc/network/interfaces    # Network interfaces (older)
+/etc/netplan/*.yaml        # Network config (Ubuntu 18.04+)
+
+
+B.6 PACKAGE MANAGEMENT (APT)
+-----------------------------
+
+APT (Advanced Package Tool):
+----------------------------
+# Update package list
+sudo apt update            # Update package index
+
+# Upgrade packages
+sudo apt upgrade           # Upgrade all packages
+sudo apt full-upgrade      # Upgrade with dependencies
+sudo apt dist-upgrade      # Upgrade distribution
+
+# Install packages
+sudo apt install package   # Install package
+sudo apt install package1 package2  # Multiple packages
+sudo apt install -y package # Auto-yes to prompts
+sudo apt reinstall package # Reinstall package
+
+# Remove packages
+sudo apt remove package    # Remove package
+sudo apt purge package     # Remove package and config files
+sudo apt autoremove        # Remove unused dependencies
+sudo apt autoclean         # Clear old package cache
+
+# Search packages
+apt search keyword         # Search for packages
+apt show package          # Show package details
+apt list --installed      # List installed packages
+apt list --upgradable     # List upgradable packages
+
+# Package information
+apt-cache policy package   # Show package versions
+apt-cache depends package  # Show dependencies
+apt-cache rdepends package # Show reverse dependencies
+
+# Hold/Unhold packages
+sudo apt-mark hold package    # Prevent upgrades
+sudo apt-mark unhold package  # Allow upgrades
+apt-mark showhold            # Show held packages
+
+# Fix broken packages
+sudo apt --fix-broken install  # Fix dependencies
+sudo dpkg --configure -a       # Configure unconfigured
+
+Repository Management:
+----------------------
+# Add repository
+sudo add-apt-repository ppa:repository/name
+sudo apt update
+
+# Remove repository
+sudo add-apt-repository --remove ppa:repository/name
+sudo apt update
+
+# Repository files
+/etc/apt/sources.list          # Main repositories
+/etc/apt/sources.list.d/       # Additional repositories
+
+DPKG (Debian Package):
+----------------------
+# Install .deb package
+sudo dpkg -i package.deb       # Install
+sudo apt install -f            # Fix dependencies
+
+# Remove package
+sudo dpkg -r package           # Remove
+sudo dpkg -P package           # Purge (remove config)
+
+# List packages
+dpkg -l                        # All installed packages
+dpkg -l | grep keyword        # Search installed
+dpkg -L package               # List files in package
+dpkg -S /path/to/file         # Find package owning file
+
+# Package info
+dpkg -s package               # Package status
+
+
+B.7 SERVICE MANAGEMENT (SYSTEMCTL)
+-----------------------------------
+
+Systemd Service Management:
+---------------------------
+# Start/Stop services
+sudo systemctl start service   # Start service
+sudo systemctl stop service    # Stop service
+sudo systemctl restart service # Restart service
+sudo systemctl reload service  # Reload config
+
+# Enable/Disable services
+sudo systemctl enable service  # Start on boot
+sudo systemctl disable service # Don't start on boot
+sudo systemctl enable --now service # Enable and start
+
+# Service status
+sudo systemctl status service  # Check status
+sudo systemctl is-active service # Check if active
+sudo systemctl is-enabled service # Check if enabled
+
+# List services
+systemctl list-units --type=service # All services
+systemctl list-units --type=service --state=running # Running
+systemctl list-unit-files --type=service # All unit files
+
+# Service dependencies
+systemctl list-dependencies service # Show dependencies
+
+# Mask/Unmask (prevent service from starting)
+sudo systemctl mask service    # Mask service
+sudo systemctl unmask service  # Unmask service
+
+Common Services:
+----------------
+sudo systemctl status nginx    # Nginx web server
+sudo systemctl status apache2  # Apache web server
+sudo systemctl status mysql    # MySQL database
+sudo systemctl status postgresql # PostgreSQL database
+sudo systemctl status ssh      # SSH server
+sudo systemctl status ufw      # Firewall
+
+Journal Logs (systemd logs):
+----------------------------
+# View logs
+journalctl                     # All logs
+journalctl -u service         # Specific service
+journalctl -f                 # Follow logs (real-time)
+journalctl -u nginx -f        # Follow nginx logs
+
+# Time-based logs
+journalctl --since today      # Today's logs
+journalctl --since yesterday  # Yesterday's logs
+journalctl --since "2025-10-12"  # Specific date
+journalctl --since "1 hour ago"  # Last hour
+
+# Log levels
+journalctl -p err             # Errors only
+journalctl -p warning         # Warnings and above
+
+# Log management
+journalctl --disk-usage       # Show disk usage
+sudo journalctl --vacuum-time=7d # Keep 7 days
+sudo journalctl --vacuum-size=500M # Keep 500MB
+
+Systemd Timers (cron alternative):
+-----------------------------------
+# List timers
+systemctl list-timers         # Active timers
+systemctl list-timers --all   # All timers
+
+# Create timer unit
+sudo nano /etc/systemd/system/backup.timer
+
+[Unit]
+Description=Daily backup timer
+
+[Timer]
+OnCalendar=daily
+OnCalendar=02:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+
+# Enable timer
+sudo systemctl enable backup.timer
+sudo systemctl start backup.timer
+
+
+B.8 TEXT EDITING AND FILE VIEWING
+----------------------------------
+
+Viewing Files:
+--------------
+cat filename                   # Display entire file
+cat file1 file2               # Concatenate files
+cat -n filename               # With line numbers
+
+less filename                  # Page through file
+# In less: q=quit, /pattern=search, n=next, N=previous
+
+more filename                  # Older pager
+
+head filename                  # First 10 lines
+head -n 20 filename           # First 20 lines
+head -c 100 filename          # First 100 bytes
+
+tail filename                  # Last 10 lines
+tail -n 20 filename           # Last 20 lines
+tail -f filename              # Follow file (real-time)
+tail -f /var/log/syslog       # Watch log file
+
+# View multiple files
+tail -f file1 file2           # Follow multiple files
+
+Text Editors:
+-------------
+1. NANO (Easiest)
+   nano filename              # Open/create file
+
+   Shortcuts:
+   Ctrl+O: Save
+   Ctrl+X: Exit
+   Ctrl+K: Cut line
+   Ctrl+U: Paste
+   Ctrl+W: Search
+   Ctrl+\: Search and replace
+
+2. VIM (Powerful)
+   vim filename               # Open/create file
+
+   Modes:
+   - Normal mode: ESC
+   - Insert mode: i
+   - Command mode: :
+
+   Commands:
+   :w        Save
+   :q        Quit
+   :wq       Save and quit
+   :q!       Quit without saving
+   /pattern  Search
+   n         Next search result
+   dd        Delete line
+   yy        Copy line
+   p         Paste
+   u         Undo
+   Ctrl+r    Redo
+
+3. VI (Standard)
+   vi filename                # Similar to vim
+
+   Same commands as vim
+
+Text Processing:
+----------------
+# Sort lines
+sort filename                  # Sort alphabetically
+sort -r filename              # Reverse sort
+sort -n filename              # Numeric sort
+sort -u filename              # Sort and remove duplicates
+
+# Unique lines
+uniq filename                  # Remove consecutive duplicates
+sort filename | uniq          # Remove all duplicates
+sort filename | uniq -c       # Count occurrences
+
+# Cut fields
+cut -d: -f1 /etc/passwd       # First field (delimiter :)
+cut -c1-10 filename           # Characters 1-10
+
+# Paste files
+paste file1 file2             # Merge lines side by side
+
+# Translate characters
+tr 'a-z' 'A-Z' < file         # Lowercase to uppercase
+tr -d '0-9' < file            # Delete digits
+
+# Word count
+wc filename                    # Lines, words, bytes
+wc -l filename                # Lines only
+wc -w filename                # Words only
+
+# Compare files
+diff file1 file2              # Show differences
+diff -u file1 file2           # Unified format
+sdiff file1 file2             # Side by side
+
+
+B.9 ARCHIVE AND COMPRESSION
+----------------------------
+
+TAR (Tape Archive):
+-------------------
+# Create archive
+tar -cf archive.tar files     # Create tar
+tar -czf archive.tar.gz files # Create tar.gz (gzip)
+tar -cjf archive.tar.bz2 files # Create tar.bz2 (bzip2)
+tar -cJf archive.tar.xz files # Create tar.xz (xz)
+
+# Extract archive
+tar -xf archive.tar           # Extract tar
+tar -xzf archive.tar.gz       # Extract tar.gz
+tar -xjf archive.tar.bz2      # Extract tar.bz2
+tar -xJf archive.tar.xz       # Extract tar.xz
+
+# Extract to specific directory
+tar -xzf archive.tar.gz -C /path/to/dir
+
+# List contents
+tar -tzf archive.tar.gz       # List without extracting
+tar -tvf archive.tar.gz       # Detailed list
+
+# Add files to archive
+tar -rf archive.tar newfile   # Add to tar
+# Note: Can't add to compressed archives
+
+# Exclude files
+tar -czf backup.tar.gz --exclude='*.log' /var/www
+tar -czf backup.tar.gz --exclude-vcs /project # Exclude VCS
+
+# Progress bar
+tar -czf - /var/www | pv > backup.tar.gz
+
+Common TAR Examples:
+--------------------
+# Backup website
+tar -czf website-backup-$(date +%Y%m%d).tar.gz /var/www/
+
+# Backup excluding node_modules
+tar -czf project.tar.gz --exclude=node_modules project/
+
+# Extract specific file
+tar -xzf archive.tar.gz path/to/file
+
+GZIP (Compression):
+-------------------
+gzip filename                  # Compress (replaces original)
+gzip -k filename              # Keep original
+gzip -d filename.gz           # Decompress
+gunzip filename.gz            # Same as gzip -d
+
+# Compress multiple files
+gzip file1 file2 file3
+
+# View compressed file
+zcat file.gz                  # View without extracting
+zless file.gz                 # Page through compressed file
+zgrep pattern file.gz         # Search in compressed file
+
+BZIP2 (Better compression):
+---------------------------
+bzip2 filename                 # Compress
+bzip2 -d filename.bz2         # Decompress
+bunzip2 filename.bz2          # Same as bzip2 -d
+
+# View compressed
+bzcat file.bz2
+bzless file.bz2
+bzgrep pattern file.bz2
+
+ZIP (Windows compatible):
+-------------------------
+# Create zip
+zip archive.zip files         # Zip files
+zip -r archive.zip directory  # Zip directory recursively
+
+# Extract zip
+unzip archive.zip             # Extract
+unzip archive.zip -d /path   # Extract to path
+unzip -l archive.zip         # List contents
+
+# Add to zip
+zip archive.zip newfile       # Add file
+
+7ZIP (Best compression):
+------------------------
+# Install
+sudo apt install p7zip-full
+
+# Create archive
+7z a archive.7z files         # Create 7z archive
+
+# Extract
+7z x archive.7z               # Extract with structure
+7z e archive.7z               # Extract without structure
+
+# List contents
+7z l archive.7z
+
+
+B.10 USER AND GROUP MANAGEMENT
+-------------------------------
+
+User Management:
+----------------
+# Add user
+sudo adduser username         # Interactive
+sudo useradd username         # Non-interactive
+sudo useradd -m -s /bin/bash username # With home and shell
+
+# Delete user
+sudo deluser username         # Delete user
+sudo deluser --remove-home username # Delete with home
+
+# Modify user
+sudo usermod -aG sudo username  # Add to sudo group
+sudo usermod -s /bin/bash username # Change shell
+sudo usermod -l newname oldname # Rename user
+
+# Password
+sudo passwd username          # Change user password
+passwd                        # Change own password
+
+# User info
+id username                   # User ID and groups
+whoami                       # Current user
+who                          # Logged in users
+w                            # Detailed who
+last                         # Login history
+lastlog                      # Last login times
+
+# Lock/Unlock user
+sudo usermod -L username      # Lock user
+sudo usermod -U username      # Unlock user
+
+Group Management:
+-----------------
+# Add group
+sudo addgroup groupname       # Create group
+sudo groupadd groupname       # Same as above
+
+# Delete group
+sudo delgroup groupname       # Delete group
+
+# Add user to group
+sudo usermod -aG groupname username
+sudo adduser username groupname
+
+# Remove user from group
+sudo gpasswd -d username groupname
+
+# List groups
+groups                        # Current user's groups
+groups username               # User's groups
+cat /etc/group               # All groups
+
+Sudo Configuration:
+-------------------
+# Edit sudoers (safe way)
+sudo visudo                   # Edit sudoers file
+
+# Grant sudo access
+sudo usermod -aG sudo username
+
+# Allow specific command
+# In /etc/sudoers:
+username ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart nginx
+
+# Test sudo
+sudo -l                       # List sudo privileges
+
+
+================================================================================
+SECTION C: GIT COMMANDS AND WORKFLOWS
+================================================================================
+
+C.1 GIT BASICS AND SETUP
+-------------------------
+
+Installing Git:
+---------------
+# Ubuntu/Debian
+sudo apt update
+sudo apt install git
+
+# Verify installation
+git --version
+
+Initial Configuration:
+----------------------
+# Set user name and email
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+
+# Set default branch name
+git config --global init.defaultBranch main
+
+# Set default editor
+git config --global core.editor "nano"
+
+# View configuration
+git config --list
+git config user.name
+git config user.email
+
+# Configuration file locations
+~/.gitconfig                  # Global config
+.git/config                   # Local repository config
+
+Git Help:
+---------
+git help                      # General help
+git help command              # Command help
+git command --help            # Same as above
+
+
+C.2 REPOSITORY OPERATIONS
+--------------------------
+
+Creating Repository:
+--------------------
+# Initialize new repository
+git init                      # Create .git folder
+git init project-name         # Create new directory
+
+# Clone existing repository
+git clone URL                 # Clone to current directory
+git clone URL dirname         # Clone to specific directory
+git clone -b branch URL       # Clone specific branch
+
+# Examples
+git clone https://github.com/user/repo.git
+git clone git@github.com:user/repo.git  # SSH
+
+Repository Status:
+------------------
+git status                    # Show status
+git status -s                 # Short status
+git status --ignored          # Show ignored files
+
+Git Log:
+--------
+git log                       # Show commit history
+git log --oneline            # One line per commit
+git log --graph              # Show branch graph
+git log --all --decorate --oneline --graph # Detailed graph
+git log -n 5                 # Last 5 commits
+git log --since="2 weeks ago"# Commits since date
+git log --author="Name"      # Commits by author
+git log --grep="keyword"     # Search commit messages
+git log filename             # Commits affecting file
+git log -p                   # Show patches (changes)
+
+# Pretty format
+git log --pretty=format:"%h - %an, %ar : %s"
+
+Viewing Changes:
+----------------
+git diff                      # Unstaged changes
+git diff --staged            # Staged changes
+git diff HEAD                # All changes since last commit
+git diff branch1 branch2     # Differences between branches
+git diff commit1 commit2     # Differences between commits
+git diff filename            # Changes in specific file
+
+
+C.3 BRANCH MANAGEMENT
+---------------------
+
+Branch Basics:
+--------------
+# List branches
+git branch                    # Local branches
+git branch -r                # Remote branches
+git branch -a                # All branches
+
+# Create branch
+git branch branch-name        # Create branch
+git checkout -b branch-name   # Create and switch
+
+# Switch branch
+git checkout branch-name      # Switch to branch
+git switch branch-name        # Modern syntax
+
+# Create and switch (modern)
+git switch -c branch-name     # Create and switch
+
+# Delete branch
+git branch -d branch-name     # Delete merged branch
+git branch -D branch-name     # Force delete
+
+# Rename branch
+git branch -m old-name new-name # Rename branch
+git branch -m new-name        # Rename current branch
+
+Merging:
+--------
+# Merge branch into current
+git merge branch-name         # Merge branch
+git merge --no-ff branch-name # No fast-forward
+git merge --squash branch-name # Squash commits
+
+# Abort merge
+git merge --abort             # Cancel merge
+
+Rebasing:
+---------
+# Rebase current branch
+git rebase branch-name        # Rebase onto branch
+git rebase --continue         # Continue after resolving
+git rebase --abort            # Abort rebase
+git rebase -i HEAD~3          # Interactive rebase last 3
+
+
+C.4 COMMIT OPERATIONS
+---------------------
+
+Staging Files:
+--------------
+# Stage files
+git add filename              # Stage specific file
+git add .                     # Stage all changes
+git add *.js                  # Stage by pattern
+git add -A                    # Stage all (including deletions)
+git add -u                    # Stage modified and deleted
+
+# Unstage files
+git reset filename            # Unstage file
+git reset                     # Unstage all
+
+Committing:
+-----------
+# Create commit
+git commit -m "Message"       # Commit with message
+git commit -am "Message"      # Add and commit (tracked files)
+git commit --amend           # Modify last commit
+git commit --amend -m "New message" # Change last message
+
+# Empty commit
+git commit --allow-empty -m "Message"
+
+Undoing Changes:
+----------------
+# Discard working directory changes
+git checkout -- filename      # Discard file changes
+git checkout -- .            # Discard all changes
+
+# Unstage changes
+git reset HEAD filename       # Unstage file
+git reset HEAD               # Unstage all
+
+# Undo commits
+git reset --soft HEAD~1       # Undo last commit, keep changes staged
+git reset --mixed HEAD~1      # Undo last commit, unstage changes
+git reset --hard HEAD~1       # Undo last commit, discard changes
+
+# Revert commit (create new commit)
+git revert commit-hash        # Revert specific commit
+git revert HEAD              # Revert last commit
+
+Stashing:
+---------
+# Save work temporarily
+git stash                     # Stash changes
+git stash save "message"     # Stash with message
+git stash -u                 # Include untracked files
+
+# List stashes
+git stash list
+
+# Apply stash
+git stash apply              # Apply latest stash
+git stash apply stash@{2}   # Apply specific stash
+git stash pop                # Apply and remove latest
+
+# Delete stash
+git stash drop stash@{0}     # Delete specific stash
+git stash clear              # Delete all stashes
+
+
+C.5 REMOTE REPOSITORY OPERATIONS
+---------------------------------
+
+Managing Remotes:
+-----------------
+# Add remote
+git remote add name URL       # Add remote
+git remote add origin https://github.com/user/repo.git
+
+# List remotes
+git remote                    # List remote names
+git remote -v                 # List with URLs
+
+# Show remote info
+git remote show origin        # Detailed remote info
+
+# Rename remote
+git remote rename old new     # Rename remote
+
+# Remove remote
+git remote remove name        # Remove remote
+
+# Change remote URL
+git remote set-url origin NEW_URL
+
+Fetching and Pulling:
+---------------------
+# Fetch from remote
+git fetch                     # Fetch all remotes
+git fetch origin             # Fetch specific remote
+git fetch origin branch      # Fetch specific branch
+
+# Pull changes
+git pull                      # Fetch and merge
+git pull origin main         # Pull specific branch
+git pull --rebase            # Fetch and rebase
+
+Pushing:
+--------
+# Push to remote
+git push                      # Push current branch
+git push origin main         # Push to specific branch
+git push -u origin main      # Push and set upstream
+git push --all               # Push all branches
+git push --tags              # Push all tags
+
+# Force push (DANGEROUS)
+git push --force             # Force push
+git push --force-with-lease  # Safer force push
+
+# Delete remote branch
+git push origin --delete branch-name
+
+Tags:
+-----
+# List tags
+git tag                       # List all tags
+git tag -l "v1.*"            # List by pattern
+
+# Create tag
+git tag v1.0.0               # Lightweight tag
+git tag -a v1.0.0 -m "Version 1.0.0" # Annotated tag
+
+# Show tag
+git show v1.0.0              # Show tag info
+
+# Push tags
+git push origin v1.0.0       # Push specific tag
+git push origin --tags       # Push all tags
+
+# Delete tag
+git tag -d v1.0.0            # Delete local tag
+git push origin --delete v1.0.0 # Delete remote tag
+
+
+C.6 GIT TROUBLESHOOTING
+------------------------
+
+Common Problems:
+----------------
+
+1. Merge Conflicts:
+   # When merge conflict occurs
+   git status                 # See conflicted files
+   # Edit files to resolve conflicts
+   git add resolved-file     # Mark as resolved
+   git commit                # Complete merge
+
+2. Detached HEAD:
+   # When accidentally in detached HEAD state
+   git checkout main         # Return to branch
+   # Or create branch from current state
+   git checkout -b new-branch
+
+3. Committed to Wrong Branch:
+   # Move last commit to another branch
+   git log                   # Note commit hash
+   git checkout correct-branch
+   git cherry-pick commit-hash
+   git checkout wrong-branch
+   git reset --hard HEAD~1
+
+4. Accidentally Committed Sensitive Data:
+   # Remove from last commit
+   git rm --cached sensitive-file
+   git commit --amend
+
+   # Remove from history (DESTRUCTIVE)
+   git filter-branch --tree-filter 'rm -f sensitive-file' HEAD
+   # Or use BFG Repo-Cleaner
+
+5. Wrong Commit Message:
+   # Change last commit message
+   git commit --amend -m "Correct message"
+
+   # Change older commit message
+   git rebase -i HEAD~3      # Interactive rebase
+   # Change 'pick' to 'reword' for commits to edit
+
+6. Lost Commits:
+   # Find lost commits
+   git reflog                # Show reference log
+   git checkout commit-hash  # Recover lost commit
+
+7. Large Files in History:
+   # Find large files
+   git rev-list --objects --all | \
+     grep "$(git verify-pack -v .git/objects/pack/*.idx | \
+     sort -k 3 -n | tail -10 | awk '{print$1}')"
+
+Cleaning Repository:
+--------------------
+# Remove untracked files
+git clean -n                  # Dry run (show what would be deleted)
+git clean -f                  # Remove untracked files
+git clean -fd                 # Remove untracked files and directories
+git clean -fX                 # Remove ignored files
+git clean -fx                 # Remove untracked and ignored
+
+# Optimize repository
+git gc                        # Garbage collection
+git gc --aggressive           # Aggressive optimization
+git prune                     # Remove unreachable objects
+
+
+C.7 ADVANCED GIT OPERATIONS
+----------------------------
+
+Cherry-Pick:
+------------
+# Apply specific commit to current branch
+git cherry-pick commit-hash   # Apply commit
+git cherry-pick commit1 commit2 # Multiple commits
+git cherry-pick --continue    # Continue after resolving
+git cherry-pick --abort       # Abort cherry-pick
+
+Bisect (Find Bug):
+------------------
+# Binary search for bad commit
+git bisect start              # Start bisect
+git bisect bad               # Mark current as bad
+git bisect good commit-hash  # Mark good commit
+# Git checks out middle commit - test it
+git bisect good              # If good
+git bisect bad               # If bad
+# Repeat until found
+git bisect reset             # End bisect
+
+Submodules:
+-----------
+# Add submodule
+git submodule add URL path    # Add submodule
+
+# Clone with submodules
+git clone --recursive URL     # Clone with submodules
+
+# Initialize submodules
+git submodule init            # Initialize
+git submodule update          # Update submodules
+
+# Update all submodules
+git submodule update --remote
+
+Worktrees:
+----------
+# Create worktree
+git worktree add path branch  # Create worktree
+
+# List worktrees
+git worktree list             # List all worktrees
+
+# Remove worktree
+git worktree remove path      # Remove worktree
+
+Git Hooks:
+----------
+# Hooks are in .git/hooks/
+# Common hooks:
+# pre-commit: Run before commit
+# post-commit: Run after commit
+# pre-push: Run before push
+
+# Example pre-commit hook (.git/hooks/pre-commit):
+#!/bin/bash
+npm test
+if [ $? -ne 0 ]; then
+  echo "Tests failed. Commit aborted."
+  exit 1
+fi
+
+# Make executable
+chmod +x .git/hooks/pre-commit
+
+
+C.8 GIT WORKFLOWS FOR DEPLOYMENT
+---------------------------------
+
+Basic Deployment Workflow:
+---------------------------
+1. Local Development:
+   git checkout -b feature/new-feature
+   # Make changes
+   git add .
+   git commit -m "Add new feature"
+
+2. Push to Repository:
+   git push -u origin feature/new-feature
+
+3. Create Pull Request (on GitHub/GitLab)
+
+4. Merge to Main:
+   git checkout main
+   git merge feature/new-feature
+   git push origin main
+
+5. Deploy to Server:
+   # On server
+   ssh root@72.60.202.218
+   cd /var/www/schoolm
+   git pull origin main
+   # Rebuild and restart
+   cd frontend && npm run build
+   pm2 restart schoolm-api
+
+Deployment with Tags:
+---------------------
+1. Tag Release:
+   git tag -a v1.0.0 -m "Version 1.0.0"
+   git push origin v1.0.0
+
+2. Deploy Specific Tag:
+   # On server
+   git fetch --tags
+   git checkout v1.0.0
+   # Rebuild and restart
+
+Automatic Deployment (Git Hooks):
+----------------------------------
+1. Server-Side Hook (post-receive):
+   # On server: /var/repo/project.git/hooks/post-receive
+
+   #!/bin/bash
+   cd /var/www/schoolm
+   git pull origin main
+   cd frontend && npm run build
+   pm2 restart schoolm-api
+   echo "Deployed successfully"
+
+2. Make executable:
+   chmod +x post-receive
+
+3. Push to deploy:
+   git push origin main
+   # Automatically deploys!
+
+Git Workflow Best Practices:
+-----------------------------
+1. Commit Often:
+   - Small, focused commits
+   - Clear commit messages
+   - Test before committing
+
+2. Branch Strategy:
+   main - Production code
+   develop - Development code
+   feature/* - New features
+   hotfix/* - Bug fixes
+
+3. Commit Message Format:
+   type: Brief description
+
+   Detailed explanation
+
+   Types: feat, fix, docs, style, refactor, test
+
+4. Before Pushing:
+   git pull --rebase          # Get latest changes
+   git log --oneline -5       # Review commits
+   npm test                   # Run tests
+   git push
+
+.gitignore File:
+----------------
+# Create .gitignore in project root
+
+# Node modules
+node_modules/
+npm-debug.log
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Build output
+dist/
+build/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# Dependencies
+package-lock.json  # Optional
+
+
+================================================================================
+SECTION D: DEPLOYMENT PROBLEMS AND SOLUTIONS
+================================================================================
+
+D.1 BACKEND DEPLOYMENT ISSUES
+------------------------------
+
+PROBLEM 1: PM2 Process Keeps Restarting
+Symptoms:
+- PM2 shows high restart count
+- Application keeps crashing
+- pm2 status shows status: errored
+
+Diagnosis:
+pm2 logs schoolm-api --err --lines 50    # Check error logs
+pm2 describe schoolm-api                  # Detailed info
+
+Common Causes and Solutions:
+
+A. Environment Variables Not Loaded
+   Solution:
+   # Check .env file exists
+   ls -la /var/www/schoolm/api/.env
+
+   # Verify contents
+   cat /var/www/schoolm/api/.env
+
+   # Update ecosystem.config.js with explicit vars
+   nano /var/www/schoolm/ecosystem.config.js
+
+   # Restart with --update-env
+   pm2 restart schoolm-api --update-env
+
+B. MongoDB Connection Failed
+   Solution:
+   # Test MongoDB connection
+   node -e "require('mongoose').connect('mongodb+srv://...').then(() => console.log('OK'))"
+
+   # Check network connectivity
+   ping cluster0.ovqn73c.mongodb.net
+
+   # Verify connection string in .env
+   # Ensure no spaces or special characters not URL-encoded
+
+C. Port Already in Use
+   Solution:
+   # Find process using port
+   sudo lsof -i :5000
+
+   # Kill process
+   sudo kill -9 <PID>
+
+   # Or change port in .env and ecosystem.config.js
+
+D. Missing Dependencies
+   Solution:
+   cd /var/www/schoolm/api
+   npm install
+   pm2 restart schoolm-api
+
+E. Syntax Error in Code
+   Solution:
+   # Test code locally first
+   node server.js
+
+   # Check for errors
+   pm2 logs schoolm-api --err
+
+F. Insufficient Memory
+   Solution:
+   # Check memory usage
+   free -h
+   pm2 describe schoolm-api
+
+   # Increase max memory in ecosystem.config.js
+   max_memory_restart: '2G'
+
+   # Or add swap space
+   sudo fallocate -l 2G /swapfile
+   sudo chmod 600 /swapfile
+   sudo mkswap /swapfile
+   sudo swapon /swapfile
+
+
+PROBLEM 2: JWT Authentication Not Working
+Symptoms:
+- Login returns 500 error
+- "JWT secret not defined" error
+- "secretOrPrivateKey must have a value" error
+
+Solutions:
+# Verify JWT_SECRET is set
+echo $JWT_SECRET  # Should show secret
+
+# Check .env file
+cat /var/www/schoolm/api/.env | grep JWT_SECRET
+
+# Ensure variable name matches in code
+grep -r "JWT_SECRET" /var/www/schoolm/api/
+
+# NOT: process.env.JWTSECRET ❌
+# YES: process.env.JWT_SECRET ✅
+
+# Update ecosystem.config.js
+nano /var/www/schoolm/ecosystem.config.js
+
+env: {
+  JWT_SECRET: 'your_actual_secret_here'
+}
+
+# Restart PM2
+pm2 delete schoolm-api
+pm2 start /var/www/schoolm/ecosystem.config.js
+pm2 save
+
+
+PROBLEM 3: File Upload Not Working
+Symptoms:
+- Image uploads fail
+- 500 error on file upload
+- "ENOENT: no such file or directory"
+
+Solutions:
+# Check upload directory exists
+ls -la /var/www/schoolm/api/images
+
+# Create if missing
+mkdir -p /var/www/schoolm/api/images
+
+# Set correct permissions
+sudo chown -R $USER:$USER /var/www/schoolm/api/images
+chmod 755 /var/www/schoolm/api/images
+
+# If using www-data user
+sudo chown -R www-data:www-data /var/www/schoolm/api/images
+
+# Check file size limit
+# In server.js or middleware
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+# Check Nginx client_max_body_size
+sudo nano /etc/nginx/sites-available/gentime-backend
+client_max_body_size 50M;
+
+# Reload Nginx
+sudo systemctl reload nginx
+
+
+PROBLEM 4: CORS Errors
+Symptoms:
+- Frontend shows CORS error in console
+- "Access-Control-Allow-Origin" error
+- OPTIONS request fails
+
+Solutions:
+# Check CORS configuration in server.js
+const corsOptions = {
+  origin: [
+    'http://localhost:5173',
+    'https://www.schoolm.gentime.in',
+    process.env.FRONTEND_URL
+  ],
+  credentials: true,
+  exposedHeaders: ["Authorization"]
+};
+app.use(cors(corsOptions));
+
+# Ensure frontend URL is included in origin array
+# Restart backend
+pm2 restart schoolm-api
+
+# Check if CORS headers are sent
+curl -H "Origin: https://www.schoolm.gentime.in" \
+  -H "Access-Control-Request-Method: POST" \
+  -H "Access-Control-Request-Headers: Content-Type" \
+  -X OPTIONS https://api.gentime.in/api/school/login -v
+
+
+PROBLEM 5: Database Connection Timeout
+Symptoms:
+- "MongooseServerSelectionError"
+- "connect ETIMEDOUT"
+- Can't connect to MongoDB
+
+Solutions:
+# Check network connectivity
+ping cluster0.ovqn73c.mongodb.net
+
+# Check MongoDB Atlas whitelist
+# Login to MongoDB Atlas
+# Network Access → IP Whitelist
+# Add current server IP: 72.60.202.218
+# Or add 0.0.0.0/0 (allow all - not recommended for production)
+
+# Check connection string
+# Format: mongodb+srv://username:password@cluster.mongodb.net/database
+# Ensure password doesn't contain special characters or is URL-encoded
+
+# Test connection
+node -e "
+const mongoose = require('mongoose');
+mongoose.connect('mongodb+srv://schoolm2025:kallesh717@cluster0.ovqn73c.mongodb.net/school_management')
+  .then(() => { console.log('Connected OK'); process.exit(0); })
+  .catch((err) => { console.error('Error:', err); process.exit(1); });
+"
+
+# Increase connection timeout in code
+mongoose.connect(uri, {
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+});
+
+
+D.2 FRONTEND DEPLOYMENT ISSUES
+-------------------------------
+
+PROBLEM 1: White/Blank Page After Deployment
+Symptoms:
+- Browser shows white screen
+- No errors in console
+- HTML loads but no content
+
+Solutions:
+# Check if build was created
+ls -la /var/www/schoolm/frontend/dist/
+
+# Rebuild frontend
+cd /var/www/schoolm/frontend
+rm -rf dist
+npm run build
+
+# Check for build errors
+npm run build 2>&1 | tee build.log
+
+# Verify environment variables
+cat .env.production
+# Should be: VITE_API_URL=https://api.gentime.in/api
+
+# Check Nginx is serving correct directory
+sudo nano /etc/nginx/sites-available/gentime-frontend
+# Should have: root /var/www/schoolm/frontend/dist;
+
+# Clear browser cache
+# Hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
+
+# Check browser console for errors (F12)
+
+
+PROBLEM 2: API Calls Returning 404
+Symptoms:
+- Frontend loads but API calls fail
+- Console shows 404 errors
+- "Cannot GET /api/..."
+
+Solutions:
+# Verify API URL in built frontend
+grep -r "api\.gentime\.in" /var/www/schoolm/frontend/dist/assets/
+
+# Check .env.production
+cat /var/www/schoolm/frontend/.env.production
+
+# Should be:
+VITE_API_URL=https://api.gentime.in/api
+
+# NOT:
+# VITE_API_URL=https://api.gentime.in (missing /api) ❌
+# VITE_API_URL=https://api.gentime.in/api/ (extra slash) ❌
+
+# Rebuild after changing .env
+cd /var/www/schoolm/frontend
+npm run build
+
+# Verify frontend makes correct API calls
+# In browser console:
+# Network tab → Check API requests
+# Should be: https://api.gentime.in/api/school/login
+
+
+PROBLEM 3: Login Not Working
+Symptoms:
+- Login form submits but nothing happens
+- No redirect after login
+- Console shows network error
+
+Solutions:
+# Check axios is sending credentials
+# In Login.jsx, ensure:
+axios.post(url, {...values}, { withCredentials: true })
+
+# Check API response in browser Network tab
+# Should see:
+# - Status: 200 OK
+# - Authorization header in response
+# - User object in response body
+
+# Check if JWT token is saved
+# Browser console:
+localStorage.getItem('token')
+localStorage.getItem('user')
+
+# Verify CORS allows credentials
+# In server.js:
+credentials: true  // Must be set
+
+# Check cookie settings
+# In server.js (if using cookies):
+res.cookie('token', token, {
+  httpOnly: true,
+  secure: true,     // For HTTPS
+  sameSite: 'none'  // For cross-origin
+});
+
+
+PROBLEM 4: Images Not Loading
+Symptoms:
+- Uploaded images show 404
+- Image paths broken
+- Images work locally but not on server
+
+Solutions:
+# Check image directory exists
+ls -la /var/www/schoolm/api/images/
+
+# Check Nginx configuration
+sudo nano /etc/nginx/sites-available/gentime-frontend
+
+# Should have location block:
+location /images {
+    alias /var/www/schoolm/api/images;
+    autoindex off;
+}
+
+# Reload Nginx
+sudo systemctl reload nginx
+
+# Check permissions
+sudo chmod -R 755 /var/www/schoolm/api/images
+sudo chown -R www-data:www-data /var/www/schoolm/api/images
+
+# Test image access
+curl -I https://www.schoolm.gentime.in/images/test.jpg
+
+
+PROBLEM 5: Routing Not Working (404 on Refresh)
+Symptoms:
+- Direct URL navigation returns 404
+- Refresh on any page shows Nginx 404
+- Only homepage works
+
+Solutions:
+# Update Nginx configuration
+sudo nano /etc/nginx/sites-available/gentime-frontend
+
+# Must have:
+location / {
+    root /var/www/schoolm/frontend/dist;
+    try_files $uri $uri/ /index.html;  # This line is crucial
+    index index.html;
+}
+
+# Reload Nginx
+sudo nginx -t
+sudo systemctl reload nginx
+
+# This tells Nginx to fallback to index.html for all routes
+# Allowing React Router to handle routing
+
+
+D.3 PM2 PROCESS MANAGER ISSUES
+-------------------------------
+
+PROBLEM 1: PM2 Not Starting on Boot
+Symptoms:
+- Application stops after server reboot
+- Need to manually start PM2
+
+Solutions:
+# Generate startup script
+pm2 startup systemd
+
+# Copy and run the command it provides
+# Example output:
+sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u root --hp /root
+
+# Save current processes
+pm2 save
+
+# Test by rebooting
+sudo reboot
+
+# After reboot, check:
+pm2 list
+
+
+PROBLEM 2: PM2 Logs Too Large
+Symptoms:
+- /root/.pm2/logs/ taking too much space
+- Disk space issues
+
+Solutions:
+# Check log sizes
+du -sh /root/.pm2/logs/*
+
+# Clear logs
+pm2 flush
+
+# Set up log rotation
+pm2 install pm2-logrotate
+
+# Configure rotation
+pm2 set pm2-logrotate:max_size 10M      # Max file size
+pm2 set pm2-logrotate:retain 7          # Keep 7 files
+pm2 set pm2-logrotate:compress true     # Compress old logs
+
+# Manual cleanup (keep last 7 days)
+find /root/.pm2/logs/ -name "*.log" -mtime +7 -delete
+
+
+PROBLEM 3: PM2 Process Using Too Much Memory
+Symptoms:
+- High memory usage
+- Server slows down
+- Process restarts due to memory limit
+
+Solutions:
+# Check memory usage
+pm2 list
+free -h
+
+# Increase memory limit
+# In ecosystem.config.js:
+max_memory_restart: '2G'  # Increase from 1G
+
+# Restart
+pm2 restart schoolm-api
+
+# Or restart when memory is high
+pm2 restart schoolm-api --max-memory-restart 500M
+
+# Monitor memory
+pm2 monit
+
+# If persistent memory leak, fix in code:
+# - Close database connections
+# - Clear intervals/timeouts
+# - Remove event listeners
+# - Use WeakMap for caches
+
+
+PROBLEM 4: PM2 Shows "Stopped" Status
+Symptoms:
+- pm2 list shows status: stopped
+- Application not running
+
+Solutions:
+# Check why it stopped
+pm2 describe schoolm-api
+pm2 logs schoolm-api --err --lines 50
+
+# Start again
+pm2 start schoolm-api
+
+# If it keeps stopping:
+# Check for syntax errors
+node /var/www/schoolm/api/server.js
+
+# Check for missing dependencies
+cd /var/www/schoolm/api
+npm install
+
+# Check environment variables
+pm2 restart schoolm-api --update-env
+
+
+D.4 NGINX WEB SERVER ISSUES
+----------------------------
+
+PROBLEM 1: 502 Bad Gateway
+Symptoms:
+- Nginx shows 502 error
+- "Bad Gateway" message
+
+Solutions:
+# Check if backend is running
+pm2 status
+curl http://localhost:5000/api/auth/check
+
+# Check Nginx error logs
+sudo tail -f /var/log/nginx/error.log
+
+# Common causes:
+A. Backend not running
+   pm2 start schoolm-api
+
+B. Wrong proxy_pass port
+   sudo nano /etc/nginx/sites-available/gentime-backend
+   # Should be: proxy_pass http://localhost:5000;
+
+C. Backend crashed
+   pm2 logs schoolm-api --err
+   # Fix the error and restart
+
+D. Firewall blocking
+   sudo ufw allow 5000
+   # Or only allow from localhost (more secure)
+
+# Test backend directly
+curl http://localhost:5000/api/auth/check
+
+# Reload Nginx
+sudo nginx -t
+sudo systemctl reload nginx
+
+
+PROBLEM 2: 413 Request Entity Too Large
+Symptoms:
+- File upload fails with 413
+- Large requests rejected
+
+Solutions:
+# Increase client_max_body_size
+sudo nano /etc/nginx/sites-available/gentime-backend
+
+server {
+    ...
+    client_max_body_size 50M;  # Increase this
+    ...
+}
+
+# Also in frontend config
+sudo nano /etc/nginx/sites-available/gentime-frontend
+client_max_body_size 50M;
+
+# Reload Nginx
+sudo nginx -t
+sudo systemctl reload nginx
+
+# Also check backend limit
+# In server.js:
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+
+PROBLEM 3: Nginx Won't Start/Reload
+Symptoms:
+- systemctl start nginx fails
+- nginx -t shows errors
+
+Solutions:
+# Test configuration
+sudo nginx -t
+
+# Common errors:
+A. Syntax error in config
+   # Fix the error shown
+   sudo nano /etc/nginx/sites-available/gentime-frontend
+
+B. Port already in use
+   sudo lsof -i :80
+   sudo lsof -i :443
+   # Kill process or change port
+
+C. SSL certificate path wrong
+   ls -la /etc/letsencrypt/live/www.schoolm.gentime.in/
+   # Ensure files exist
+
+D. Permission denied
+   sudo chown -R root:root /etc/nginx
+   sudo chmod 644 /etc/nginx/sites-available/*
+
+# Check Nginx status
+sudo systemctl status nginx
+
+# View detailed errors
+sudo journalctl -u nginx --since today
+
+
+PROBLEM 4: SSL Not Working
+Symptoms:
+- HTTPS shows certificate error
+- "Your connection is not private"
+- Mixed content warnings
+
+Solutions:
+# Check certificate status
+sudo certbot certificates
+
+# Renew if expired
+sudo certbot renew
+
+# Check Nginx SSL config
+sudo nano /etc/nginx/sites-available/gentime-frontend
+
+# Should have:
+listen 443 ssl;
+ssl_certificate /etc/letsencrypt/live/www.schoolm.gentime.in/fullchain.pem;
+ssl_certificate_key /etc/letsencrypt/live/www.schoolm.gentime.in/privkey.pem;
+
+# Test SSL
+openssl s_client -connect www.schoolm.gentime.in:443
+
+# Force HTTPS redirect
+# In Nginx config:
+server {
+    listen 80;
+    server_name www.schoolm.gentime.in;
+    return 301 https://$server_name$request_uri;
+}
+
+
+D.5 SSL CERTIFICATE ISSUES
+---------------------------
+
+PROBLEM 1: Certificate Expired
+Symptoms:
+- "Your connection is not secure"
+- Certificate expired warning
+
+Solutions:
+# Check expiry
+sudo certbot certificates
+
+# Renew certificate
+sudo certbot renew
+
+# If renewal fails, check:
+sudo certbot renew --dry-run
+
+# Manual renewal
+sudo certbot certonly --nginx -d www.schoolm.gentime.in -d api.gentime.in
+
+# Check auto-renewal timer
+sudo systemctl status certbot.timer
+sudo systemctl list-timers
+
+
+PROBLEM 2: Certbot Renewal Failed
+Symptoms:
+- Email notification of failed renewal
+- certbot renew shows errors
+
+Solutions:
+# Check renewal log
+sudo cat /var/log/letsencrypt/letsencrypt.log
+
+# Common causes:
+A. Port 80 not accessible
+   sudo ufw allow 80
+
+B. Nginx config error
+   sudo nginx -t
+
+C. Domain not resolving
+   nslookup www.schoolm.gentime.in
+
+D. Rate limit reached
+   # Wait 1 week or use staging
+   sudo certbot renew --dry-run --staging
+
+# Force renewal
+sudo certbot renew --force-renewal
+
+
+PROBLEM 3: Mixed Content Warnings
+Symptoms:
+- Some resources load over HTTP
+- Browser shows "Not Secure"
+
+Solutions:
+# Ensure frontend makes HTTPS API calls
+# In .env.production:
+VITE_API_URL=https://api.gentime.in/api  # Not http
+
+# Rebuild frontend
+cd /var/www/schoolm/frontend
+npm run build
+
+# Add Content Security Policy header
+# In Nginx:
+add_header Content-Security-Policy "upgrade-insecure-requests";
+
+# Force HTTPS in HTML
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+
+
+D.6 NETWORK AND CONNECTIVITY ISSUES
+------------------------------------
+
+PROBLEM 1: Domain Not Resolving
+Symptoms:
+- Cannot access website by domain
+- DNS_PROBE_FINISHED_NXDOMAIN error
+
+Solutions:
+# Check DNS records
+nslookup www.schoolm.gentime.in
+dig www.schoolm.gentime.in
+
+# Verify A records at registrar:
+# www.schoolm → 72.60.202.218
+# api → 72.60.202.218
+
+# Wait for DNS propagation (5-30 minutes)
+
+# Test with IP
+curl http://72.60.202.218
+
+# Flush local DNS cache
+# Windows: ipconfig /flushdns
+# Mac: sudo dscacheutil -flushcache
+# Linux: sudo systemd-resolve --flush-caches
+
+
+PROBLEM 2: Slow Response Times
+Symptoms:
+- Website loads slowly
+- API requests timeout
+- High latency
+
+Solutions:
+# Check server load
+top
+htop
+
+# Check network
+ping www.schoolm.gentime.in
+mtr www.schoolm.gentime.in
+
+# Check Nginx access log
+sudo tail -f /var/log/nginx/access.log
+
+# Optimize backend:
+# - Add database indexes
+# - Cache responses
+# - Compress responses
+
+# Enable Nginx compression
+# In nginx.conf:
+gzip on;
+gzip_types text/plain text/css application/json application/javascript;
+
+# Enable caching
+# In Nginx:
+location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
+    expires 30d;
+    add_header Cache-Control "public, immutable";
+}
+
+
+PROBLEM 3: Connection Timeout
+Symptoms:
+- Request hangs
+- Gateway timeout error
+- ERR_CONNECTION_TIMED_OUT
+
+Solutions:
+# Increase Nginx timeouts
+sudo nano /etc/nginx/sites-available/gentime-backend
+
+location / {
+    proxy_pass http://localhost:5000;
+    proxy_connect_timeout 60s;
+    proxy_send_timeout 60s;
+    proxy_read_timeout 60s;
+}
+
+# Increase PM2 timeouts
+# In code, increase request timeouts:
+axios.defaults.timeout = 30000;  # 30 seconds
+
+# Check if backend is processing slowly
+pm2 logs schoolm-api
+
+# Optimize database queries
+# Add indexes, limit results, use pagination
+
+
+D.7 PERFORMANCE ISSUES
+-----------------------
+
+PROBLEM 1: High CPU Usage
+Symptoms:
+- Server slow
+- top shows high CPU %
+- Application unresponsive
+
+Solutions:
+# Check CPU usage
+top
+htop
+
+# Find CPU-intensive process
+ps aux --sort=-%cpu | head -10
+
+# If Node.js using high CPU:
+pm2 monit
+
+# Solutions:
+A. Restart application
+   pm2 restart schoolm-api
+
+B. Check for infinite loops in code
+   pm2 logs schoolm-api
+
+C. Optimize database queries
+   # Add indexes
+   # Use select() to limit fields
+   # Use limit() and skip() for pagination
+
+D. Add caching
+   # Use Redis or memory cache
+
+E. Limit concurrent requests
+   # Add rate limiting middleware
+
+
+PROBLEM 2: Memory Leak
+Symptoms:
+- Memory usage keeps increasing
+- Eventually runs out of memory
+- Frequent restarts
+
+Solutions:
+# Monitor memory
+pm2 monit
+free -h -s 5  # Every 5 seconds
+
+# Find memory leak in code:
+# Common causes:
+# - Global variables accumulating
+# - Event listeners not removed
+# - Unclosed database connections
+# - Circular references
+# - Large caches not cleared
+
+# Quick fix: Restart periodically
+# In ecosystem.config.js:
+cron_restart: '0 2 * * *'  # Restart at 2 AM daily
+
+# Proper fix: Find and fix leak
+# Use Node.js profiler:
+node --inspect server.js
+# Open chrome://inspect in Chrome
+
+
+PROBLEM 3: Database Slow Queries
+Symptoms:
+- API responses slow
+- Database timeouts
+- High latency
+
+Solutions:
+# Check database performance
+# In MongoDB Atlas dashboard
+
+# Add indexes
+# In your model:
+schema.index({ email: 1 });
+schema.index({ schoolId: 1, studentId: 1 });
+
+# Optimize queries:
+# Bad:
+Model.find()  # Returns all documents
+
+# Good:
+Model.find({ schoolId: id })
+  .select('name email')
+  .limit(50)
+  .lean()  # Returns plain JS objects (faster)
+
+# Use pagination
+const page = 1;
+const limit = 20;
+Model.find()
+  .skip((page - 1) * limit)
+  .limit(limit)
+
+# Enable query profiling
+mongoose.set('debug', true);
+
+
+D.8 SECURITY ISSUES
+-------------------
+
+PROBLEM 1: Brute Force Attacks
+Symptoms:
+- Many failed login attempts in logs
+- High CPU from authentication
+- Slow login
+
+Solutions:
+# Install Fail2Ban
+sudo apt install fail2ban
+
+# Configure SSH protection
+sudo nano /etc/fail2ban/jail.local
+
+[sshd]
+enabled = true
+maxretry = 3
+bantime = 3600
+
+# Restart Fail2Ban
+sudo systemctl restart fail2ban
+
+# Check banned IPs
+sudo fail2ban-client status sshd
+
+# Add rate limiting to API
+# Install express-rate-limit
+npm install express-rate-limit
+
+# In server.js:
+const rateLimit = require('express-rate-limit');
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,  # 15 minutes
+  max: 100  # Limit each IP to 100 requests per windowMs
+});
+
+app.use('/api/', limiter);
+
+# Login-specific limit
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5  # 5 login attempts
+});
+
+app.post('/api/*/login', loginLimiter, ...);
+
+
+PROBLEM 2: DDoS Attack
+Symptoms:
+- Extremely high traffic
+- Server overloaded
+- Legitimate users can't access
+
+Solutions:
+# Block attacker IPs
+sudo ufw deny from <attacker-ip>
+
+# Use Nginx rate limiting
+# In nginx.conf:
+http {
+    limit_req_zone $binary_remote_addr zone=one:10m rate=10r/s;
+
+    server {
+        location / {
+            limit_req zone=one burst=20 nodelay;
+        }
+    }
+}
+
+# Use Cloudflare (free DDoS protection)
+# Point DNS to Cloudflare
+# Enable proxy (orange cloud)
+
+# Block countries (if attack is from specific country)
+# Use geoip module in Nginx
+
+
+PROBLEM 3: Exposed Sensitive Data
+Symptoms:
+- .env file accessible
+- API keys visible
+- Database credentials leaked
+
+Solutions:
+# Ensure .env is not committed
+echo ".env" >> .gitignore
+git rm --cached .env
+git commit -m "Remove .env"
+
+# Don't expose .env in Nginx
+# Nginx should NOT serve .env files
+
+# If already exposed:
+1. Rotate all secrets immediately
+2. Change database password
+3. Generate new JWT secret
+4. Update .env files
+5. Restart services
+
+# Scan for exposed secrets
+# Use tools like:
+# - GitGuardian
+# - TruffleHog
+# - git-secrets
+
+
+================================================================================
+SECTION E: DATABASE PROBLEMS AND SOLUTIONS
+================================================================================
+
+E.1 MONGODB CONNECTION ISSUES
+------------------------------
+
+PROBLEM 1: Connection Timeout
+Error: "MongooseServerSelectionError: connect ETIMEDOUT"
+
+Solutions:
+# Check network connectivity
+ping cluster0.ovqn73c.mongodb.net
+
+# Check MongoDB Atlas whitelist
+# 1. Login to MongoDB Atlas
+# 2. Security → Network Access
+# 3. Add IP: 72.60.202.218
+# 4. Or 0.0.0.0/0 for any IP (not recommended)
+
+# Test connection
+mongosh "mongodb+srv://cluster0.ovqn73c.mongodb.net/" --username schoolm2025
+
+# Increase timeout in code
+mongoose.connect(uri, {
+  serverSelectionTimeoutMS: 10000,  # 10 seconds
+  socketTimeoutMS: 45000,
+});
+
+# Check firewall
+sudo ufw status
+# Ensure outbound connections allowed
+
+
+PROBLEM 2: Authentication Failed
+Error: "MongoServerError: Authentication failed"
+
+Solutions:
+# Check username and password
+# In .env:
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database
+
+# If password has special characters, URL encode:
+# @ → %40
+# : → %3A
+# / → %2F
+# ? → %3F
+# # → %23
+
+# Verify credentials in MongoDB Atlas
+# Database Access → Database Users
+# Ensure user has readWrite permission
+
+# Create new database user
+# Database Access → Add New Database User
+# Username: newuser
+# Password: Generate secure password
+# Database User Privileges: Read and write to any database
+
+
+PROBLEM 3: Too Many Connections
+Error: "MongoServerError: Too many connections"
+
+Solutions:
+# Check current connections
+# In MongoDB Atlas:
+# Metrics → Connections
+
+# Optimize connection pooling
+mongoose.connect(uri, {
+  maxPoolSize: 10,  # Default is 100
+  minPoolSize: 5,
+});
+
+# Close connections properly
+process.on('SIGINT', async () => {
+  await mongoose.connection.close();
+  process.exit(0);
+});
+
+# Upgrade MongoDB Atlas cluster
+# Higher tier = more connections allowed
+
+
+E.2 DATABASE PERFORMANCE ISSUES
+--------------------------------
+
+PROBLEM 1: Slow Queries
+Symptoms:
+- API endpoints take > 1 second
+- Database operations slow
+- High database CPU usage
+
+Solutions:
+# Enable profiling
+mongoose.set('debug', true);
+
+# Create indexes
+# In model file:
+const userSchema = new Schema({
+  email: { type: String, index: true },  # Single index
+  schoolId: String,
+  studentId: String
+});
+
+# Compound index
+userSchema.index({ schoolId: 1, studentId: 1 });
+
+# Text index for search
+userSchema.index({ name: 'text', description: 'text' });
+
+# Create index in MongoDB Atlas
+# Collections → Indexes → Create Index
+{
+  "email": 1
+}
+
+# Optimize queries
+# Bad:
+const users = await User.find();  # Fetches all
+
+# Good:
+const users = await User.find({ schoolId: id })
+  .select('name email')  # Only needed fields
+  .limit(50)             # Limit results
+  .lean();              # Plain objects (faster)
+
+# Use explain to analyze query
+User.find({ email: 'test@test.com' }).explain('executionStats');
+
+
+PROBLEM 2: Large Documents
+Symptoms:
+- Documents > 16MB
+- BSON size error
+
+Solutions:
+# Check document size
+db.collection.find().forEach(doc => {
+  print(Object.bsonsize(doc));
+});
+
+# Solutions:
+A. Split large arrays into separate collections
+# Bad:
+{
+  _id: 1,
+  students: [/* thousands of students */]
+}
+
+# Good:
+# School collection:
+{ _id: 1, name: 'School' }
+
+# Students collection:
+{ _id: 1, schoolId: 1, name: 'Student 1' }
+{ _id: 2, schoolId: 1, name: 'Student 2' }
+
+B. Store large files in GridFS
+# For files > 16MB
+const gridfsBucket = new mongoose.mongo.GridFSBucket(db, {
+  bucketName: 'uploads'
+});
+
+C. Use references instead of embedding
+# Instead of embedding entire documents
+
+
+E.3 DATA INTEGRITY ISSUES
+--------------------------
+
+PROBLEM 1: Duplicate Documents
+Symptoms:
+- Multiple documents with same unique value
+- Inconsistent data
+
+Solutions:
+# Create unique index
+schema.index({ email: 1 }, { unique: true });
+
+# Compound unique index
+schema.index(
+  { schoolId: 1, studentId: 1 },
+  { unique: true }
+);
+
+# Find duplicates
+db.users.aggregate([
+  { $group: {
+    _id: '$email',
+    count: { $sum: 1 }
+  }},
+  { $match: { count: { $gt: 1 } }}
+]);
+
+# Remove duplicates (keep first)
+# In MongoDB shell:
+db.users.aggregate([
+  { $group: {
+    _id: '$email',
+    doc: { $first: '$$ROOT' },
+    count: { $sum: 1 }
+  }},
+  { $match: { count: { $gt: 1 } }}
+]).forEach(group => {
+  db.users.deleteMany({
+    email: group._id,
+    _id: { $ne: group.doc._id }
+  });
+});
+
+
+PROBLEM 2: Orphaned Documents
+Symptoms:
+- Documents reference non-existent parents
+- Foreign key constraint violations
+
+Solutions:
+# Find orphaned documents
+const students = await Student.find();
+for (let student of students) {
+  const school = await School.findById(student.schoolId);
+  if (!school) {
+    console.log('Orphaned student:', student._id);
+  }
+}
+
+# Remove orphaned documents
+await Student.deleteMany({
+  schoolId: { $nin: await School.distinct('_id') }
+});
+
+# Use referential integrity with middleware
+schema.pre('remove', async function() {
+  // Delete related documents
+  await Student.deleteMany({ schoolId: this._id });
+});
+
+
+PROBLEM 3: Schema Validation Errors
+Symptoms:
+- ValidationError when saving
+- Required fields missing
+
+Solutions:
+# Define schema with validation
+const schema = new Schema({
+  email: {
+    type: String,
+    required: [true, 'Email is required'],
+    unique: true,
+    lowercase: true,
+    trim: true,
+    validate: {
+      validator: (v) => /^\S+@\S+\.\S+$/.test(v),
+      message: 'Invalid email format'
+    }
+  },
+  age: {
+    type: Number,
+    min: [0, 'Age cannot be negative'],
+    max: [120, 'Age must be realistic']
+  }
+});
+
+# Handle validation errors
+try {
+  await user.save();
+} catch (error) {
+  if (error.name === 'ValidationError') {
+    // Handle validation error
+    console.log(error.errors);
+  }
+}
+
+
+E.4 BACKUP AND RECOVERY ISSUES
+-------------------------------
+
+PROBLEM 1: Backup Failed
+Solutions:
+# MongoDB Atlas automatic backups
+# Check in Atlas dashboard:
+# Clusters → Backup → Schedule
+
+# Manual backup with mongodump
+mongodump --uri="mongodb+srv://username:password@cluster.mongodb.net/database" \
+  --out=/backup/mongodb-$(date +%Y%m%d)
+
+# Backup specific collection
+mongodump --uri="mongodb+srv://..." \
+  --collection=users \
+  --out=/backup/
+
+# Automated backup script
+#!/bin/bash
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_DIR="/backup/mongodb"
+
+mongodump --uri="mongodb+srv://..." \
+  --out="$BACKUP_DIR/$DATE"
+
+# Keep only last 7 days
+find $BACKUP_DIR -type d -mtime +7 -exec rm -rf {} \;
+
+
+PROBLEM 2: Restore Failed
+Solutions:
+# Restore entire database
+mongorestore --uri="mongodb+srv://..." \
+  /backup/mongodb-20251012/
+
+# Restore specific collection
+mongorestore --uri="mongodb+srv://..." \
+  --collection=users \
+  /backup/mongodb-20251012/database/users.bson
+
+# Restore to different database
+mongorestore --uri="mongodb+srv://..." \
+  --db=new_database \
+  /backup/mongodb-20251012/old_database/
+
+# Drop existing data before restore
+mongorestore --drop --uri="mongodb+srv://..." \
+  /backup/mongodb-20251012/
+
+
+E.5 MIGRATION ISSUES
+--------------------
+
+PROBLEM 1: Schema Changes
+Symptoms:
+- Need to add new field to existing documents
+- Need to rename field
+
+Solutions:
+# Add new field with default value
+db.users.updateMany(
+  { newField: { $exists: false } },
+  { $set: { newField: 'defaultValue' } }
+);
+
+# Rename field
+db.users.updateMany(
+  {},
+  { $rename: { 'oldName': 'newName' } }
+);
+
+# Remove field
+db.users.updateMany(
+  {},
+  { $unset: { 'fieldToRemove': '' } }
+);
+
+# Change data type
+db.users.find().forEach(doc => {
+  db.users.updateOne(
+    { _id: doc._id },
+    { $set: { age: parseInt(doc.age) } }
+  );
+});
+
+
+PROBLEM 2: Data Migration Between Environments
+Solutions:
+# Export from production
+mongoexport --uri="mongodb+srv://prod..." \
+  --collection=users \
+  --out=users.json
+
+# Import to development
+mongoimport --uri="mongodb://localhost:27017/dev" \
+  --collection=users \
+  --file=users.json
+
+# Copy between MongoDB Atlas clusters
+# Use MongoDB Compass or Studio 3T
+
+
+E.6 INDEX OPTIMIZATION
+----------------------
+
+Best Practices:
+---------------
+# Single field index
+schema.index({ email: 1 });
+
+# Compound index (order matters!)
+schema.index({ schoolId: 1, studentId: 1 });
+
+# Text index for search
+schema.index({ name: 'text', description: 'text' });
+
+# Unique index
+schema.index({ email: 1 }, { unique: true });
+
+# Sparse index (only index documents with field)
+schema.index({ optionalField: 1 }, { sparse: true });
+
+# TTL index (auto-delete after time)
+schema.index({ createdAt: 1 }, { expireAfterSeconds: 86400 });
+
+# Check indexes
+Model.collection.getIndexes();
+
+# Drop index
+Model.collection.dropIndex('indexName');
+
+# Explain query
+Model.find({ email: 'test@test.com' })
+  .explain('executionStats');
+
+
+E.7 QUERY OPTIMIZATION
+----------------------
+
+Best Practices:
+---------------
+# 1. Use indexes
+const users = await User.find({ email: 'test@test.com' });
+# Create index: schema.index({ email: 1 });
+
+# 2. Select only needed fields
+const users = await User.find()
+  .select('name email');  # Only get name and email
+
+# 3. Limit results
+const users = await User.find()
+  .limit(50);
+
+# 4. Use lean() for read-only
+const users = await User.find()
+  .lean();  # Returns plain JS objects (faster)
+
+# 5. Pagination
+const page = 1;
+const limit = 20;
+const users = await User.find()
+  .skip((page - 1) * limit)
+  .limit(limit);
+
+# 6. Use aggregation for complex queries
+const result = await User.aggregate([
+  { $match: { schoolId: id } },
+  { $group: { _id: '$grade', count: { $sum: 1 } } },
+  { $sort: { count: -1 } }
+]);
+
+# 7. Avoid loading large arrays
+# Bad:
+const school = await School.findById(id);  # Loads all students
+
+# Good:
+const school = await School.findById(id).select('name');
+const students = await Student.find({ schoolId: id }).limit(50);
+
+
+================================================================================
+SECTION F: FUTURE PROBLEMS AND PREVENTIVE SOLUTIONS
+================================================================================
+
+F.1 SCALABILITY ISSUES
+----------------------
+
+Problem: Application slows as users increase
+
+Preventive Solutions:
+---------------------
+1. Horizontal Scaling (Multiple Servers):
+   # Use PM2 cluster mode
+   # In ecosystem.config.js:
+   instances: 'max'  # Use all CPU cores
+
+   # Or load balancer with multiple VPS
+   # Use Nginx as load balancer:
+   upstream backend {
+     server 72.60.202.218:5000;
+     server 72.60.202.219:5000;
+   }
+
+2. Database Indexing:
+   # Create indexes before they're needed
+   schema.index({ email: 1 });
+   schema.index({ schoolId: 1, createdAt: -1 });
+
+3. Caching:
+   # Install Redis
+   sudo apt install redis-server
+
+   # Use Redis for caching
+   const redis = require('redis');
+   const client = redis.createClient();
+
+   # Cache API responses
+   app.get('/api/schools/all', async (req, res) => {
+     const cacheKey = 'schools:all';
+     const cached = await client.get(cacheKey);
+
+     if (cached) {
+       return res.json(JSON.parse(cached));
+     }
+
+     const schools = await School.find();
+     await client.setex(cacheKey, 3600, JSON.stringify(schools));
+     res.json(schools);
+   });
+
+4. CDN for Static Assets:
+   # Use Cloudflare CDN (free)
+   # Configure in Cloudflare dashboard
+   # Assets served from nearest location
+
+5. Database Sharding:
+   # Split data across multiple databases
+   # By region, school, or date range
+
+
+F.2 MEMORY AND CPU ISSUES
+--------------------------
+
+Problem: Server runs out of resources
+
+Preventive Solutions:
+---------------------
+1. Monitor Resources:
+   # Set up monitoring
+   # Install Netdata
+   bash <(curl -Ss https://my-netdata.io/kickstart.sh)
+
+   # Or use PM2 Plus (paid)
+   pm2 plus
+
+   # Or Prometheus + Grafana (free)
+
+2. Optimize Code:
+   # Avoid memory leaks
+   # - Close database connections
+   # - Remove event listeners
+   # - Clear intervals/timeouts
+   # - Use WeakMap for caches
+
+   # Example:
+   const cache = new WeakMap();  # Auto garbage collected
+
+3. Add Swap Space:
+   # Create 2GB swap
+   sudo fallocate -l 2G /swapfile
+   sudo chmod 600 /swapfile
+   sudo mkswap /swapfile
+   sudo swapon /swapfile
+
+   # Make permanent
+   echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+4. Limit Process Resources:
+   # In ecosystem.config.js:
+   max_memory_restart: '1G'  # Restart if exceeds 1GB
+
+   # Or use ulimit
+   ulimit -m 1048576  # 1GB memory limit
+
+5. Upgrade VPS:
+   # When consistently hitting limits
+   # Upgrade RAM, CPU, or both
+
+
+F.3 STORAGE ISSUES
+------------------
+
+Problem: Disk space runs out
+
+Preventive Solutions:
+---------------------
+1. Monitor Disk Usage:
+   # Check disk space daily
+   df -h
+
+   # Set up monitoring alert
+   # Create /root/check-disk.sh:
+   #!/bin/bash
+   THRESHOLD=80
+   USAGE=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+
+   if [ $USAGE -gt $THRESHOLD ]; then
+     echo "Disk usage: $USAGE%" | mail -s "Disk Alert" admin@gentime.in
+   fi
+
+   # Add to crontab
+   0 0 * * * /root/check-disk.sh
+
+2. Automatic Log Rotation:
+   # Configure logrotate
+   sudo nano /etc/logrotate.d/schoolm
+
+   /var/www/schoolm/api/*.log {
+     daily
+     rotate 7
+     compress
+     missingok
+     notifempty
+   }
+
+3. Clean Up Regularly:
+   # Create cleanup script /root/cleanup.sh:
+   #!/bin/bash
+
+   # Clean old logs
+   find /var/log -name "*.log" -mtime +30 -delete
+
+   # Clean PM2 logs
+   pm2 flush
+
+   # Clean old backups
+   find /backup -name "*.tar.gz" -mtime +30 -delete
+
+   # Clean package cache
+   sudo apt autoremove
+   sudo apt autoclean
+
+   # Clean journal logs
+   sudo journalctl --vacuum-time=30d
+
+   # Add to crontab (weekly)
+   0 2 * * 0 /root/cleanup.sh
+
+4. Use External Storage:
+   # For file uploads, use cloud storage
+   # AWS S3, Google Cloud Storage, or Cloudinary
+
+   # Example with AWS S3:
+   npm install aws-sdk multer-s3
+
+   const multerS3 = require('multer-s3');
+   const upload = multer({
+     storage: multerS3({
+       s3: s3Client,
+       bucket: 'schoolm-uploads',
+       key: (req, file, cb) => {
+         cb(null, Date.now() + '-' + file.originalname);
+       }
+     })
+   });
+
+5. Database Cleanup:
+   # Remove old data
+   # Delete documents older than 1 year:
+   const oneYearAgo = new Date();
+   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+   await OldModel.deleteMany({
+     createdAt: { $lt: oneYearAgo }
+   });
+
+
+F.4 DEPENDENCY UPDATES
+----------------------
+
+Problem: Outdated dependencies with vulnerabilities
+
+Preventive Solutions:
+---------------------
+1. Regular Updates:
+   # Check for updates weekly
+   cd /var/www/schoolm/api
+   npm outdated
+
+   cd /var/www/schoolm/frontend
+   npm outdated
+
+2. Update Dependencies:
+   # Minor updates (safe)
+   npm update
+
+   # Major updates (test carefully)
+   npm install package@latest
+
+   # Update all to latest
+   npm install -g npm-check-updates
+   ncu -u
+   npm install
+
+3. Security Audits:
+   # Check vulnerabilities
+   npm audit
+
+   # Fix automatically
+   npm audit fix
+
+   # Fix with breaking changes
+   npm audit fix --force
+
+4. Automated Dependency Updates:
+   # Use Dependabot (GitHub)
+   # Create .github/dependabot.yml:
+   version: 2
+   updates:
+     - package-ecosystem: "npm"
+       directory: "/api"
+       schedule:
+         interval: "weekly"
+     - package-ecosystem: "npm"
+       directory: "/frontend"
+       schedule:
+         interval: "weekly"
+
+5. Testing Before Update:
+   # Always test locally first
+   npm run test
+   npm start
+
+   # Then on staging server
+   # Finally on production
+
+
+F.5 SECURITY VULNERABILITIES
+-----------------------------
+
+Problem: Security exploits discovered
+
+Preventive Solutions:
+---------------------
+1. Regular Security Audits:
+   # Use security scanners
+   npm audit
+
+   # Use Snyk (free tier)
+   npm install -g snyk
+   snyk test
+
+   # OWASP Dependency Check
+   # Check for CVEs regularly
+
+2. Keep Everything Updated:
+   # System packages
+   sudo apt update && sudo apt upgrade -y
+
+   # Node.js
+   sudo npm install -g n
+   sudo n lts
+
+   # NPM packages
+   npm audit fix
+
+3. Secure Configuration:
+   # Strong JWT secret (64+ characters)
+   JWT_SECRET=$(openssl rand -base64 64)
+
+   # Secure cookies
+   res.cookie('token', token, {
+     httpOnly: true,
+     secure: true,
+     sameSite: 'strict',
+     maxAge: 3600000
+   });
+
+   # Rate limiting
+   const rateLimit = require('express-rate-limit');
+   app.use('/api/', rateLimit({
+     windowMs: 15 * 60 * 1000,
+     max: 100
+   }));
+
+   # Helmet (security headers)
+   const helmet = require('helmet');
+   app.use(helmet());
+
+4. Input Validation:
+   # Validate all inputs
+   const { body, validationResult } = require('express-validator');
+
+   app.post('/api/user',
+     body('email').isEmail(),
+     body('password').isLength({ min: 8 }),
+     (req, res) => {
+       const errors = validationResult(req);
+       if (!errors.isEmpty()) {
+         return res.status(400).json({ errors: errors.array() });
+       }
+       // Process request
+     }
+   );
+
+   # Sanitize inputs
+   const mongoSanitize = require('express-mongo-sanitize');
+   app.use(mongoSanitize());
+
+5. Security Monitoring:
+   # Set up intrusion detection
+   sudo apt install aide
+   sudo aideinit
+
+   # Monitor failed login attempts
+   sudo grep "Failed password" /var/log/auth.log | tail -20
+
+   # Use fail2ban
+   sudo apt install fail2ban
+
+
+F.6 MONITORING AND ALERTING
+----------------------------
+
+Problem: Issues go unnoticed until major failure
+
+Preventive Solutions:
+---------------------
+1. Uptime Monitoring:
+   # Use UptimeRobot (free)
+   # Monitor: https://www.schoolm.gentime.in
+   # Monitor: https://api.gentime.in/api/auth/check
+   # Alert via email/SMS when down
+
+2. Server Monitoring:
+   # Install Netdata (free)
+   bash <(curl -Ss https://my-netdata.io/kickstart.sh)
+
+   # Access at: http://72.60.202.218:19999
+
+   # Monitor:
+   # - CPU usage
+   # - Memory usage
+   # - Disk space
+   # - Network traffic
+   # - Application metrics
+
+3. Application Monitoring:
+   # Use PM2 Plus (paid) or
+   # Use custom monitoring:
+
+   # Create /root/health-check.sh:
+   #!/bin/bash
+
+   # Check backend
+   if ! curl -f http://localhost:5000/api/auth/check > /dev/null 2>&1; then
+     echo "Backend down!" | mail -s "Backend Alert" admin@gentime.in
+     pm2 restart schoolm-api
+   fi
+
+   # Check PM2
+   if ! pm2 list | grep -q "online"; then
+     echo "PM2 process down!" | mail -s "PM2 Alert" admin@gentime.in
+     pm2 restart all
+   fi
+
+   # Add to crontab (every 5 minutes)
+   */5 * * * * /root/health-check.sh
+
+4. Log Aggregation:
+   # Centralize logs for analysis
+   # Use ELK Stack (Elasticsearch, Logstash, Kibana)
+   # Or use cloud service like Loggly, Papertrail
+
+5. Error Tracking:
+   # Use Sentry (free tier)
+   npm install @sentry/node
+
+   # In server.js:
+   const Sentry = require('@sentry/node');
+   Sentry.init({ dsn: 'your-dsn-here' });
+
+   app.use(Sentry.Handlers.requestHandler());
+   app.use(Sentry.Handlers.errorHandler());
+
+6. Database Monitoring:
+   # MongoDB Atlas has built-in monitoring
+   # Monitor:
+   # - Connection count
+   # - Query performance
+   # - Disk usage
+   # - Memory usage
+
+   # Set up alerts in Atlas dashboard
+
+7. Backup Monitoring:
+   # Verify backups work
+   # Test restore monthly
+
+   # Create backup test script:
+   #!/bin/bash
+   mongorestore --uri="mongodb://test-db" /backup/latest/
+   # Run tests
+   # Alert if fails
+
+
+================================================================================
+QUICK REFERENCE - MOST COMMON COMMANDS
+================================================================================
+
+VPS Connection:
+---------------
+ssh root@72.60.202.218
+
+PM2 Commands:
+-------------
+pm2 status                      # View processes
+pm2 logs schoolm-api           # View logs
+pm2 restart schoolm-api        # Restart
+pm2 monit                      # Real-time monitoring
+
+Nginx Commands:
+---------------
+sudo nginx -t                   # Test config
+sudo systemctl reload nginx     # Reload
+sudo systemctl restart nginx    # Restart
+sudo tail -f /var/log/nginx/error.log  # View errors
+
+System Monitoring:
+------------------
+top                            # Process monitor
+htop                           # Better process monitor
+free -h                        # Memory usage
+df -h                          # Disk usage
+netstat -tulpn                 # Network connections
+
+Git Commands:
+-------------
+git status                     # Check status
+git add .                      # Stage changes
+git commit -m "message"        # Commit
+git push origin main           # Push to remote
+git pull origin main           # Pull from remote
+
+Deployment:
+-----------
+# Backend update
+cd /var/www/schoolm/api
+git pull
+npm install
+pm2 restart schoolm-api
+
+# Frontend update
+cd /var/www/schoolm/frontend
+git pull
+npm install
+npm run build
+
+Database:
+---------
+mongosh "mongodb+srv://cluster.mongodb.net/" --username schoolm2025
+# Then run queries
+
+Security:
+---------
+sudo ufw status                # Firewall status
+sudo fail2ban-client status    # Fail2Ban status
+sudo certbot certificates      # SSL certificates
+
+Troubleshooting:
+----------------
+pm2 logs schoolm-api --err     # Backend errors
+sudo tail -f /var/log/nginx/error.log  # Nginx errors
+curl http://localhost:5000/api/auth/check  # Test backend
+curl https://api.gentime.in/api/auth/check # Test public API
+
+
+================================================================================
+EMERGENCY CONTACTS AND RESOURCES
+================================================================================
+
+VPS Provider Support:
+---------------------
+[Your VPS Provider Support Contact]
+
+Domain Registrar:
+-----------------
+[Your Domain Registrar Support]
+
+MongoDB Atlas Support:
+----------------------
+https://support.mongodb.com
+
+Important Email:
+----------------
+Admin: admin@gentime.in
+Alerts: alerts@gentime.in
+
+Backup Location:
+----------------
+Server: /backup/
+Local: [Your Local Backup Location]
+
+Documentation:
+--------------
+Node.js: https://nodejs.org/docs/
+Express: https://expressjs.com/
+React: https://react.dev/
+MongoDB: https://docs.mongodb.com/
+Nginx: https://nginx.org/en/docs/
+PM2: https://pm2.keymetrics.io/docs/
+
+GitHub Repository:
+------------------
+[Your GitHub Repository URL]
+
+
+================================================================================
+END OF TECHNICAL REFERENCE GUIDE
+================================================================================
+
+Document Version: 1.0
+Last Updated: October 12, 2025
+Total Pages: ~150 (if printed)
+Total Sections: 6 main sections (A-F)
+Total Problems Documented: 50+
+Total Solutions Provided: 100+
+
+This guide covers:
+✓ Complete VPS management
+✓ All Ubuntu/Linux commands
+✓ Complete Git workflow
+✓ All deployment problems
+✓ Database management
+✓ Future-proofing solutions
+
+Keep this guide handy for reference during development, deployment,
+and troubleshooting!
+
+================================================================================

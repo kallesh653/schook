@@ -4,7 +4,7 @@ import("./css/text.css");
 import("./css/mobile.css");
 
 import "./App.css";
-import { BrowserRouter, Route, Routes, useSearchParams } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 
 import Client from "./client/Client";
 import Home from "./client/components/home/Home";
@@ -106,7 +106,7 @@ function App() {
             </Route>
   
             <Route path="/" element={<Client />}>
-              <Route index element={<Home />} />
+              <Route index element={<Navigate to="/home" replace />} />
               <Route path="home" element={<Home />} />
               <Route path="contact" element={<Contact />} />
               <Route path="login" element={<Login />} />
