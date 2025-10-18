@@ -126,8 +126,17 @@ const Courses = () => {
     };
 
     const getSchoolId = () => {
-        // Try to get from localStorage first, then from sessionStorage
-        return localStorage.getItem('schoolId') || sessionStorage.getItem('schoolId');
+        // Get schoolId from user object stored in localStorage
+        const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
+        if (userStr) {
+            try {
+                const user = JSON.parse(userStr);
+                return user.id; // School admin's ID is the schoolId
+            } catch (e) {
+                console.error('Error parsing user:', e);
+            }
+        }
+        return null;
     };
 
     const fetchCourses = async () => {
@@ -137,6 +146,7 @@ const Courses = () => {
 
             if (!schoolId) {
                 showSnackbar('School ID not found. Please login again.', 'error');
+                setPageLoading(false);
                 return;
             }
 
@@ -150,7 +160,8 @@ const Courses = () => {
             }
         } catch (error) {
             console.error('Error fetching courses:', error);
-            showSnackbar(error.response?.data?.message || 'Error fetching courses', 'error');
+            const errorMsg = error.response?.data?.message || error.message || 'Error fetching courses';
+            showSnackbar(errorMsg, 'error');
             setCourses([]);
         } finally {
             setPageLoading(false);
