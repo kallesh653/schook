@@ -11,7 +11,8 @@ import {
   Star as StarIcon,
   PlayArrow as PlayIcon,
   ArrowForward as ArrowIcon,
-  GetApp as DownloadIcon
+  GetApp as DownloadIcon,
+  Login as LoginIcon
 } from '@mui/icons-material';
 import { styled, keyframes } from '@mui/material/styles';
 import Carousel from './carousel/Carousel';
@@ -19,6 +20,7 @@ import ImageSlider from './ImageSlider';
 import BeautifulSlider from './BeautifulSlider';
 import axios from 'axios';
 import { baseUrl } from '../../../environment';
+import { useNavigate } from 'react-router-dom';
 
 // Advanced CSS animations
 const float = keyframes`
@@ -159,6 +161,8 @@ const StatsCard = styled(Paper)(({ theme }) => ({
 }));
 
 const Home = () => {
+  const navigate = useNavigate();
+
   const [animatedStats, setAnimatedStats] = useState({
     students: 0,
     teachers: 0,
@@ -353,6 +357,44 @@ const Home = () => {
 
       {/* Beautiful Full-Width Slider with Images and Videos */}
       <BeautifulSlider slides={combinedSlides} />
+
+      {/* Student Login Button - Floating (always visible on mobile and desktop) */}
+      <Zoom in timeout={1000}>
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: { xs: 20, md: 40 },
+            left: { xs: 20, md: 40 },
+            zIndex: 1000,
+          }}
+        >
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => navigate('/student-login')}
+            startIcon={<LoginIcon />}
+            sx={{
+              background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+              borderRadius: '50px',
+              px: { xs: 3, md: 4 },
+              py: 1.5,
+              fontSize: { xs: '0.9rem', md: '1.1rem' },
+              fontWeight: 600,
+              textTransform: 'none',
+              boxShadow: '0 8px 25px rgba(67, 233, 123, 0.5)',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'translateY(-3px) scale(1.05)',
+                boxShadow: '0 12px 35px rgba(67, 233, 123, 0.6)',
+                background: 'linear-gradient(135deg, #38f9d7 0%, #43e97b 100%)',
+              },
+              animation: `${pulse} 2s infinite`,
+            }}
+          >
+            Student Login
+          </Button>
+        </Box>
+      </Zoom>
 
       {/* Download App Button - Floating */}
       {showInstallButton && (

@@ -13,7 +13,7 @@ import { AuthContext } from "../../../context/AuthContext";
 export default function Login() {
     const { authenticated, login } = useContext(AuthContext);
 
-    const [loginType, setLoginType] =useState("student")
+    const [loginType, setLoginType] =useState("school_owner")
     const [message, setMessage] =  useState("");
     const [type, setType]= useState("succeess");
 
@@ -110,10 +110,8 @@ export default function Login() {
                         value={loginType}
                         onChange={handleSelection}
                     >
-                       
-                        <MenuItem value={"student"}>Student</MenuItem>
+                         <MenuItem  value={'school_owner'}>Admin</MenuItem>
                          <MenuItem  value={'teacher'}>Teacher</MenuItem>
-                         <MenuItem  value={'school_owner'}>School Owner</MenuItem>
                     </Select>
                 </FormControl>
                     <TextField fullWidth sx={{ marginTop: "10px" }} id="outlined-basic"

@@ -10,6 +10,7 @@ import Client from "./client/Client";
 import Home from "./client/components/home/Home";
 import Contact from "./client/components/contact/Contact";
 import Login from "./client/components/login/Login";
+import StudentLogin from "./client/components/login/StudentLogin";
 import Register from "./client/components/register/Register";
 
 import Logout from "./client/components/logout/Logout";
@@ -19,6 +20,7 @@ import Class from "./school/components/class/Class";
 import Students from "./school/components/students/Students";
 import Teachers from "./school/components/teachers/Teachers";
 import Subject from "./school/components/subjects/Subjects";
+import Courses from "./school/components/courses/Courses";
 import ClassDetails from "./school/components/class details/ClassDetails";
 import StudentDetails from "./student/components/student details/StudentDetails";
 import StudentApp from "./student/components/student details/StudentApp";
@@ -65,6 +67,7 @@ function App() {
               <Route index element={<SchoolDashboard />} />
               <Route path="front-page" element={<FrontPageManagement />} />
               <Route path="public-home" element={<PublicHomePageManagement />} />
+              <Route path="courses" element={<Courses />} />
               <Route path="class" element={<Class />} />
               <Route path="class-details" element={<ClassDetails />} />
               <Route path="subject" element={<Subject />} />
@@ -108,6 +111,7 @@ function App() {
               <Route path="home" element={<Home />} />
               <Route path="contact" element={<Contact />} />
               <Route path="login" element={<Login />} />
+              <Route path="student-login" element={<StudentLogin />} />
               <Route path="register" element={<Register />} />
               <Route path="logout" element={<Logout />} />
             </Route>

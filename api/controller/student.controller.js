@@ -27,7 +27,7 @@ module.exports = {
                 filterQuery['student_class'] = req.query.student_class
             }
     
-            const filteredStudents = await Student.find(filterQuery).populate("student_class");
+            const filteredStudents = await Student.find(filterQuery).populate("student_class").populate("course");
             res.status(200).json({success:true, data:filteredStudents})
         } catch (error) {
             console.log("Error in fetching Student with query", error);
@@ -150,7 +150,7 @@ module.exports = {
     getStudentWithId: async(req, res)=>{
         const id = req.params.id;
         const schoolId =  req.user.schoolId;
-        Student.findOne({_id:id, school:schoolId}).populate("student_class").then(resp=>{
+        Student.findOne({_id:id, school:schoolId}).populate("student_class").populate("course").then(resp=>{
             if(resp){
                 console.log("data",resp)
                 res.status(200).json({success:true, data:resp})
@@ -165,7 +165,7 @@ module.exports = {
      getOwnDetails: async(req, res)=>{
         const id = req.user.id;
         const schoolId =  req.user.schoolId;
-        Student.findOne({_id:id,school:schoolId}).populate("student_class").then(resp=>{
+        Student.findOne({_id:id,school:schoolId}).populate("student_class").populate("course").then(resp=>{
             if(resp){
                 console.log("data",resp)
                 res.status(200).json({success:true, data:resp})
