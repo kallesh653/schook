@@ -289,13 +289,32 @@ export default function Students() {
   };
 
   const fetchCourses = () => {
-    const schoolId = localStorage.getItem('schoolId') || '66e0e5fcb543e2e1cb54df19';
-    axios
-      .get(`${baseUrl}/course/school/${schoolId}`)
-      .then((resp) => {
-        setCourses(resp.data.courses);
-      })
-      .catch(() => console.log("Error in fetching courses"));
+    const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        const schoolId = user.id; // School admin's ID is the schoolId
+
+        console.log('Fetching courses for school:', schoolId);
+
+        axios
+          .get(`${baseUrl}/course/school/${schoolId}`)
+          .then((resp) => {
+            console.log('Courses fetched:', resp.data);
+            setCourses(resp.data.courses || []);
+          })
+          .catch((error) => {
+            console.error("Error in fetching courses:", error);
+            setCourses([]);
+          });
+      } catch (e) {
+        console.error('Error parsing user:', e);
+        setCourses([]);
+      }
+    } else {
+      console.error('No user found in storage');
+      setCourses([]);
+    }
   };
 
   const fetchStudents = () => {

@@ -3,14 +3,21 @@ const Course = require('../model/course.model');
 // Create a new course
 const createCourse = async (req, res) => {
     try {
-        const schoolId = req.user?.schoolId || req.user?.id;
+        console.log('=== CREATE COURSE ===');
+        console.log('req.user:', req.user);
+        console.log('req.body:', req.body);
+
+        const schoolId = req.user.id;
 
         if (!schoolId) {
+            console.error('❌ No school ID found');
             return res.status(401).json({
                 success: false,
                 message: "School ID not found. Please login again."
             });
         }
+
+        console.log('✅ School ID:', schoolId);
 
         const courseData = {
             school: schoolId,
@@ -27,8 +34,12 @@ const createCourse = async (req, res) => {
             status: req.body.status || 'Active'
         };
 
+        console.log('Course data to save:', courseData);
+
         const newCourse = new Course(courseData);
         const savedCourse = await newCourse.save();
+
+        console.log('✅ Course saved successfully:', savedCourse);
 
         res.status(201).json({
             success: true,
@@ -36,7 +47,7 @@ const createCourse = async (req, res) => {
             course: savedCourse
         });
     } catch (error) {
-        console.error('Error creating course:', error);
+        console.error('❌ Error creating course:', error);
         res.status(500).json({
             success: false,
             message: 'Error creating course',
@@ -48,16 +59,20 @@ const createCourse = async (req, res) => {
 // Get all courses for a school
 const getCourses = async (req, res) => {
     try {
-        const schoolId = req.params.schoolId || req.user?.schoolId || req.user?.id;
+        console.log('=== GET COURSES ===');
+        const schoolId = req.params.schoolId;
+        console.log('School ID from params:', schoolId);
 
         if (!schoolId) {
-            return res.status(401).json({
+            console.error('❌ No school ID provided');
+            return res.status(400).json({
                 success: false,
-                message: "School ID not found."
+                message: "School ID is required"
             });
         }
 
         const courses = await Course.find({ school: schoolId }).sort({ createdAt: -1 });
+        console.log(`✅ Found ${courses.length} courses for school ${schoolId}`);
 
         res.status(200).json({
             success: true,
@@ -65,7 +80,7 @@ const getCourses = async (req, res) => {
             courses: courses
         });
     } catch (error) {
-        console.error('Error fetching courses:', error);
+        console.error('❌ Error fetching courses:', error);
         res.status(500).json({
             success: false,
             message: 'Error fetching courses',
