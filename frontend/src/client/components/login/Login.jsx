@@ -43,7 +43,11 @@ export default function Login() {
         initialValues: initialValues,
         validationSchema: loginSchema,
         onSubmit: (values) => {
-            console.log("Login Formik values", values)
+            console.log("=== LOGIN ATTEMPT ===")
+            console.log("Login values:", values)
+            console.log("Login type:", loginType)
+            console.log("Base URL:", baseUrl)
+
             let url;
             let navUrl;
             if(loginType=="school_owner"){
@@ -56,7 +60,11 @@ export default function Login() {
                 url = `${baseUrl}/student/login`
                 navUrl='/student'
             }
+
+                console.log("Full Login URL:", url)
+
                 axios.post(url, {...values}, { withCredentials: true }).then(resp=>{
+                    console.log("✅ Login successful:", resp.data)
                     setMessage(resp.data.message)
                     setType("success")
                     let token = resp.headers.authorization || resp.headers.Authorization;
@@ -70,14 +78,19 @@ export default function Login() {
                     }
                     Formik.resetForm();
                 }).catch(e=>{
+                    console.error("❌ Login error:", e)
                     if(e.response){
+                        console.error("Error response:", e.response.data)
                         setMessage(e.response.data.message);
                         setType("error")
-                        console.log("Error in login submit", e.response.data.message)
-                    } else {
-                        setMessage("Network error. Please check your connection.");
+                    } else if(e.request){
+                        console.error("No response received:", e.request)
+                        setMessage("Cannot connect to server. Please check if server is running.");
                         setType("error")
-                        console.log("Network error in login", e.message)
+                    } else {
+                        console.error("Error message:", e.message)
+                        setMessage("Network error: " + e.message);
+                        setType("error")
                     }
                 })
             

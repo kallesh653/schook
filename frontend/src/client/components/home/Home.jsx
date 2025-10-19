@@ -12,7 +12,10 @@ import {
   PlayArrow as PlayIcon,
   ArrowForward as ArrowIcon,
   GetApp as DownloadIcon,
-  Login as LoginIcon
+  Login as LoginIcon,
+  WhatsApp as WhatsAppIcon,
+  Instagram as InstagramIcon,
+  Twitter as TwitterIcon
 } from '@mui/icons-material';
 import { styled, keyframes } from '@mui/material/styles';
 import Carousel from './carousel/Carousel';
@@ -209,6 +212,11 @@ const Home = () => {
 
   const [sliderImages, setSliderImages] = useState([]);
   const [combinedSlides, setCombinedSlides] = useState([]);
+  const [socialMedia, setSocialMedia] = useState({
+    whatsapp: '',
+    instagram: '',
+    twitter: ''
+  });
 
   // Function to fetch PUBLIC home page data (NOT school-specific)
   const fetchFrontPageData = async () => {
@@ -269,6 +277,15 @@ const Home = () => {
             secondaryColor: data.theme.secondaryColor,
             showStatistics: data.statistics?.showSection !== false
           }));
+        }
+
+        // Set social media links
+        if (data.socialMedia) {
+          setSocialMedia({
+            whatsapp: data.socialMedia.whatsapp || '',
+            instagram: data.socialMedia.instagram || '',
+            twitter: data.socialMedia.twitter || ''
+          });
         }
       }
     } catch (error) {
@@ -432,6 +449,94 @@ const Home = () => {
             >
               Download App
             </Button>
+          </Box>
+        </Zoom>
+      )}
+
+      {/* Social Media Icons - Floating on right side */}
+      {(socialMedia.whatsapp || socialMedia.instagram || socialMedia.twitter) && (
+        <Zoom in timeout={1200}>
+          <Box
+            sx={{
+              position: 'fixed',
+              right: { xs: 15, md: 30 },
+              top: '50%',
+              transform: 'translateY(-50%)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+              zIndex: 999,
+            }}
+          >
+            {socialMedia.whatsapp && (
+              <IconButton
+                component="a"
+                href={socialMedia.whatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  bgcolor: '#25D366',
+                  color: 'white',
+                  width: { xs: 48, md: 56 },
+                  height: { xs: 48, md: 56 },
+                  boxShadow: '0 4px 15px rgba(37, 211, 102, 0.4)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    bgcolor: '#128C7E',
+                    transform: 'translateX(-5px) scale(1.1)',
+                    boxShadow: '0 6px 20px rgba(37, 211, 102, 0.6)',
+                  },
+                }}
+              >
+                <WhatsAppIcon sx={{ fontSize: { xs: 24, md: 28 } }} />
+              </IconButton>
+            )}
+            {socialMedia.instagram && (
+              <IconButton
+                component="a"
+                href={socialMedia.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  background: 'linear-gradient(135deg, #E4405F 0%, #C13584 100%)',
+                  color: 'white',
+                  width: { xs: 48, md: 56 },
+                  height: { xs: 48, md: 56 },
+                  boxShadow: '0 4px 15px rgba(228, 64, 95, 0.4)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #C13584 0%, #833AB4 100%)',
+                    transform: 'translateX(-5px) scale(1.1)',
+                    boxShadow: '0 6px 20px rgba(228, 64, 95, 0.6)',
+                  },
+                }}
+              >
+                <InstagramIcon sx={{ fontSize: { xs: 24, md: 28 } }} />
+              </IconButton>
+            )}
+            {socialMedia.twitter && (
+              <IconButton
+                component="a"
+                href={socialMedia.twitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  bgcolor: '#000000',
+                  color: 'white',
+                  width: { xs: 48, md: 56 },
+                  height: { xs: 48, md: 56 },
+                  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    bgcolor: '#333333',
+                    transform: 'translateX(-5px) scale(1.1)',
+                    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.5)',
+                  },
+                }}
+              >
+                <TwitterIcon sx={{ fontSize: { xs: 24, md: 28 } }} />
+              </IconButton>
+            )}
           </Box>
         </Zoom>
       )}

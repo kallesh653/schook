@@ -39,7 +39,8 @@ import {
   Villa as CampusIcon,
   CheckCircle as WhyChooseUsIcon,
   FormatQuote as TestimonialsIcon,
-  Article as AboutIcon
+  Article as AboutIcon,
+  Share as SocialMediaIcon
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import axios from 'axios';
@@ -142,6 +143,15 @@ const PublicHomePageManagement = () => {
     image: null
   });
 
+  // Social Media
+  const [socialMedia, setSocialMedia] = useState({
+    whatsapp: '',
+    instagram: '',
+    twitter: '',
+    facebook: '',
+    youtube: ''
+  });
+
   // Dialogs
   const [openSliderDialog, setOpenSliderDialog] = useState(false);
   const [openNewsDialog, setOpenNewsDialog] = useState(false);
@@ -217,6 +227,15 @@ const PublicHomePageManagement = () => {
           title: data.aboutSection?.title || 'About Our School',
           description: data.aboutSection?.description || '',
           image: data.aboutSection?.image || null
+        });
+
+        // Set social media
+        setSocialMedia({
+          whatsapp: data.socialMedia?.whatsapp || '',
+          instagram: data.socialMedia?.instagram || '',
+          twitter: data.socialMedia?.twitter || '',
+          facebook: data.socialMedia?.facebook || '',
+          youtube: data.socialMedia?.youtube || ''
         });
       }
     } catch (error) {
@@ -624,6 +643,31 @@ const PublicHomePageManagement = () => {
     }
   };
 
+  // Save Social Media
+  const handleSaveSocialMedia = async () => {
+    try {
+      setSaving(true);
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      await axios.patch(`${baseUrl}/public-home/social-media`, socialMedia, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSnackbar({
+        open: true,
+        message: 'Social media links updated successfully!',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error('Error saving social media:', error);
+      setSnackbar({
+        open: true,
+        message: 'Error saving social media links',
+        severity: 'error'
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleFileUpload = (file, field, section = 'hero') => {
     if (!file) return;
 
@@ -725,6 +769,7 @@ const PublicHomePageManagement = () => {
           <Tab icon={<TestimonialsIcon />} label="What Parents Say" />
           <Tab icon={<AboutIcon />} label="About School" />
           <Tab icon={<NewsIcon />} label="Latest News" />
+          <Tab icon={<SocialMediaIcon />} label="Social Media" />
         </Tabs>
 
         {/* Header & Logo Tab */}
@@ -1488,6 +1533,135 @@ const PublicHomePageManagement = () => {
                 </Paper>
               </Grid>
             )}
+          </Grid>
+        </TabPanel>
+
+        {/* Social Media Tab */}
+        <TabPanel value={tabValue} index={9}>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <Alert severity="info" sx={{ mb: 3 }}>
+                Add your social media profile links. These will appear as floating icons on the right side of the public home page.
+              </Alert>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <StyledCard>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom sx={{ color: 'white', mb: 3 }}>
+                    Social Media Links
+                  </Typography>
+
+                  <TextField
+                    fullWidth
+                    label="WhatsApp Link"
+                    value={socialMedia.whatsapp}
+                    onChange={(e) => setSocialMedia(prev => ({ ...prev, whatsapp: e.target.value }))}
+                    placeholder="https://wa.me/1234567890"
+                    sx={{
+                      mb: 2,
+                      '& .MuiInputBase-root': { color: 'white' },
+                      '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.8)' },
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' }
+                    }}
+                  />
+
+                  <TextField
+                    fullWidth
+                    label="Instagram Link"
+                    value={socialMedia.instagram}
+                    onChange={(e) => setSocialMedia(prev => ({ ...prev, instagram: e.target.value }))}
+                    placeholder="https://instagram.com/yourschool"
+                    sx={{
+                      mb: 2,
+                      '& .MuiInputBase-root': { color: 'white' },
+                      '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.8)' },
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' }
+                    }}
+                  />
+
+                  <TextField
+                    fullWidth
+                    label="Twitter/X Link"
+                    value={socialMedia.twitter}
+                    onChange={(e) => setSocialMedia(prev => ({ ...prev, twitter: e.target.value }))}
+                    placeholder="https://twitter.com/yourschool"
+                    sx={{
+                      mb: 2,
+                      '& .MuiInputBase-root': { color: 'white' },
+                      '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.8)' },
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' }
+                    }}
+                  />
+
+                  <TextField
+                    fullWidth
+                    label="Facebook Link"
+                    value={socialMedia.facebook}
+                    onChange={(e) => setSocialMedia(prev => ({ ...prev, facebook: e.target.value }))}
+                    placeholder="https://facebook.com/yourschool"
+                    sx={{
+                      mb: 2,
+                      '& .MuiInputBase-root': { color: 'white' },
+                      '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.8)' },
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' }
+                    }}
+                  />
+
+                  <TextField
+                    fullWidth
+                    label="YouTube Link"
+                    value={socialMedia.youtube}
+                    onChange={(e) => setSocialMedia(prev => ({ ...prev, youtube: e.target.value }))}
+                    placeholder="https://youtube.com/c/yourschool"
+                    sx={{
+                      '& .MuiInputBase-root': { color: 'white' },
+                      '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.8)' },
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' }
+                    }}
+                  />
+                </CardContent>
+              </StyledCard>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
+                    Preview
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    Social media icons will appear as floating buttons on the right side of your public home page.
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    Only icons with valid URLs will be displayed. Leave fields empty to hide specific social media icons.
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'bold', mt: 3 }}>
+                    Tips:
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" component="ul" sx={{ pl: 2 }}>
+                    <li>Use full URLs including https://</li>
+                    <li>For WhatsApp, use format: https://wa.me/PHONENUMBER</li>
+                    <li>Test links before saving to ensure they work correctly</li>
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Box sx={{ textAlign: 'center' }}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<SaveIcon />}
+                  onClick={handleSaveSocialMedia}
+                  disabled={saving}
+                  sx={{ px: 4 }}
+                >
+                  {saving ? 'Saving...' : 'Save Social Media Links'}
+                </Button>
+              </Box>
+            </Grid>
           </Grid>
         </TabPanel>
       </Paper>

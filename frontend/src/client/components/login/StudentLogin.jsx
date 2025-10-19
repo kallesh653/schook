@@ -31,11 +31,15 @@ export default function StudentLogin() {
         initialValues: initialValues,
         validationSchema: loginSchema,
         onSubmit: (values) => {
-            console.log("Student Login Formik values", values)
+            console.log("=== STUDENT LOGIN ATTEMPT ===")
+            console.log("Login values:", values)
+            console.log("Base URL:", baseUrl)
             const url = `${baseUrl}/student/login`;
+            console.log("Full Login URL:", url)
             const navUrl = '/student';
 
             axios.post(url, { ...values }, { withCredentials: true }).then(resp => {
+                console.log("✅ Student login successful:", resp.data)
                 setMessage(resp.data.message)
                 setType("success")
                 let token = resp.headers.authorization || resp.headers.Authorization;
@@ -49,14 +53,19 @@ export default function StudentLogin() {
                 }
                 Formik.resetForm();
             }).catch(e => {
+                console.error("❌ Student login error:", e)
                 if (e.response) {
+                    console.error("Error response:", e.response.data)
                     setMessage(e.response.data.message);
                     setType("error")
-                    console.log("Error in student login submit", e.response.data.message)
-                } else {
-                    setMessage("Network error. Please check your connection.");
+                } else if (e.request) {
+                    console.error("No response received:", e.request)
+                    setMessage("Cannot connect to server. Please check if server is running.");
                     setType("error")
-                    console.log("Network error in student login", e.message)
+                } else {
+                    console.error("Error message:", e.message)
+                    setMessage("Network error: " + e.message);
+                    setType("error")
                 }
             })
         }
