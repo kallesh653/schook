@@ -69,6 +69,7 @@ courseSchema.pre('save', function(next) {
 // Index for faster queries
 courseSchema.index({ school: 1, courseName: 1 });
 
-const Course = mongoose.model('Course', courseSchema);
+// Explicitly set collection name to 'courses'
+const Course = mongoose.model('Course', courseSchema, 'courses');
 
 module.exports = Course;
