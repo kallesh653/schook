@@ -221,6 +221,30 @@ const publicHomePageSchema = new mongoose.Schema({
     }
   },
 
+  // Social Media Links
+  socialMedia: {
+    whatsapp: {
+      type: String,
+      default: ''
+    },
+    instagram: {
+      type: String,
+      default: ''
+    },
+    twitter: {
+      type: String,
+      default: ''
+    },
+    facebook: {
+      type: String,
+      default: ''
+    },
+    youtube: {
+      type: String,
+      default: ''
+    }
+  },
+
   // Footer
   footer: {
     copyrightText: {

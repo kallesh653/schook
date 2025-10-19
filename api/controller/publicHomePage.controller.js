@@ -433,3 +433,35 @@ exports.updateAbout = async (req, res) => {
     });
   }
 };
+// Update social media links
+exports.updateSocialMedia = async (req, res) => {
+  try {
+    const { whatsapp, instagram, twitter, facebook, youtube } = req.body;
+
+    let publicPage = await PublicHomePage.findOne({ isSingleton: true });
+
+    if (!publicPage) {
+      publicPage = await PublicHomePage.create({ isSingleton: true });
+    }
+
+    if (whatsapp !== undefined) publicPage.socialMedia.whatsapp = whatsapp;
+    if (instagram !== undefined) publicPage.socialMedia.instagram = instagram;
+    if (twitter !== undefined) publicPage.socialMedia.twitter = twitter;
+    if (facebook !== undefined) publicPage.socialMedia.facebook = facebook;
+    if (youtube !== undefined) publicPage.socialMedia.youtube = youtube;
+
+    await publicPage.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Social media links updated successfully',
+      data: publicPage
+    });
+  } catch (error) {
+    console.error('Error updating social media:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating social media links'
+    });
+  }
+};

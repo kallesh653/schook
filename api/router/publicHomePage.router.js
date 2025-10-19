@@ -18,5 +18,6 @@ router.patch('/programs', auth(['SCHOOL']), publicHomePageController.updateProgr
 router.patch('/campus', auth(['SCHOOL']), publicHomePageController.updateCampus);
 router.patch('/testimonials', auth(['SCHOOL']), publicHomePageController.updateTestimonials);
 router.patch('/about', auth(['SCHOOL']), publicHomePageController.updateAbout);
+router.patch('/social-media', auth(['SCHOOL']), publicHomePageController.updateSocialMedia);
 
 module.exports = router;
