@@ -26,7 +26,7 @@ import {
   Search as SeoIcon
 } from '@mui/icons-material';
 import axios from 'axios';
-import { Environment } from '../../../environment';
+import { baseUrl } from '../../../environment';
 
 // Import section components
 import HeaderSection from './sections/HeaderSection';
@@ -60,7 +60,7 @@ const HomePageManagement = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        `${Environment.BaseURL}/api/home-page-content/${schoolId}`,
+        `${baseUrl}/home-page-content/${schoolId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -163,7 +163,7 @@ const HomePageManagement = () => {
 
     try {
       const response = await axios.post(
-        `${Environment.BaseURL}/api/home-page-content/${schoolId}`,
+        `${baseUrl}/home-page-content/${schoolId}`,
         defaultData,
         {
           headers: {
@@ -204,7 +204,7 @@ const HomePageManagement = () => {
     try {
       setSaving(true);
       const response = await axios.put(
-        `${Environment.BaseURL}/api/home-page-content/${schoolId}${endpoint}`,
+        `${baseUrl}/home-page-content/${schoolId}${endpoint}`,
         data,
         {
           headers: {

@@ -33,7 +33,7 @@ import {
   PlayArrow as PlayIcon
 } from '@mui/icons-material';
 import axios from 'axios';
-import { Environment } from '../../../../environment';
+import { baseUrl } from '../../../../environment';
 
 const SliderSection = ({ data, saveSection, showSnackbar, schoolId, saving }) => {
   const [sliders, setSliders] = useState(data.sliders || []);
@@ -122,7 +122,7 @@ const SliderSection = ({ data, saveSection, showSnackbar, schoolId, saving }) =>
     try {
       setUploading(true);
       const response = await axios.post(
-        `${Environment.BaseURL}/api/home-page-content/${schoolId}/upload`,
+        `${baseUrl.replace('/api', '')}/api/home-page-content/${schoolId}/upload`,
         formDataUpload,
         {
           headers: {
@@ -185,7 +185,7 @@ const SliderSection = ({ data, saveSection, showSnackbar, schoolId, saving }) =>
 
     try {
       const response = await axios.delete(
-        `${Environment.BaseURL}/api/home-page-content/${schoolId}/sliders/${sliderId}`,
+        `${baseUrl.replace('/api', '')}/api/home-page-content/${schoolId}/sliders/${sliderId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`

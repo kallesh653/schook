@@ -22,7 +22,7 @@ import {
   LinkedIn
 } from '@mui/icons-material';
 import axios from 'axios';
-import { Environment } from '../../../../environment';
+import { baseUrl } from '../../../../environment';
 
 const HeaderSection = ({ data, updateData, saveSection, showSnackbar, schoolId, saving }) => {
   const [formData, setFormData] = useState(data.header || {});
@@ -68,7 +68,7 @@ const HeaderSection = ({ data, updateData, saveSection, showSnackbar, schoolId, 
     try {
       setUploading(true);
       const response = await axios.post(
-        `${Environment.BaseURL}/api/home-page-content/${schoolId}/upload`,
+        `${baseUrl}/home-page-content/${schoolId}/upload`,
         formDataUpload,
         {
           headers: {

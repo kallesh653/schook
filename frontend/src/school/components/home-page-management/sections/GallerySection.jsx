@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import { Add, Edit, Delete, Save, CloudUpload, Close, Collections } from '@mui/icons-material';
 import axios from 'axios';
-import { Environment } from '../../../../environment';
+import { baseUrl } from '../../../../environment';
 
 const GallerySection = ({ data, saveSection, showSnackbar, schoolId, saving }) => {
   const [gallery, setGallery] = useState(data.gallery || []);
@@ -73,7 +73,7 @@ const GallerySection = ({ data, saveSection, showSnackbar, schoolId, saving }) =
     try {
       setUploading(true);
       const response = await axios.post(
-        `${Environment.BaseURL}/api/home-page-content/${schoolId}/upload`,
+        `${baseUrl.replace('/api', '')}/api/home-page-content/${schoolId}/upload`,
         fd,
         {
           headers: {
@@ -113,7 +113,7 @@ const GallerySection = ({ data, saveSection, showSnackbar, schoolId, saving }) =
     if (!window.confirm('Delete this image from gallery?')) return;
 
     try {
-      await axios.delete(`${Environment.BaseURL}/api/home-page-content/${schoolId}/gallery/${id}`, {
+      await axios.delete(`${baseUrl.replace('/api', '')}/api/home-page-content/${schoolId}/gallery/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       showSnackbar('Gallery image deleted', 'success');

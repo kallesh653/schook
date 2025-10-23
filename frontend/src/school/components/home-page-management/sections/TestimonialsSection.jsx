@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Grid, TextField, Button, Typography, Card, CardContent, CardActions, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Rating, Switch, FormControlLabel } from '@mui/material';
 import { Add, Edit, Delete, Save, Close, RateReview } from '@mui/icons-material';
 import axios from 'axios';
-import { Environment } from '../../../../environment';
+import { baseUrl } from '../../../../environment';
 
 const TestimonialsSection = ({ data, saveSection, showSnackbar, schoolId }) => {
   const [testimonials, setTestimonials] = useState(data.testimonials?.items || []);
@@ -27,7 +27,7 @@ const TestimonialsSection = ({ data, saveSection, showSnackbar, schoolId }) => {
     if (!window.confirm('Delete?')) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${Environment.BaseURL}/api/home-page-content/${schoolId}/testimonials/${id}`, { headers: { Authorization: `Bearer ${token}` }});
+      await axios.delete(`${baseUrl.replace('/api', '')}/api/home-page-content/${schoolId}/testimonials/${id}`, { headers: { Authorization: `Bearer ${token}` }});
       showSnackbar('Deleted', 'success');
       setTestimonials(testimonials.filter(t => t._id !== id));
     } catch (error) { showSnackbar('Error', 'error'); }

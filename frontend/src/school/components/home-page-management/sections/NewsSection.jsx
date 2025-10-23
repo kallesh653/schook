@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Grid, TextField, Button, Typography, Card, CardContent, CardActions, Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from '@mui/material';
 import { Add, Edit, Delete, Save, Close } from '@mui/icons-material';
 import axios from 'axios';
-import { Environment } from '../../../../environment';
+import { baseUrl } from '../../../../environment';
 
 const NewsSection = ({ data, saveSection, showSnackbar, schoolId }) => {
   const [news, setNews] = useState(data.news || []);
@@ -23,7 +23,7 @@ const NewsSection = ({ data, saveSection, showSnackbar, schoolId }) => {
   const handleDelete = async (id) => {
     if (window.confirm('Delete?')) {
       try {
-        await axios.delete(`${Environment.BaseURL}/api/home-page-content/${schoolId}/news/${id}`, {
+        await axios.delete(`${baseUrl.replace('/api', '')}/api/home-page-content/${schoolId}/news/${id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         showSnackbar('Deleted', 'success');

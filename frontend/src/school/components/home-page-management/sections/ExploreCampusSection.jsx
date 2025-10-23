@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Grid, TextField, Button, Typography, Paper, IconButton } from '@mui/material';
 import { Save, CloudUpload, Delete } from '@mui/icons-material';
 import axios from 'axios';
-import { Environment } from '../../../../environment';
+import { baseUrl } from '../../../../environment';
 
 const ExploreCampusSection = ({ data, saveSection, showSnackbar, schoolId, saving }) => {
   const [formData, setFormData] = useState(data.exploreCampus || {});
@@ -16,7 +16,7 @@ const ExploreCampusSection = ({ data, saveSection, showSnackbar, schoolId, savin
     files.forEach(file => fd.append('file', file));
     try {
       setUploading(true);
-      const response = await axios.post(`${Environment.BaseURL}/api/home-page-content/${schoolId}/upload`, fd, {
+      const response = await axios.post(`${baseUrl.replace('/api', '')}/api/home-page-content/${schoolId}/upload`, fd, {
         headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       if (response.data.success) {

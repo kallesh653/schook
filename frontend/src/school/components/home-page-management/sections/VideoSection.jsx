@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import { Add, Edit, Delete, Save, Close, VideoLibrary, PlayCircle } from '@mui/icons-material';
 import axios from 'axios';
-import { Environment } from '../../../../environment';
+import { baseUrl } from '../../../../environment';
 
 const VideoSection = ({ data, saveSection, showSnackbar, schoolId }) => {
   const [videos, setVideos] = useState(data.videos || []);
@@ -71,7 +71,7 @@ const VideoSection = ({ data, saveSection, showSnackbar, schoolId }) => {
     if (!window.confirm('Delete this video?')) return;
 
     try {
-      await axios.delete(`${Environment.BaseURL}/api/home-page-content/${schoolId}/videos/${id}`, {
+      await axios.delete(`${baseUrl.replace('/api', '')}/api/home-page-content/${schoolId}/videos/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       showSnackbar('Video deleted', 'success');
