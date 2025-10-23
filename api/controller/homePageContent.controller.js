@@ -3,7 +3,34 @@ const formidable = require("formidable");
 const fs = require("fs");
 const path = require("path");
 
-// Get home page content
+// Get home page content for any school (public - no auth)
+const getPublicHomePageContent = async (req, res) => {
+  try {
+    // Try to get first available school's home page content
+    const content = await HomePageContent.findOne().populate('schoolId');
+
+    if (!content) {
+      return res.status(404).json({
+        success: false,
+        message: "No home page content available yet"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: content
+    });
+  } catch (error) {
+    console.error("Error fetching public home page content:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching home page content",
+      error: error.message
+    });
+  }
+};
+
+// Get home page content by schoolId
 const getHomePageContent = async (req, res) => {
   try {
     const { schoolId } = req.params;
@@ -1018,6 +1045,7 @@ const uploadFile = async (req, res) => {
 };
 
 module.exports = {
+  getPublicHomePageContent,
   getHomePageContent,
   createOrUpdateHomePageContent,
   updateHeader,

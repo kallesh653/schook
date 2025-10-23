@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const {
+  getPublicHomePageContent,
   getHomePageContent,
   createOrUpdateHomePageContent,
   updateHeader,
@@ -31,7 +32,10 @@ const {
   uploadFile
 } = require("../controller/homePageContent.controller");
 
-// Public endpoint - Get home page content (no auth required)
+// Public endpoint - Get any school's home page content (no auth required)
+router.get("/public", getPublicHomePageContent);
+
+// Public endpoint - Get specific school's home page content (no auth required)
 router.get("/public/:schoolId", getHomePageContent);
 
 // Get home page content (admin)

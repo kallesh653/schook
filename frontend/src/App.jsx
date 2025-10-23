@@ -7,7 +7,6 @@ import "./App.css";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 
 import Client from "./client/Client";
-import Home from "./client/components/home/Home";
 import Contact from "./client/components/contact/Contact";
 import Login from "./client/components/login/Login";
 import StudentLogin from "./client/components/login/StudentLogin";
@@ -107,8 +106,7 @@ function App() {
   
             <Route path="/" element={<Client />}>
               <Route index element={<Navigate to="/home" replace />} />
-              <Route path="home" element={<Home />} />
-              <Route path="public-home" element={<PublicHomePage />} />
+              <Route path="home" element={<PublicHomePage />} />
               <Route path="contact" element={<Contact />} />
               <Route path="login" element={<Login />} />
               <Route path="student-login" element={<StudentLogin />} />

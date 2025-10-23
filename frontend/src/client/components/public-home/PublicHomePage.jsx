@@ -61,21 +61,6 @@ const PublicHomePage = () => {
   const [homeData, setHomeData] = useState(null);
   const [error, setError] = useState(null);
 
-  // Get first school ID from localStorage or use a default
-  const getSchoolId = () => {
-    // Try to get from user data
-    const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        return user.id;
-      } catch (e) {}
-    }
-    // For now, we'll need to handle this differently
-    // In production, you might want to get school from subdomain or URL param
-    return null;
-  };
-
   useEffect(() => {
     fetchHomePageContent();
   }, []);
@@ -83,18 +68,9 @@ const PublicHomePage = () => {
   const fetchHomePageContent = async () => {
     try {
       setLoading(true);
-      const schoolId = getSchoolId();
 
-      if (!schoolId) {
-        // If no school ID, use a default or show a message
-        setError('No school selected');
-        setLoading(false);
-        return;
-      }
-
-      const response = await axios.get(
-        `${baseUrl}/home-page-content/public/${schoolId}`
-      );
+      // Fetch public home page content (no schoolId needed)
+      const response = await axios.get(`${baseUrl}/home-page-content/public`);
 
       if (response.data.success) {
         setHomeData(response.data.data);
