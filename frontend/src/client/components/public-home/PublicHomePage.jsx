@@ -746,18 +746,17 @@ const PublicHomePage = () => {
             {/* Slider with images/videos */}
             {content.sliders.map((slide, index) => (
               <HeroSlide key={index} active={currentSlide === index}>
-                {/* FIX: Check slide.mediaType for video/image */}
-                {slide.mediaType === 'video' && slide.video ? (
+                {slide.mediaType === 'video' ? (
                   <HeroVideo
-                    src={getImageUrl(slide.video)}
+                    src={getImageUrl(slide.mediaUrl)}
                     autoPlay
                     loop
                     muted
                     playsInline
                   />
-                ) : slide.image ? (
-                  <HeroMedia src={getImageUrl(slide.image)} alt={slide.title || 'Slide'} />
-                ) : null}
+                ) : (
+                  <HeroMedia src={getImageUrl(slide.mediaUrl)} alt={slide.title || 'Slide'} />
+                )}
               </HeroSlide>
             ))}
 
