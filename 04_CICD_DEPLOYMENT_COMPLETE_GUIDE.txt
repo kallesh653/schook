@@ -1,0 +1,1627 @@
+================================================================================
+     CI/CD & DEPLOYMENT COMPLETE GUIDE - ZERO TO PRODUCTION
+     Continuous Integration & Continuous Deployment Mastery
+================================================================================
+
+Author: Comprehensive CI/CD Learning Guide
+Purpose: Master modern deployment practices from basics to advanced
+Target: Developers to DevOps Engineers
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+PART 1: CI/CD FUNDAMENTALS
+    1.1  What is CI/CD?
+    1.2  Why CI/CD?
+    1.3  CI vs CD vs Continuous Deployment
+    1.4  CI/CD Pipeline Overview
+    1.5  Key Concepts
+
+PART 2: VERSION CONTROL (GIT)
+    2.1  Git Basics
+    2.2  Git Workflow
+    2.3  Branching Strategies
+    2.4  Git Commands Cheat Sheet
+    2.5  GitHub/GitLab/Bitbucket
+
+PART 3: CI/CD TOOLS
+    3.1  GitHub Actions
+    3.2  GitLab CI/CD
+    3.3  Jenkins
+    3.4  CircleCI
+    3.5  Travis CI
+    3.6  AWS CodePipeline
+    3.7  Comparison & Choosing
+
+PART 4: GITHUB ACTIONS - DEEP DIVE
+    4.1  What is GitHub Actions?
+    4.2  Workflows
+    4.3  Events & Triggers
+    4.4  Jobs & Steps
+    4.5  Actions Marketplace
+    4.6  Secrets Management
+    4.7  Matrix Builds
+    4.8  Artifacts
+    4.9  Environment Variables
+    4.10 Complete Examples
+
+PART 5: DOCKER IN CI/CD
+    5.1  Building Docker Images
+    5.2  Docker Multi-stage Builds
+    5.3  Docker Registry (Docker Hub, ECR)
+    5.4  Docker in GitHub Actions
+    5.5  Docker Compose in CI/CD
+    5.6  Security Scanning
+
+PART 6: TESTING IN CI/CD
+    6.1  Unit Testing
+    6.2  Integration Testing
+    6.3  E2E Testing
+    6.4  Test Coverage
+    6.5  Automated Testing in Pipeline
+    6.6  Test Reporting
+
+PART 7: DEPLOYMENT STRATEGIES
+    7.1  Manual Deployment
+    7.2  Automated Deployment
+    7.3  Blue-Green Deployment
+    7.4  Canary Deployment
+    7.5  Rolling Deployment
+    7.6  A/B Testing
+    7.7  Feature Flags
+
+PART 8: DEPLOYING TO DIFFERENT PLATFORMS
+    8.1  Deploy to VPS (Traditional)
+    8.2  Deploy to AWS EC2
+    8.3  Deploy to AWS ECS (Containers)
+    8.4  Deploy to AWS Lambda (Serverless)
+    8.5  Deploy to Vercel/Netlify (Frontend)
+    8.6  Deploy to Heroku
+    8.7  Deploy to DigitalOcean
+    8.8  Deploy to Kubernetes
+
+PART 9: SCHOOL SYSTEM CI/CD
+    9.1  Current Manual Deployment
+    9.2  GitHub Actions Setup
+    9.3  Build Pipeline
+    9.4  Test Pipeline
+    9.5  Deploy Pipeline
+    9.6  Complete Workflow
+    9.7  Rollback Strategy
+
+PART 10: MONITORING & LOGGING
+    10.1 Application Monitoring
+    10.2 Server Monitoring
+    10.3 Log Aggregation
+    10.4 Error Tracking
+    10.5 Performance Monitoring
+    10.6 Uptime Monitoring
+    10.7 Alerting
+
+PART 11: SECURITY IN CI/CD
+    11.1 Secrets Management
+    11.2 Code Scanning
+    11.3 Dependency Scanning
+    11.4 Container Scanning
+    11.5 SAST (Static Analysis)
+    11.6 DAST (Dynamic Analysis)
+    11.7 Compliance & Auditing
+
+PART 12: ADVANCED TOPICS
+    12.1 Infrastructure as Code (IaC)
+    12.2 Terraform
+    12.3 Ansible
+    12.4 GitOps
+    12.5 Service Mesh
+    12.6 Chaos Engineering
+
+PART 13: BEST PRACTICES
+    13.1 Pipeline Optimization
+    13.2 Caching Strategies
+    13.3 Parallel Execution
+    13.4 Fast Feedback
+    13.5 Documentation
+    13.6 Team Collaboration
+
+PART 14: TROUBLESHOOTING
+    14.1 Common Issues
+    14.2 Debugging Pipelines
+    14.3 Performance Issues
+    14.4 Rollback Procedures
+    14.5 Disaster Recovery
+
+================================================================================
+PART 1: CI/CD FUNDAMENTALS
+================================================================================
+
+1.1 WHAT IS CI/CD?
+--------------------------------------------------------------------------------
+
+SIMPLE DEFINITIONS:
+
+CI (Continuous Integration):
+Automatically build and test code every time changes are pushed
+
+CD (Continuous Delivery):
+Automatically prepare code for release (ready to deploy)
+
+CD (Continuous Deployment):
+Automatically deploy code to production
+
+
+REAL-WORLD ANALOGY:
+
+WITHOUT CI/CD (Traditional):
+┌─────────────────────────────────────────────────────┐
+│ Developer writes code (1 week)                      │
+│         ↓                                           │
+│ Manually merge code → Conflicts! (2 hours)         │
+│         ↓                                           │
+│ Manually run tests → Some fail! (30 mins)          │
+│         ↓                                           │
+│ Fix tests (1 hour)                                  │
+│         ↓                                           │
+│ Manually build app → Build errors! (1 hour)        │
+│         ↓                                           │
+│ Fix build (30 mins)                                 │
+│         ↓                                           │
+│ Manually SSH to server (10 mins)                   │
+│         ↓                                           │
+│ Manually copy files (5 mins)                        │
+│         ↓                                           │
+│ Restart server → Crashes! (15 mins)                │
+│         ↓                                           │
+│ Debug and fix (2 hours)                             │
+│         ↓                                           │
+│ FINALLY deployed! (Total: ~8 hours after coding)   │
+└─────────────────────────────────────────────────────┘
+
+Stressful, error-prone, slow! ✗
+
+
+WITH CI/CD (Modern):
+┌─────────────────────────────────────────────────────┐
+│ Developer writes code                               │
+│         ↓                                           │
+│ Push to GitHub                                      │
+│         ↓                                           │
+│ ┌────────────────────────────────────────────────┐ │
+│ │        AUTOMATIC PIPELINE                      │ │
+│ │  ✓ Merge code                                  │ │
+│ │  ✓ Run tests (all pass!)                       │ │
+│ │  ✓ Build app                                   │ │
+│ │  ✓ Build Docker image                          │ │
+│ │  ✓ Push to registry                            │ │
+│ │  ✓ Deploy to staging                           │ │
+│ │  ✓ Run E2E tests                               │ │
+│ │  ✓ Deploy to production                        │ │
+│ └────────────────────────────────────────────────┘ │
+│         ↓                                           │
+│ DEPLOYED! (Total: 5 minutes, fully automated)      │
+└─────────────────────────────────────────────────────┘
+
+Fast, reliable, stress-free! ✓
+
+
+1.2 WHY CI/CD?
+--------------------------------------------------------------------------------
+
+BENEFITS:
+
+1. FASTER TIME TO MARKET
+   Without CI/CD: Weekly/monthly releases
+   With CI/CD: Multiple deploys per day
+
+   Example: Amazon deploys every 11.6 seconds!
+
+2. FEWER BUGS
+   Automated testing catches bugs early
+   Before they reach production
+
+3. CONSISTENT RELEASES
+   Same process every time
+   No "works on my machine" problems
+
+4. REDUCED RISK
+   Small, frequent changes → Less risky
+   Easy to rollback if issues
+
+5. DEVELOPER PRODUCTIVITY
+   No manual deployment = More coding time
+   Developers focus on features, not ops
+
+6. BETTER COLLABORATION
+   Immediate feedback on code
+   Team sees status of all changes
+
+7. IMPROVED CODE QUALITY
+   Automated linting, testing, security scans
+   Code reviews before merge
+
+
+REAL-WORLD IMPACT:
+
+Company: Netflix
+- Deploys 4000+ times per day
+- CI/CD enables rapid innovation
+- Automated rollback if issues
+
+Company: Etsy
+- Went from bi-weekly to 50+ deploys/day
+- Developer satisfaction increased
+- Bugs decreased 90%
+
+Your School System:
+Current:
+- Manual deployment (30-60 minutes)
+- Sometimes breaks
+- Deploy only when confident
+- Maybe once per week
+
+With CI/CD:
+- Automatic deployment (5 minutes)
+- Tested before deploy
+- Deploy every bug fix immediately
+- Multiple times per day
+
+
+1.3 CI VS CD VS CONTINUOUS DEPLOYMENT
+--------------------------------------------------------------------------------
+
+DETAILED EXPLANATION:
+
+1. CONTINUOUS INTEGRATION (CI)
+   ┌────────────────────────────────────┐
+   │ Developer pushes code to Git       │
+   │              ↓                     │
+   │ Automatic: Build                   │
+   │              ↓                     │
+   │ Automatic: Run tests               │
+   │              ↓                     │
+   │ Automatic: Code analysis           │
+   │              ↓                     │
+   │ Result: ✓ Pass or ✗ Fail         │
+   └────────────────────────────────────┘
+
+   Goal: Ensure code integrates with main branch
+
+   Key Practices:
+   ✓ Commit code frequently (multiple times/day)
+   ✓ Automated build on every commit
+   ✓ Automated testing on every build
+   ✓ Fix broken builds immediately
+   ✓ Keep build fast (<10 minutes)
+
+
+2. CONTINUOUS DELIVERY (CD)
+   ┌────────────────────────────────────┐
+   │ CI passes                          │
+   │              ↓                     │
+   │ Automatic: Build artifacts         │
+   │              ↓                     │
+   │ Automatic: Deploy to staging       │
+   │              ↓                     │
+   │ Automatic: Run E2E tests           │
+   │              ↓                     │
+   │ MANUAL: Approve production deploy  │ ← Human decision
+   │              ↓                     │
+   │ Automatic: Deploy to production    │
+   └────────────────────────────────────┘
+
+   Goal: Code is ALWAYS ready to deploy
+
+   Key Practices:
+   ✓ Automated deployment to staging
+   ✓ Tested in production-like environment
+   ✓ One-click deployment to production
+   ✓ Manual approval before production
+
+
+3. CONTINUOUS DEPLOYMENT
+   ┌────────────────────────────────────┐
+   │ CI passes                          │
+   │              ↓                     │
+   │ Automatic: Build artifacts         │
+   │              ↓                     │
+   │ Automatic: Deploy to staging       │
+   │              ↓                     │
+   │ Automatic: Run E2E tests           │
+   │              ↓                     │
+   │ Automatic: Deploy to production    │ ← Fully automated
+   └────────────────────────────────────┘
+
+   Goal: Every change that passes tests goes to production automatically
+
+   Key Practices:
+   ✓ Robust automated testing (high confidence)
+   ✓ Automated rollback on failures
+   ✓ Feature flags for risky changes
+   ✓ Excellent monitoring
+
+
+COMPARISON:
+
+Aspect                CI        CD (Delivery)    CD (Deployment)
+────────────────────────────────────────────────────────────────
+Build                 Auto      Auto             Auto
+Test                  Auto      Auto             Auto
+Deploy to Staging     -         Auto             Auto
+Deploy to Production  -         Manual           Auto
+Risk Level            Low       Medium           High
+Typical Use           All       Enterprise       Tech Giants
+
+
+CHOOSING WHICH:
+
+START WITH: Continuous Integration
+- Automated build and test
+- Foundation for everything
+
+ADD: Continuous Delivery
+- Automated staging deploys
+- Manual production deploys
+- Good for: Banks, Healthcare (strict compliance)
+
+ADVANCE TO: Continuous Deployment
+- Fully automated
+- Good for: SaaS, Web apps (fast iteration)
+
+
+YOUR SCHOOL SYSTEM:
+Recommended: Continuous Delivery
+- Auto-deploy to staging
+- Manual approval for production
+- Safe and efficient
+
+
+1.4 CI/CD PIPELINE OVERVIEW
+--------------------------------------------------------------------------------
+
+TYPICAL PIPELINE STAGES:
+
+┌──────────────────────────────────────────────────────────────┐
+│                         CI/CD PIPELINE                       │
+└──────────────────────────────────────────────────────────────┘
+
+Stage 1: SOURCE
+┌─────────────┐
+│ Git Push    │ Developer pushes code to GitHub
+└──────┬──────┘
+       │ Triggers pipeline
+       ↓
+
+Stage 2: BUILD
+┌─────────────┐
+│ Install deps│ npm install
+│ Lint code   │ ESLint, Prettier
+│ Compile     │ TypeScript → JavaScript
+└──────┬──────┘
+       │ If pass ✓
+       ↓
+
+Stage 3: TEST
+┌─────────────┐
+│ Unit tests  │ Jest, Mocha
+│ Integration │ Supertest
+│ Coverage    │ 80% minimum
+└──────┬──────┘
+       │ If pass ✓
+       ↓
+
+Stage 4: SECURITY
+┌─────────────┐
+│ Code scan   │ SonarQube
+│ Dependencies│ npm audit
+│ Secrets     │ Detect leaked keys
+└──────┬──────┘
+       │ If pass ✓
+       ↓
+
+Stage 5: BUILD ARTIFACT
+┌─────────────┐
+│ Build Docker│ docker build
+│ Tag image   │ myapp:v1.2.3
+│ Push to reg │ Docker Hub/ECR
+└──────┬──────┘
+       │ If pass ✓
+       ↓
+
+Stage 6: DEPLOY (STAGING)
+┌─────────────┐
+│ Pull image  │ From registry
+│ Run on stage│ staging.myapp.com
+│ Smoke tests │ Basic health checks
+└──────┬──────┘
+       │ If pass ✓
+       ↓
+
+Stage 7: E2E TESTS
+┌─────────────┐
+│ Run Cypress │ Test user flows
+│ Performance │ Load testing
+│ Visual tests│ Screenshot comparison
+└──────┬──────┘
+       │ If pass ✓
+       ↓
+
+Stage 8: MANUAL APPROVAL (Continuous Delivery)
+┌─────────────┐
+│ Wait for    │ Team lead reviews
+│ Approval    │ Click "Deploy"
+└──────┬──────┘
+       │ Approved ✓
+       ↓
+
+Stage 9: DEPLOY (PRODUCTION)
+┌─────────────┐
+│ Blue-green  │ Deploy to new servers
+│ Health check│ Ensure healthy
+│ Switch      │ Route traffic to new
+└──────┬──────┘
+       │ If healthy ✓
+       ↓
+
+Stage 10: POST-DEPLOY
+┌─────────────┐
+│ Monitoring  │ Watch errors, metrics
+│ Notify team │ Slack/Email
+│ Rollback?   │ If issues detected
+└─────────────┘
+
+
+PIPELINE EXECUTION TIME:
+
+Fast Pipeline (Optimized):
+- Build: 1 min
+- Test: 2 min
+- Security: 1 min
+- Docker: 2 min
+- Deploy: 1 min
+Total: ~7 minutes ✓
+
+Slow Pipeline (Not optimized):
+- Build: 5 min
+- Test: 10 min
+- Security: 3 min
+- Docker: 5 min
+- Deploy: 2 min
+Total: ~25 minutes ✗
+
+Goal: Keep pipeline under 10 minutes
+Why? Fast feedback = Happy developers!
+
+
+1.5 KEY CONCEPTS
+--------------------------------------------------------------------------------
+
+1. PIPELINE
+   Automated workflow
+   Series of stages/steps
+   Defined in YAML/JSON file
+
+2. JOB
+   Logical grouping of steps
+   Runs on a runner/agent
+   Can run in parallel
+
+3. STEP
+   Individual command
+   Example: npm install, npm test
+
+4. RUNNER/AGENT
+   Machine that executes pipeline
+   Can be:
+   - Cloud (GitHub, GitLab hosted)
+   - Self-hosted (your own server)
+
+5. ARTIFACT
+   Build output
+   Examples:
+   - Compiled code
+   - Docker image
+   - Test results
+   - Coverage reports
+
+6. ENVIRONMENT
+   Target for deployment
+   Examples:
+   - Development
+   - Staging
+   - Production
+
+7. TRIGGER
+   Event that starts pipeline
+   Examples:
+   - Git push
+   - Pull request
+   - Schedule (cron)
+   - Manual
+
+8. CACHE
+   Store dependencies
+   Speed up builds
+   Example: Cache node_modules
+
+9. SECRETS
+   Sensitive data
+   API keys, passwords
+   Encrypted in CI/CD platform
+
+10. STATUS CHECK
+    Build result on Pull Request
+    ✓ All checks passed
+    ✗ Some checks failed
+
+
+================================================================================
+PART 2: VERSION CONTROL (GIT)
+================================================================================
+
+2.1 GIT BASICS
+--------------------------------------------------------------------------------
+
+WHAT IS GIT?
+
+Git = Version control system
+Track changes to code over time
+Collaborate with team
+
+SIMPLE ANALOGY:
+Git = Google Docs "Version History" for code
+- See who changed what
+- Revert to previous version
+- Work on same file simultaneously
+
+
+KEY CONCEPTS:
+
+1. REPOSITORY (REPO)
+   Folder containing your project + git history
+
+2. COMMIT
+   Snapshot of code at a point in time
+   Like saving your game
+
+3. BRANCH
+   Separate line of development
+   Work on features without affecting main code
+
+4. MERGE
+   Combine changes from one branch to another
+
+5. REMOTE
+   Copy of repository on server (GitHub)
+
+6. CLONE
+   Download repository from remote
+
+7. PUSH
+   Upload commits to remote
+
+8. PULL
+   Download commits from remote
+
+
+2.2 GIT WORKFLOW
+--------------------------------------------------------------------------------
+
+TYPICAL WORKFLOW:
+
+┌─────────────────────────────────────────────────────┐
+│ Step 1: Clone Repository                           │
+├─────────────────────────────────────────────────────┤
+│ git clone https://github.com/user/repo.git         │
+│ cd repo                                             │
+└─────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────┐
+│ Step 2: Create Branch                              │
+├─────────────────────────────────────────────────────┤
+│ git checkout -b feature/add-student-search          │
+└─────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────┐
+│ Step 3: Make Changes                               │
+├─────────────────────────────────────────────────────┤
+│ [Edit files...]                                     │
+│                                                     │
+│ git status                    # See changes        │
+│ git diff                      # See exact changes  │
+└─────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────┐
+│ Step 4: Stage Changes                              │
+├─────────────────────────────────────────────────────┤
+│ git add src/components/Students.jsx                 │
+│ # Or add all files:                                 │
+│ git add .                                           │
+└─────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────┐
+│ Step 5: Commit                                     │
+├─────────────────────────────────────────────────────┤
+│ git commit -m "Add search functionality to students"│
+└─────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────┐
+│ Step 6: Push to Remote                             │
+├─────────────────────────────────────────────────────┤
+│ git push origin feature/add-student-search          │
+└─────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────┐
+│ Step 7: Create Pull Request                        │
+├─────────────────────────────────────────────────────┤
+│ Go to GitHub → Open Pull Request                   │
+│ Review changes → Merge to main                      │
+└─────────────────────────────────────────────────────┘
+
+
+2.3 BRANCHING STRATEGIES
+--------------------------------------------------------------------------------
+
+COMMON STRATEGIES:
+
+1. GITHUB FLOW (Simple - Recommended for your project)
+
+   main (production)
+   ├── feature/add-login ──┐
+   ├── feature/add-attendance ─┐
+   └── hotfix/fix-crash ──────┐│
+                              │││
+                         Merge│││
+                              ↓↓↓
+   main (updated)
+
+   Rules:
+   - main is always deployable
+   - Create branch for each feature
+   - Open Pull Request
+   - Merge after review
+   - Deploy from main
+
+   Pros:
+   ✓ Simple
+   ✓ Fast
+   ✓ Good for CI/CD
+
+   Cons:
+   ✗ No separate staging branch
+
+
+2. GIT FLOW (Complex - For larger teams)
+
+   main (production)
+   ├── develop (integration)
+   │   ├── feature/search
+   │   ├── feature/export
+   │   └── feature/reports
+   ├── release/v1.2
+   └── hotfix/urgent-fix
+
+   Branches:
+   - main: Production-ready
+   - develop: Integration branch
+   - feature/*: New features
+   - release/*: Preparing release
+   - hotfix/*: Emergency fixes
+
+   Pros:
+   ✓ Organized
+   ✓ Multiple versions supported
+
+   Cons:
+   ✗ Complex
+   ✗ Slower releases
+
+
+3. TRUNK-BASED (Advanced - For CD)
+
+   main (trunk)
+   ├── short-lived-branch (1-2 days max)
+   └── another-short-branch
+
+   Rules:
+   - Branches live < 2 days
+   - Merge to main frequently
+   - Use feature flags
+   - Direct commits to main (small teams)
+
+   Pros:
+   ✓ Continuous deployment
+   ✓ Faster integration
+
+   Cons:
+   ✗ Requires discipline
+   ✗ Robust testing needed
+
+
+RECOMMENDATION FOR YOUR PROJECT:
+
+GitHub Flow
+- Simple and effective
+- Perfect for CI/CD
+- Easy to understand
+
+
+2.4 GIT COMMANDS CHEAT SHEET
+--------------------------------------------------------------------------------
+
+SETUP:
+```bash
+# Configure user
+git config --global user.name "Your Name"
+git config --global user.email "your@email.com"
+
+# Check config
+git config --list
+```
+
+REPOSITORY:
+```bash
+# Initialize new repo
+git init
+
+# Clone existing repo
+git clone https://github.com/user/repo.git
+
+# Clone to specific folder
+git clone https://github.com/user/repo.git my-folder
+```
+
+BRANCHES:
+```bash
+# List branches
+git branch
+
+# Create new branch
+git branch feature/new-feature
+
+# Switch to branch
+git checkout feature/new-feature
+
+# Create and switch (shorthand)
+git checkout -b feature/new-feature
+
+# Delete branch
+git branch -d feature/new-feature
+
+# Force delete (unmerged)
+git branch -D feature/new-feature
+
+# Rename branch
+git branch -m old-name new-name
+```
+
+STAGING:
+```bash
+# Check status
+git status
+
+# View changes
+git diff
+
+# Add file
+git add filename.js
+
+# Add all files
+git add .
+
+# Add all JS files
+git add *.js
+
+# Remove from staging
+git reset filename.js
+```
+
+COMMITS:
+```bash
+# Commit with message
+git commit -m "Add student search feature"
+
+# Commit all tracked files
+git commit -am "Fix bug in attendance"
+
+# Amend last commit
+git commit --amend -m "Updated message"
+
+# View commit history
+git log
+
+# View compact history
+git log --oneline
+
+# View with graph
+git log --graph --oneline
+```
+
+REMOTE:
+```bash
+# View remotes
+git remote -v
+
+# Add remote
+git remote add origin https://github.com/user/repo.git
+
+# Push to remote
+git push origin main
+
+# Push and set upstream
+git push -u origin feature/new
+
+# Pull from remote
+git pull origin main
+
+# Fetch (without merge)
+git fetch origin
+```
+
+MERGING:
+```bash
+# Merge branch into current
+git merge feature/new-feature
+
+# Abort merge (if conflicts)
+git merge --abort
+```
+
+CONFLICTS:
+```bash
+# View conflicts
+git status
+
+# After resolving conflicts:
+git add .
+git commit -m "Resolve merge conflicts"
+```
+
+UNDOING:
+```bash
+# Discard changes in file
+git checkout -- filename.js
+
+# Discard all changes
+git reset --hard
+
+# Undo last commit (keep changes)
+git reset --soft HEAD~1
+
+# Undo last commit (discard changes)
+git reset --hard HEAD~1
+
+# Revert commit (creates new commit)
+git revert <commit-hash>
+```
+
+STASH (Temporary save):
+```bash
+# Save changes temporarily
+git stash
+
+# Save with message
+git stash save "Work in progress"
+
+# List stashes
+git stash list
+
+# Apply latest stash
+git stash apply
+
+# Apply and remove from stash list
+git stash pop
+
+# Drop stash
+git stash drop
+```
+
+TAGS (Versioning):
+```bash
+# Create tag
+git tag v1.0.0
+
+# Create annotated tag
+git tag -a v1.0.0 -m "Version 1.0.0"
+
+# List tags
+git tag
+
+# Push tag to remote
+git push origin v1.0.0
+
+# Push all tags
+git push origin --tags
+
+# Delete tag
+git tag -d v1.0.0
+```
+
+
+ADVANCED:
+```bash
+# Interactive rebase (clean history)
+git rebase -i HEAD~3
+
+# Cherry-pick commit
+git cherry-pick <commit-hash>
+
+# View file from another branch
+git show branch:filename.js
+
+# Search commits
+git log --grep="bug fix"
+
+# Find who changed line
+git blame filename.js
+```
+
+
+================================================================================
+PART 4: GITHUB ACTIONS - DEEP DIVE
+================================================================================
+
+4.1 WHAT IS GITHUB ACTIONS?
+--------------------------------------------------------------------------------
+
+DEFINITION:
+GitHub Actions = CI/CD platform built into GitHub
+Automate workflows directly from your repository
+
+ADVANTAGES:
+✓ Integrated with GitHub (no external tool)
+✓ Free for public repos
+✓ Free: 2000 minutes/month for private repos
+✓ Easy setup (YAML file in repo)
+✓ Large marketplace of actions
+✓ Runs on GitHub servers (no setup needed)
+
+
+4.2 WORKFLOWS
+--------------------------------------------------------------------------------
+
+WORKFLOW = Automated process
+Defined in .github/workflows/filename.yml
+
+STRUCTURE:
+```yaml
+name: Workflow name
+on: [trigger events]
+jobs:
+  job-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Step name
+        run: command
+```
+
+
+EXAMPLE - Simple Workflow:
+
+.github/workflows/test.yml
+```yaml
+name: Test Application
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+```
+
+What this does:
+1. Triggers on every push and PR
+2. Checks out your code
+3. Installs Node.js 18
+4. Installs dependencies
+5. Runs tests
+
+
+4.3 EVENTS & TRIGGERS
+--------------------------------------------------------------------------------
+
+TRIGGER TYPES:
+
+1. PUSH
+   ```yaml
+   on: push
+   ```
+   Triggers on any push to any branch
+
+2. PUSH (Specific branch)
+   ```yaml
+   on:
+     push:
+       branches:
+         - main
+         - develop
+   ```
+
+3. PULL REQUEST
+   ```yaml
+   on: pull_request
+   ```
+
+4. PULL REQUEST (Specific branch)
+   ```yaml
+   on:
+     pull_request:
+       branches:
+         - main
+   ```
+
+5. SCHEDULE (Cron)
+   ```yaml
+   on:
+     schedule:
+       - cron: '0 2 * * *'  # Daily at 2 AM UTC
+   ```
+
+   Cron syntax:
+   ┌─────── minute (0 - 59)
+   │ ┌─────── hour (0 - 23)
+   │ │ ┌─────── day of month (1 - 31)
+   │ │ │ ┌─────── month (1 - 12)
+   │ │ │ │ ┌─────── day of week (0 - 6) (Sunday to Saturday)
+   │ │ │ │ │
+   0 2 * * *
+
+6. WORKFLOW_DISPATCH (Manual)
+   ```yaml
+   on: workflow_dispatch
+   ```
+   Adds "Run workflow" button in GitHub UI
+
+7. MULTIPLE TRIGGERS
+   ```yaml
+   on:
+     push:
+       branches: [main]
+     pull_request:
+       branches: [main]
+     schedule:
+       - cron: '0 0 * * 0'  # Weekly on Sunday
+     workflow_dispatch:
+   ```
+
+
+4.4 JOBS & STEPS
+--------------------------------------------------------------------------------
+
+JOB = Group of steps
+Runs on a runner (virtual machine)
+
+MULTIPLE JOBS (Run in parallel):
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm test
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm run lint
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm run build
+```
+
+test, lint, build all run at the same time! ⚡
+
+
+SEQUENTIAL JOBS (Using needs):
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm test
+
+  build:
+    needs: test  # Waits for test to finish
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm run build
+
+  deploy:
+    needs: build  # Waits for build to finish
+    runs-on: ubuntu-latest
+    steps:
+      - run: ./deploy.sh
+```
+
+Flow: test → build → deploy
+
+
+RUNNERS:
+
+Available runners:
+- ubuntu-latest (Ubuntu Linux) - Most common
+- windows-latest (Windows Server)
+- macos-latest (macOS)
+
+Example:
+```yaml
+jobs:
+  test-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm test
+
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - run: npm test
+
+  test-mac:
+    runs-on: macos-latest
+    steps:
+      - run: npm test
+```
+
+
+4.5 ACTIONS MARKETPLACE
+--------------------------------------------------------------------------------
+
+USING ACTIONS:
+
+Actions = Reusable components
+Available at: https://github.com/marketplace
+
+Common Actions:
+
+1. CHECKOUT CODE
+   ```yaml
+   - name: Checkout
+     uses: actions/checkout@v3
+   ```
+
+2. SETUP NODE.JS
+   ```yaml
+   - name: Setup Node
+     uses: actions/setup-node@v3
+     with:
+       node-version: 18
+   ```
+
+3. SETUP PYTHON
+   ```yaml
+   - name: Setup Python
+     uses: actions/setup-python@v4
+     with:
+       python-version: '3.10'
+   ```
+
+4. CACHE DEPENDENCIES
+   ```yaml
+   - name: Cache node modules
+     uses: actions/cache@v3
+     with:
+       path: node_modules
+       key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+   ```
+
+5. UPLOAD ARTIFACTS
+   ```yaml
+   - name: Upload build
+     uses: actions/upload-artifact@v3
+     with:
+       name: build
+       path: dist/
+   ```
+
+6. DOWNLOAD ARTIFACTS
+   ```yaml
+   - name: Download build
+     uses: actions/download-artifact@v3
+     with:
+       name: build
+   ```
+
+7. DOCKER BUILD AND PUSH
+   ```yaml
+   - name: Build and push Docker
+     uses: docker/build-push-action@v4
+     with:
+       push: true
+       tags: user/app:latest
+   ```
+
+8. DEPLOY TO AWS
+   ```yaml
+   - name: Configure AWS credentials
+     uses: aws-actions/configure-aws-credentials@v2
+     with:
+       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+       aws-region: us-east-1
+   ```
+
+
+4.6 SECRETS MANAGEMENT
+--------------------------------------------------------------------------------
+
+STORING SECRETS:
+
+GitHub Settings → Secrets and variables → Actions → New repository secret
+
+Examples:
+- AWS_ACCESS_KEY_ID
+- AWS_SECRET_ACCESS_KEY
+- DB_PASSWORD
+- API_KEY
+
+USING SECRETS:
+```yaml
+steps:
+  - name: Deploy
+    env:
+      AWS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    run: ./deploy.sh
+```
+
+IMPORTANT:
+✓ Secrets are encrypted
+✓ Never logged in output
+✓ Can't be read, only used
+
+
+4.10 COMPLETE EXAMPLES
+--------------------------------------------------------------------------------
+
+EXAMPLE 1: SCHOOL SYSTEM CI/CD
+
+.github/workflows/deploy.yml
+```yaml
+name: Deploy School Management System
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # Job 1: Test Backend
+  test-backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+        env:
+          NODE_ENV: test
+          MONGODB_URI: ${{ secrets.MONGODB_TEST_URI }}
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./api/coverage/lcov.info
+
+  # Job 2: Test Frontend
+  test-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/dist
+
+  # Job 3: Build Docker Images
+  build-docker:
+    needs: [test-backend, test-frontend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./api
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/school-backend:latest
+            ${{ secrets.DOCKER_USERNAME }}/school-backend:${{ github.sha }}
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/school-frontend:latest
+            ${{ secrets.DOCKER_USERNAME }}/school-frontend:${{ github.sha }}
+
+  # Job 4: Deploy to VPS
+  deploy:
+    needs: build-docker
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/schoolm
+            docker-compose pull
+            docker-compose up -d
+            docker system prune -f
+
+      - name: Health check
+        run: |
+          sleep 10
+          curl -f https://api.gentime.in/health || exit 1
+
+      - name: Notify on Slack
+        if: success()
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "✅ Deployment successful! Version: ${{ github.sha }}"
+            }
+
+      - name: Rollback on failure
+        if: failure()
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/schoolm
+            git checkout HEAD~1
+            docker-compose up -d
+```
+
+EXAMPLE 2: Matrix Build (Test Multiple Versions)
+
+```yaml
+name: Test Multiple Node Versions
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [16, 18, 20]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - run: npm install
+      - run: npm test
+```
+
+This creates 9 jobs (3 OS × 3 Node versions)!
+
+
+(Continuing with deployment strategies, monitoring, etc...)
+
+
+================================================================================
+PART 7: DEPLOYMENT STRATEGIES
+================================================================================
+
+7.1 MANUAL DEPLOYMENT (Traditional)
+--------------------------------------------------------------------------------
+
+PROCESS:
+1. SSH to server
+2. Pull latest code
+3. Install dependencies
+4. Build application
+5. Restart server
+
+EXAMPLE:
+```bash
+ssh user@server
+cd /var/www/myapp
+git pull origin main
+npm install
+npm run build
+pm2 restart all
+```
+
+PROBLEMS:
+✗ Manual (error-prone)
+✗ Downtime during deployment
+✗ No rollback strategy
+✗ Inconsistent across environments
+
+
+7.3 BLUE-GREEN DEPLOYMENT
+--------------------------------------------------------------------------------
+
+CONCEPT:
+Two identical environments: Blue (current) and Green (new)
+Deploy to Green → Test → Switch traffic → Blue becomes standby
+
+┌─────────────────────────────────────────────────┐
+│              LOAD BALANCER                      │
+└────────┬────────────────────────────────────────┘
+         │
+    ┌────┴────┐
+    ↓         ↓
+┌────────┐  ┌────────┐
+│ BLUE   │  │ GREEN  │
+│ v1.0   │  │ v1.1   │
+│ (Live) │  │ (New)  │
+└────────┘  └────────┘
+
+Step 1: Deploy v1.1 to Green
+Step 2: Test Green
+Step 3: Switch Load Balancer to Green
+Step 4: Blue (v1.0) becomes standby
+
+If issues → Instant rollback to Blue!
+
+ADVANTAGES:
+✓ Zero downtime
+✓ Instant rollback
+✓ Test in production environment
+
+DISADVANTAGES:
+✗ Requires 2× resources
+✗ Database migrations tricky
+
+
+IMPLEMENTATION (Docker Compose):
+
+docker-compose.yml
+```yaml
+version: '3.8'
+
+services:
+  blue:
+    image: myapp:v1.0
+    ports:
+      - "5001:5000"
+    environment:
+      - ENV=production
+
+  green:
+    image: myapp:v1.1
+    ports:
+      - "5002:5000"
+    environment:
+      - ENV=production
+
+  nginx:
+    image: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - blue
+      - green
+```
+
+nginx.conf (switch between blue/green):
+```nginx
+upstream backend {
+    server blue:5000;  # Change to green:5000 for switch
+}
+
+server {
+    listen 80;
+    location / {
+        proxy_pass http://backend;
+    }
+}
+```
+
+Deployment script:
+```bash
+#!/bin/bash
+
+# Deploy new version to green
+docker-compose up -d green
+
+# Test green
+curl http://localhost:5002/health || exit 1
+
+# Update nginx to point to green
+sed -i 's/server blue/server green/' nginx.conf
+
+# Reload nginx
+docker-compose exec nginx nginx -s reload
+
+# Green is now live!
+# Blue is standby for rollback
+```
+
+
+(File continues with more deployment strategies, monitoring, best practices...)

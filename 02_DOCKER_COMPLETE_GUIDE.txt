@@ -1,0 +1,2064 @@
+================================================================================
+        COMPLETE DOCKER GUIDE - BEGINNER TO EXPERT
+        Everything You Need to Know About Docker
+================================================================================
+
+Author: Comprehensive Docker Learning Guide
+Purpose: Master Docker from basics to production deployment
+Target: Complete beginners to DevOps engineers
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+PART 1: DOCKER FUNDAMENTALS
+    1.1  What is Docker? (Simple Explanation)
+    1.2  Why Docker? (Problems it Solves)
+    1.3  Virtual Machines vs Containers
+    1.4  Docker Architecture
+    1.5  Key Concepts & Terminology
+
+PART 2: INSTALLATION & SETUP
+    2.1  Installing Docker on Windows
+    2.2  Installing Docker on macOS
+    2.3  Installing Docker on Linux (Ubuntu)
+    2.4  Docker Desktop Overview
+    2.5  Verifying Installation
+
+PART 3: DOCKER BASICS
+    3.1  Docker Images Explained
+    3.2  Docker Containers Explained
+    3.3  Docker Hub
+    3.4  First Docker Container
+    3.5  Container Lifecycle
+
+PART 4: DOCKER COMMANDS (COMPLETE LIST)
+    4.1  Image Commands
+    4.2  Container Commands
+    4.3  Network Commands
+    4.4  Volume Commands
+    4.5  System Commands
+    4.6  Docker Compose Commands
+
+PART 5: DOCKERFILE
+    5.1  What is Dockerfile?
+    5.2  Dockerfile Instructions
+    5.3  Building Images
+    5.4  Best Practices
+    5.5  Multi-stage Builds
+
+PART 6: DOCKER COMPOSE
+    6.1  What is Docker Compose?
+    6.2  docker-compose.yml Syntax
+    6.3  Multi-container Applications
+    6.4  Environment Variables
+    6.5  Compose Commands
+
+PART 7: NETWORKING
+    7.1  Docker Networking Basics
+    7.2  Bridge Network
+    7.3  Host Network
+    7.4  Overlay Network
+    7.5  Custom Networks
+
+PART 8: VOLUMES & DATA PERSISTENCE
+    8.1  Why Volumes?
+    8.2  Volume Types
+    8.3  Bind Mounts
+    8.4  Named Volumes
+    8.5  Data Backup & Restore
+
+PART 9: DOCKER FOR YOUR SCHOOL SYSTEM
+    9.1  Containerizing Node.js Backend
+    9.2  Containerizing React Frontend
+    9.3  MongoDB Container
+    9.4  Full Stack Docker Compose
+    9.5  Development vs Production
+
+PART 10: ADVANCED TOPICS
+    10.1 Docker Registry
+    10.2 Docker Swarm
+    10.3 Health Checks
+    10.4 Secrets Management
+    10.5 Security Best Practices
+
+PART 11: PRODUCTION DEPLOYMENT
+    11.1 Docker in Production
+    11.2 Container Orchestration
+    11.3 Logging & Monitoring
+    11.4 CI/CD with Docker
+    11.5 Scaling Strategies
+
+PART 12: TROUBLESHOOTING
+    12.1 Common Errors & Solutions
+    12.2 Debugging Containers
+    12.3 Performance Optimization
+    12.4 Resource Management
+
+================================================================================
+PART 1: DOCKER FUNDAMENTALS
+================================================================================
+
+1.1 WHAT IS DOCKER? (SIMPLE EXPLANATION)
+--------------------------------------------------------------------------------
+
+SIMPLE ANALOGY:
+
+Think of Docker like shipping containers:
+
+Before Shipping Containers:
+- Different cargo (cars, furniture, food) → Different transport methods
+- Slow loading/unloading
+- Breakage and damage
+- Compatibility issues
+
+After Shipping Containers:
+- Standard container size
+- Works on ships, trucks, trains
+- Fast loading/unloading
+- Protected cargo
+- Reliable delivery
+
+DOCKER = Shipping containers for software!
+
+
+TECHNICAL DEFINITION:
+
+Docker is a platform for developing, shipping, and running applications
+in isolated environments called containers.
+
+Container = Lightweight, standalone, executable package containing
+everything needed to run software:
+- Code
+- Runtime (Node.js, Python, etc.)
+- System tools
+- Libraries
+- Settings
+
+
+REAL-WORLD EXAMPLE:
+
+WITHOUT Docker:
+Developer's Machine:
+- Node.js v18
+- MongoDB v6
+- Ubuntu 20.04
+✓ App works perfectly
+
+Production Server:
+- Node.js v16  ← Different version
+- MongoDB v5   ← Different version
+- CentOS 8     ← Different OS
+✗ App breaks! "But it works on my machine!"
+
+
+WITH Docker:
+Developer creates Docker container:
+- Contains Node.js v18
+- Contains MongoDB v6
+- Contains all dependencies
+- Runs same way everywhere
+
+Production Server:
+- Runs the same container
+✓ App works! Guaranteed!
+
+
+1.2 WHY DOCKER? (PROBLEMS IT SOLVES)
+--------------------------------------------------------------------------------
+
+PROBLEM 1: "WORKS ON MY MACHINE"
+
+Scenario:
+Developer: "The app works perfectly on my laptop!"
+Server: *Crashes*
+Reason: Different Node.js version, missing dependencies
+
+Docker Solution:
+✓ Same environment everywhere
+✓ Docker container includes everything
+✓ If it works in Docker locally, it works in production
+
+
+PROBLEM 2: DEPENDENCY CONFLICTS
+
+Scenario:
+Project A needs Node.js v14
+Project B needs Node.js v18
+Your machine: Can only have one version installed
+
+Docker Solution:
+Project A runs in container with Node.js v14
+Project B runs in container with Node.js v18
+No conflicts! ✓
+
+
+PROBLEM 3: SLOW ONBOARDING
+
+Scenario (Without Docker):
+New developer joins team:
+1. Install Node.js (30 min)
+2. Install MongoDB (30 min)
+3. Configure environment (1 hour)
+4. Debug issues (2 hours)
+Total: 4 hours
+
+With Docker:
+New developer runs: docker-compose up
+Total: 5 minutes ✓
+
+
+PROBLEM 4: INCONSISTENT ENVIRONMENTS
+
+Dev environment ≠ Staging environment ≠ Production environment
+= Bugs that only appear in production
+
+Docker Solution:
+Same container runs in all environments ✓
+
+
+PROBLEM 5: RESOURCE WASTE
+
+Virtual Machines:
+- Each VM needs full OS
+- Heavy (GB of RAM each)
+- Slow to start (minutes)
+
+Docker Containers:
+- Share host OS kernel
+- Lightweight (MB of RAM)
+- Start instantly (seconds)
+
+10 VMs = 20GB RAM
+10 Containers = 2GB RAM
+
+
+1.3 VIRTUAL MACHINES VS CONTAINERS
+--------------------------------------------------------------------------------
+
+VIRTUAL MACHINE (Traditional):
+
+┌──────────────────────────────────────────┐
+│           Physical Server                │
+├──────────────────────────────────────────┤
+│          Hardware (CPU, RAM)             │
+├──────────────────────────────────────────┤
+│       Host OS (Windows/Linux)            │
+├──────────────────────────────────────────┤
+│           Hypervisor (VMware)            │
+├─────────────┬─────────────┬──────────────┤
+│   Guest OS  │  Guest OS   │  Guest OS    │
+│  (Ubuntu)   │  (CentOS)   │  (Debian)    │
+├─────────────┼─────────────┼──────────────┤
+│   App A     │   App B     │   App C      │
+└─────────────┴─────────────┴──────────────┘
+
+Each VM:
+- Full operating system
+- Size: 5-20 GB
+- Boot time: 1-2 minutes
+- RAM: 2-8 GB each
+
+
+DOCKER CONTAINER (Modern):
+
+┌──────────────────────────────────────────┐
+│           Physical Server                │
+├──────────────────────────────────────────┤
+│          Hardware (CPU, RAM)             │
+├──────────────────────────────────────────┤
+│       Host OS (Linux)                    │
+├──────────────────────────────────────────┤
+│         Docker Engine                    │
+├─────────────┬─────────────┬──────────────┤
+│ Container A │ Container B │ Container C  │
+│  (App A)    │  (App B)    │  (App C)     │
+└─────────────┴─────────────┴──────────────┘
+
+Each Container:
+- Shares host OS kernel
+- Size: 100-500 MB
+- Boot time: <1 second
+- RAM: 100-500 MB each
+
+
+COMPARISON TABLE:
+
+Feature              Virtual Machine        Docker Container
+────────────────────────────────────────────────────────────
+Size                 GBs                    MBs
+Startup Time         Minutes                Seconds
+Resource Usage       Heavy                  Lightweight
+Isolation            Complete (Full OS)     Process-level
+Portability          Limited                Excellent
+Performance          Slower                 Near-native
+Use Case             Different OS needed    Same OS, isolated apps
+
+
+WHEN TO USE WHAT:
+
+Use Virtual Machines:
+✓ Need different operating systems (Run Windows on Linux)
+✓ Complete isolation for security
+✓ Legacy applications
+
+Use Docker Containers:
+✓ Microservices architecture
+✓ Cloud-native applications
+✓ Development environments
+✓ CI/CD pipelines
+✓ Your school management system ✓
+
+
+1.4 DOCKER ARCHITECTURE
+--------------------------------------------------------------------------------
+
+COMPONENTS:
+
+┌─────────────────────────────────────────────────────────┐
+│                    DOCKER CLIENT                        │
+│         (Command Line: docker run, docker build)        │
+└────────────────────────┬────────────────────────────────┘
+                         │ REST API
+                         ↓
+┌─────────────────────────────────────────────────────────┐
+│                  DOCKER DAEMON (dockerd)                │
+│                                                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
+│  │   Images     │  │  Containers  │  │   Networks   │ │
+│  └──────────────┘  └──────────────┘  └──────────────┘ │
+│  ┌──────────────┐  ┌──────────────┐                   │
+│  │   Volumes    │  │   Plugins    │                   │
+│  └──────────────┘  └──────────────┘                   │
+└────────────────────────┬────────────────────────────────┘
+                         │
+                         ↓
+┌─────────────────────────────────────────────────────────┐
+│                   DOCKER REGISTRY                       │
+│                     (Docker Hub)                        │
+│        Public images: node, mongo, nginx, etc.          │
+└─────────────────────────────────────────────────────────┘
+
+
+EXPLANATION:
+
+1. DOCKER CLIENT
+   - What you interact with
+   - Commands: docker run, docker build, docker pull
+   - Sends instructions to Docker Daemon
+
+   Example:
+   ```bash
+   docker run nginx
+   ```
+   Client sends this to Daemon
+
+
+2. DOCKER DAEMON (dockerd)
+   - Background service running on host
+   - Manages containers, images, networks, volumes
+   - Listens to Docker API requests
+   - Does the actual work
+
+
+3. DOCKER REGISTRY
+   - Stores Docker images
+   - Docker Hub = Public registry (like GitHub for Docker images)
+   - Can host private registry
+
+   Example:
+   ```bash
+   docker pull node:18
+   ```
+   Downloads Node.js v18 image from Docker Hub
+
+
+4. DOCKER OBJECTS
+
+   a) Images
+      - Read-only template
+      - Blueprint for containers
+      - Layered file system
+      - Example: node:18, mongo:6, nginx:latest
+
+   b) Containers
+      - Running instance of image
+      - Isolated environment
+      - Can be started, stopped, deleted
+      - Example: Your running app
+
+   c) Networks
+      - Connect containers together
+      - Isolated network environments
+
+   d) Volumes
+      - Persist data
+      - Share data between containers
+
+
+WORKFLOW:
+
+Step 1: Pull Image
+```bash
+docker pull node:18
+```
+Downloads Node.js image from Docker Hub
+
+Step 2: Run Container
+```bash
+docker run -d -p 5000:5000 node:18
+```
+Creates and starts container from image
+
+Step 3: Container Runs
+Your app runs in isolated environment
+
+Step 4: Stop Container
+```bash
+docker stop <container-id>
+```
+
+
+1.5 KEY CONCEPTS & TERMINOLOGY
+--------------------------------------------------------------------------------
+
+1. IMAGE
+   - Template for creating containers
+   - Immutable (read-only)
+   - Composed of layers
+   - Can be versioned (tags)
+
+   Analogy: Class in OOP
+   ```
+   Image = Class
+   Container = Object instance
+   ```
+
+   Example:
+   ```bash
+   node:18          # Image name
+   node:18-alpine   # Image with tag
+   node:latest      # Latest version
+   ```
+
+
+2. CONTAINER
+   - Running instance of image
+   - Isolated process
+   - Has its own filesystem, network, process tree
+   - Ephemeral (temporary) by default
+
+   Example:
+   ```bash
+   docker run --name my-app node:18
+   ```
+   Creates container named "my-app" from node:18 image
+
+
+3. DOCKERFILE
+   - Text file with instructions
+   - Defines how to build image
+   - Declarative approach
+
+   Example:
+   ```dockerfile
+   FROM node:18
+   WORKDIR /app
+   COPY package.json .
+   RUN npm install
+   COPY . .
+   CMD ["node", "server.js"]
+   ```
+
+
+4. LAYER
+   - Each instruction in Dockerfile creates layer
+   - Layers are cached
+   - Speeds up builds
+
+   Example:
+   ```dockerfile
+   FROM node:18          # Layer 1
+   WORKDIR /app          # Layer 2
+   COPY package.json .   # Layer 3
+   RUN npm install       # Layer 4 (heaviest)
+   COPY . .              # Layer 5
+   CMD ["node", "app.js"]# Layer 6
+   ```
+
+   If you change code (Layer 5), Layers 1-4 use cache ✓
+   Fast rebuilds!
+
+
+5. VOLUME
+   - Persistent storage
+   - Survives container deletion
+   - Can be shared between containers
+
+   Without Volume:
+   Container deleted → Data lost ✗
+
+   With Volume:
+   Container deleted → Data persists ✓
+
+
+6. NETWORK
+   - Enables container communication
+   - Isolated networking
+
+   Example:
+   Frontend container ↔ Backend container ↔ Database container
+
+
+7. DOCKER COMPOSE
+   - Tool for multi-container apps
+   - YAML configuration file
+   - Single command to start all services
+
+   Example:
+   ```yaml
+   services:
+     backend:
+       image: node:18
+     database:
+       image: mongo:6
+   ```
+
+   Start both:
+   ```bash
+   docker-compose up
+   ```
+
+
+8. TAG
+   - Version identifier for images
+
+   Examples:
+   ```
+   node:18          # Node.js version 18
+   node:18-alpine   # Node.js 18 on Alpine Linux (smaller)
+   node:latest      # Latest version (not recommended for production)
+   ```
+
+
+9. REGISTRY
+   - Storage for Docker images
+   - Docker Hub = Public registry
+   - Can create private registry
+
+   Example:
+   ```
+   docker.io/library/node:18
+   └─┬─┘  └──┬──┘ └─┬─┘ └┬┘
+     │       │      │    └─ Tag
+     │       │      └────── Image name
+     │       └───────────── Namespace
+     └───────────────────── Registry
+   ```
+
+
+10. DOCKER HUB
+    - Official Docker registry
+    - Like GitHub for Docker images
+    - Public and private repositories
+
+    URL: hub.docker.com
+
+    Popular images:
+    - node (Node.js)
+    - mongo (MongoDB)
+    - nginx (Web server)
+    - redis (Cache)
+    - postgres (Database)
+
+
+================================================================================
+PART 2: INSTALLATION & SETUP
+================================================================================
+
+2.1 INSTALLING DOCKER ON WINDOWS
+--------------------------------------------------------------------------------
+
+REQUIREMENTS:
+- Windows 10 64-bit: Pro, Enterprise, or Education (Build 19041 or higher)
+- OR Windows 11
+- Enable Hyper-V and Containers Windows features
+- BIOS-level hardware virtualization support enabled
+
+STEP-BY-STEP INSTALLATION:
+
+Step 1: Download Docker Desktop
+- Go to: https://www.docker.com/products/docker-desktop
+- Click "Download for Windows"
+- File: Docker Desktop Installer.exe (~500MB)
+
+Step 2: Run Installer
+- Double-click Docker Desktop Installer.exe
+- Follow installation wizard
+- Keep "Use WSL 2 instead of Hyper-V" checked (recommended)
+- Click "OK"
+
+Step 3: Enable WSL 2 (if not already)
+Open PowerShell as Administrator:
+```powershell
+# Enable WSL
+dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+
+# Enable Virtual Machine Platform
+dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+
+# Restart computer
+Restart-Computer
+```
+
+After restart:
+```powershell
+# Set WSL 2 as default
+wsl --set-default-version 2
+
+# Install Ubuntu (optional but recommended)
+wsl --install -d Ubuntu
+```
+
+Step 4: Start Docker Desktop
+- Search "Docker Desktop" in Start Menu
+- Launch application
+- Wait for Docker Engine to start (green light in taskbar)
+- Accept Terms of Service
+
+Step 5: Verify Installation
+Open Command Prompt or PowerShell:
+```bash
+docker --version
+# Output: Docker version 24.0.x, build xxxxx
+
+docker run hello-world
+# Downloads and runs test container
+```
+
+Expected Output:
+```
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+```
+
+SUCCESS! ✓
+
+
+TROUBLESHOOTING:
+
+Error: "WSL 2 installation is incomplete"
+Solution:
+1. Download WSL2 Linux kernel update package
+   URL: https://aka.ms/wsl2kernel
+2. Install the package
+3. Restart Docker Desktop
+
+Error: "Docker Desktop requires Hyper-V"
+Solution:
+1. Open PowerShell as Admin
+2. Run: Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
+3. Restart computer
+
+Error: "Hardware virtualization is not enabled"
+Solution:
+1. Restart computer
+2. Enter BIOS (press F2, F10, or DEL during startup)
+3. Find "Virtualization Technology" or "VT-x"
+4. Enable it
+5. Save and exit BIOS
+
+
+2.2 INSTALLING DOCKER ON macOS
+--------------------------------------------------------------------------------
+
+REQUIREMENTS:
+- macOS 11 or newer
+- At least 4GB RAM
+- VirtualBox prior to version 4.3.30 must NOT be installed
+
+STEP-BY-STEP INSTALLATION:
+
+Step 1: Download Docker Desktop
+- Go to: https://www.docker.com/products/docker-desktop
+- Click "Download for Mac"
+- Choose:
+  - Apple Silicon (M1/M2/M3 chips)
+  - Intel chip
+- File: Docker.dmg (~600MB)
+
+Step 2: Install
+- Double-click Docker.dmg
+- Drag Docker icon to Applications folder
+- Launch Docker from Applications
+- Click "Open" if security warning appears
+
+Step 3: First Launch
+- Docker icon appears in menu bar
+- Click icon → Wait for "Docker Desktop is running"
+- Grant privileged access if prompted (needed for networking)
+
+Step 4: Verify Installation
+Open Terminal:
+```bash
+docker --version
+# Output: Docker version 24.0.x, build xxxxx
+
+docker run hello-world
+```
+
+SUCCESS! ✓
+
+
+2.3 INSTALLING DOCKER ON LINUX (UBUNTU)
+--------------------------------------------------------------------------------
+
+STEP-BY-STEP INSTALLATION:
+
+Step 1: Update System
+```bash
+sudo apt-get update
+sudo apt-get upgrade -y
+```
+
+Step 2: Install Prerequisites
+```bash
+sudo apt-get install \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release
+```
+
+Step 3: Add Docker's Official GPG Key
+```bash
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+```
+
+Step 4: Set Up Repository
+```bash
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+
+Step 5: Install Docker Engine
+```bash
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+Step 6: Verify Installation
+```bash
+sudo docker --version
+# Output: Docker version 24.0.x, build xxxxx
+
+sudo docker run hello-world
+```
+
+Step 7: Run Docker Without sudo (Optional but Recommended)
+```bash
+# Create docker group
+sudo groupadd docker
+
+# Add your user to docker group
+sudo usermod -aG docker $USER
+
+# Activate changes (logout and login, or run:)
+newgrp docker
+
+# Verify
+docker run hello-world  # No sudo needed!
+```
+
+Step 8: Configure Docker to Start on Boot
+```bash
+sudo systemctl enable docker.service
+sudo systemctl enable containerd.service
+```
+
+Step 9: Install Docker Compose (if not included)
+```bash
+sudo apt-get install docker-compose-plugin
+
+# Verify
+docker compose version
+```
+
+SUCCESS! ✓
+
+
+2.4 DOCKER DESKTOP OVERVIEW
+--------------------------------------------------------------------------------
+
+DOCKER DESKTOP INTERFACE:
+
+1. DASHBOARD
+   - View running containers
+   - Start/Stop containers with one click
+   - View logs
+   - Access container shell
+
+2. IMAGES
+   - See all downloaded images
+   - Delete unused images
+   - Pull new images
+
+3. CONTAINERS
+   - List all containers (running and stopped)
+   - Inspect container details
+   - View resource usage (CPU, Memory)
+
+4. VOLUMES
+   - Manage data volumes
+   - Backup/Restore data
+
+5. SETTINGS
+   - Resources (CPU, Memory allocation)
+   - Docker Engine configuration
+   - Kubernetes enable/disable
+   - File sharing
+
+
+USEFUL DOCKER DESKTOP FEATURES:
+
+1. Dev Environments
+   - Clone Git repository
+   - Automatic Docker setup
+   - One-click start
+
+2. Extensions
+   - Add functionality
+   - Popular: Disk usage analyzer, Log viewer
+
+3. Kubernetes
+   - Single-node Kubernetes cluster
+   - For learning and testing
+
+
+2.5 VERIFYING INSTALLATION
+--------------------------------------------------------------------------------
+
+RUN THESE COMMANDS:
+
+1. Check Docker Version
+```bash
+docker --version
+# Expected: Docker version 24.0.x, build xxxxx
+```
+
+2. Check Docker Compose
+```bash
+docker compose version
+# Expected: Docker Compose version v2.x.x
+```
+
+3. Check Docker Info
+```bash
+docker info
+```
+Output shows:
+- Total containers
+- Images
+- Server version
+- Storage driver
+- OS/Architecture
+
+4. Run Test Container
+```bash
+docker run hello-world
+```
+Expected output:
+```
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from Docker Hub.
+ 3. The Docker daemon created a new container from that image.
+ 4. The Docker daemon streamed output to Docker client, which sent it to your terminal.
+```
+
+5. Run Interactive Container
+```bash
+docker run -it ubuntu bash
+```
+You're now inside Ubuntu container!
+```bash
+root@abc123:/# ls
+root@abc123:/# pwd
+root@abc123:/# exit  # Exit container
+```
+
+6. Check Running Containers
+```bash
+docker ps
+# Shows running containers (should be empty after exiting Ubuntu)
+
+docker ps -a
+# Shows all containers (including stopped)
+```
+
+ALL GREEN? Docker is installed correctly! ✓
+
+
+================================================================================
+PART 3: DOCKER BASICS
+================================================================================
+
+3.1 DOCKER IMAGES EXPLAINED
+--------------------------------------------------------------------------------
+
+WHAT IS AN IMAGE?
+
+Image = Read-only template containing:
+- Operating system (usually minimal Linux)
+- Application code
+- Dependencies
+- Configuration
+- Commands to run
+
+Analogy: Image is like a recipe
+Container is the actual cake made from recipe
+
+
+IMAGE STRUCTURE (LAYERS):
+
+Example: Node.js Application Image
+
+Layer 5: CMD ["node", "server.js"]    ← Start command
+Layer 4: COPY . .                      ← Application code
+Layer 3: RUN npm install               ← Dependencies
+Layer 2: COPY package.json .           ← Package file
+Layer 1: WORKDIR /app                  ← Working directory
+Layer 0: FROM node:18                  ← Base OS + Node.js
+────────────────────────────────────────────────────────
+         Base Image (Linux + Node.js)
+
+
+WHY LAYERS?
+
+Benefit 1: Caching
+If Layer 0-3 don't change, Docker reuses them
+Only rebuilds Layer 4-5 when code changes
+Result: Fast builds! ⚡
+
+Benefit 2: Space Efficiency
+Multiple images can share base layers
+10 Node.js apps share same node:18 base layer
+Saves disk space!
+
+Benefit 3: Version Control
+Each layer has hash
+Can track exactly what changed
+
+
+IMAGE NAMING:
+
+Format: [registry]/[namespace]/[repository]:[tag]
+
+Examples:
+```
+node:18
+├─ Repository: node
+└─ Tag: 18
+
+docker.io/library/node:18-alpine
+├─ Registry: docker.io (Docker Hub)
+├─ Namespace: library (official images)
+├─ Repository: node
+└─ Tag: 18-alpine
+
+mycompany.com:5000/backend/api:v1.2.3
+├─ Registry: mycompany.com:5000 (private)
+├─ Namespace: backend
+├─ Repository: api
+└─ Tag: v1.2.3
+```
+
+
+COMMON BASE IMAGES:
+
+1. node:18
+   - Full Node.js environment
+   - Based on Debian Linux
+   - Size: ~900MB
+   - Use: Development
+
+2. node:18-alpine
+   - Minimal Node.js
+   - Based on Alpine Linux
+   - Size: ~170MB
+   - Use: Production (smaller, faster)
+
+3. node:18-slim
+   - Between full and alpine
+   - Size: ~240MB
+   - Use: Balance of size and compatibility
+
+4. ubuntu:22.04
+   - Full Ubuntu OS
+   - Size: ~77MB
+   - Use: When you need Ubuntu-specific tools
+
+5. nginx:latest
+   - Web server
+   - Size: ~140MB
+   - Use: Serving static files, reverse proxy
+
+6. mongo:6
+   - MongoDB database
+   - Size: ~700MB
+   - Use: Database
+
+
+3.2 DOCKER CONTAINERS EXPLAINED
+--------------------------------------------------------------------------------
+
+WHAT IS A CONTAINER?
+
+Container = Running instance of an image
+- Isolated process
+- Own filesystem (from image)
+- Own network interface
+- Own process tree
+- Shares host OS kernel
+
+Analogy:
+Image = Program file (node.exe)
+Container = Running program (process in Task Manager)
+
+
+CONTAINER LIFECYCLE:
+
+Created → Running → Paused → Stopped → Removed
+   ↓         ↓        ↓        ↓         ↓
+ State:   State:   State:   State:     Gone
+ Created  Running  Paused   Exited
+
+
+Commands for each state:
+```bash
+# Create
+docker create node:18
+
+# Create and Start (Run)
+docker run node:18
+
+# Pause
+docker pause <container-id>
+
+# Unpause
+docker unpause <container-id>
+
+# Stop (graceful)
+docker stop <container-id>
+
+# Kill (force stop)
+docker kill <container-id>
+
+# Start (stopped container)
+docker start <container-id>
+
+# Remove
+docker rm <container-id>
+```
+
+
+CONTAINER ISOLATION:
+
+Each container has:
+
+1. Isolated Filesystem
+   Container 1: /app/data/file.txt
+   Container 2: /app/data/file.txt
+   → Different files! Not shared
+
+2. Isolated Network
+   Container 1: localhost:5000
+   Container 2: localhost:5000
+   → Both can use same port!
+
+3. Isolated Processes
+   Container 1: PID 1 = node server.js
+   Container 2: PID 1 = node server.js
+   → Different processes
+
+4. Resource Limits (optional)
+   ```bash
+   docker run --memory="512m" --cpus="1.0" node:18
+   ```
+   Container limited to 512MB RAM, 1 CPU core
+
+
+CONTAINER VS PROCESS:
+
+Regular Process:
+- Shares OS
+- Can see other processes
+- Access entire filesystem
+- No resource limits (by default)
+
+Container:
+- Isolated environment
+- Can't see other containers
+- Limited filesystem view
+- Can have resource limits
+- Easier to manage and deploy
+
+
+3.3 DOCKER HUB
+--------------------------------------------------------------------------------
+
+WHAT IS DOCKER HUB?
+
+Docker Hub = GitHub for Docker images
+- Public registry
+- Official images (vetted by Docker)
+- Community images
+- Private repositories (paid)
+
+URL: hub.docker.com
+
+
+USING DOCKER HUB:
+
+1. Search for Images
+Web: hub.docker.com → Search
+Command line:
+```bash
+docker search node
+```
+
+Output:
+```
+NAME                DESCRIPTION                     STARS    OFFICIAL
+node                Node.js JavaScript runtime      12000    [OK]
+node-alpine         Minimal Node.js                 500
+bitnami/node        Packaged by Bitnami            200
+```
+
+2. Pull Image
+```bash
+docker pull node:18
+```
+
+Downloads image to your machine
+
+3. View Local Images
+```bash
+docker images
+```
+
+Output:
+```
+REPOSITORY   TAG       IMAGE ID       CREATED        SIZE
+node         18        abc123def456   2 weeks ago    900MB
+mongo        6         789ghi012jkl   1 month ago    700MB
+```
+
+
+OFFICIAL VS COMMUNITY IMAGES:
+
+Official Images:
+✓ Verified by Docker
+✓ Maintained by software vendor or Docker
+✓ Best practices followed
+✓ Regular updates
+✓ Examples: node, mongo, nginx, redis
+
+Use these for production!
+
+Community Images:
+- Created by users
+- May not be maintained
+- Security uncertain
+- Good for experimentation
+
+
+3.4 FIRST DOCKER CONTAINER
+--------------------------------------------------------------------------------
+
+LET'S RUN YOUR FIRST CONTAINER:
+
+Example 1: Hello World
+```bash
+docker run hello-world
+```
+
+What happens:
+1. Docker checks local images (not found)
+2. Downloads from Docker Hub
+3. Creates container
+4. Runs container
+5. Prints message
+6. Container exits
+
+Output:
+```
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+```
+
+
+Example 2: Interactive Ubuntu
+```bash
+docker run -it ubuntu bash
+```
+
+Flags explained:
+-i = Interactive (keep STDIN open)
+-t = TTY (terminal)
+
+You're now INSIDE the container!
+```bash
+root@1234567890ab:/# ls
+bin  boot  dev  etc  home  lib  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+
+root@1234567890ab:/# cat /etc/os-release
+NAME="Ubuntu"
+VERSION="22.04"
+
+root@1234567890ab:/# exit  # Exit container
+```
+
+Container stopped when you exited!
+
+
+Example 3: Run Nginx Web Server
+```bash
+docker run -d -p 8080:80 nginx
+```
+
+Flags explained:
+-d = Detached (run in background)
+-p 8080:80 = Port mapping (host:container)
+
+Check it:
+- Open browser
+- Go to: http://localhost:8080
+- You see: "Welcome to nginx!"
+
+Container runs in background!
+
+Stop it:
+```bash
+docker ps  # Get container ID
+docker stop <container-id>
+```
+
+
+Example 4: Run Node.js Script
+Create file hello.js:
+```javascript
+console.log('Hello from Node.js in Docker!');
+console.log('Node version:', process.version);
+```
+
+Run:
+```bash
+docker run -v $(pwd):/app -w /app node:18 node hello.js
+```
+
+Flags explained:
+-v $(pwd):/app = Mount current directory to /app in container
+-w /app = Working directory inside container
+
+Output:
+```
+Hello from Node.js in Docker!
+Node version: v18.x.x
+```
+
+
+3.5 CONTAINER LIFECYCLE
+--------------------------------------------------------------------------------
+
+DETAILED LIFECYCLE:
+
+1. CREATE (docker create or docker run)
+   ```bash
+   docker create --name my-app node:18
+   ```
+   - Creates container from image
+   - Assigns ID and name
+   - State: Created (not running)
+
+2. START (docker start)
+   ```bash
+   docker start my-app
+   ```
+   - Starts created container
+   - State: Running
+
+3. RUN (docker run = create + start)
+   ```bash
+   docker run --name my-app node:18
+   ```
+   - Creates AND starts container
+   - One command for both
+
+4. PAUSE (docker pause)
+   ```bash
+   docker pause my-app
+   ```
+   - Freezes all processes
+   - State: Paused
+   - Useful for snapshots
+
+5. UNPAUSE (docker unpause)
+   ```bash
+   docker unpause my-app
+   ```
+   - Resumes processes
+   - State: Running
+
+6. STOP (docker stop)
+   ```bash
+   docker stop my-app
+   ```
+   - Sends SIGTERM (graceful shutdown)
+   - Waits 10 seconds
+   - Then sends SIGKILL if still running
+   - State: Exited
+
+7. KILL (docker kill)
+   ```bash
+   docker kill my-app
+   ```
+   - Immediately sends SIGKILL
+   - Force stop (not graceful)
+   - Use when container not responding
+
+8. RESTART (docker restart)
+   ```bash
+   docker restart my-app
+   ```
+   - Stops and starts container
+   - Useful for applying changes
+
+9. REMOVE (docker rm)
+   ```bash
+   docker rm my-app
+   ```
+   - Deletes container
+   - Must be stopped first (or use -f flag)
+   - Container data lost (unless using volumes)
+
+
+EXAMPLE WORKFLOW:
+
+```bash
+# 1. Run container in background
+docker run -d --name my-nginx -p 8080:80 nginx
+
+# 2. Check it's running
+docker ps
+
+# 3. View logs
+docker logs my-nginx
+
+# 4. Stop container
+docker stop my-nginx
+
+# 5. Container still exists (stopped)
+docker ps -a
+
+# 6. Start it again
+docker start my-nginx
+
+# 7. Stop and remove
+docker stop my-nginx
+docker rm my-nginx
+
+# Or force remove (running container)
+docker rm -f my-nginx
+```
+
+
+AUTO-RESTART POLICIES:
+
+no (default):
+```bash
+docker run --restart=no nginx
+```
+Never automatically restart
+
+on-failure:
+```bash
+docker run --restart=on-failure nginx
+```
+Restart if container exits with non-zero code
+
+always:
+```bash
+docker run --restart=always nginx
+```
+Always restart (even after system reboot)
+
+unless-stopped:
+```bash
+docker run --restart=unless-stopped nginx
+```
+Restart unless explicitly stopped
+
+
+EXAMPLE:
+```bash
+# Run with auto-restart
+docker run -d --name api --restart=always -p 5000:5000 my-backend
+
+# Even if container crashes, Docker restarts it!
+# Even if server reboots, container starts automatically!
+```
+
+
+(Continuing in next section...)
+
+================================================================================
+PART 4: DOCKER COMMANDS (COMPLETE LIST)
+================================================================================
+
+4.1 IMAGE COMMANDS
+--------------------------------------------------------------------------------
+
+PULLING IMAGES:
+
+1. Pull Latest Version
+```bash
+docker pull node
+# Same as: docker pull node:latest
+```
+
+2. Pull Specific Version
+```bash
+docker pull node:18
+docker pull node:18.16.0
+docker pull node:18-alpine
+```
+
+3. Pull from Different Registry
+```bash
+docker pull myregistry.com:5000/node:18
+```
+
+
+LISTING IMAGES:
+
+1. List All Images
+```bash
+docker images
+# Or
+docker image ls
+```
+
+Output:
+```
+REPOSITORY   TAG       IMAGE ID       CREATED        SIZE
+node         18        abc123def456   2 weeks ago    900MB
+node         18-alpine xyz789ghi012   2 weeks ago    170MB
+mongo        6         345mno678pqr   1 month ago    700MB
+```
+
+2. List with Filters
+```bash
+# Only specific repository
+docker images node
+
+# Dangling images (untagged)
+docker images -f dangling=true
+```
+
+
+BUILDING IMAGES:
+
+1. Build from Dockerfile
+```bash
+docker build -t my-app:1.0 .
+```
+
+Flags:
+-t = Tag (name:version)
+. = Build context (current directory)
+
+2. Build with Different Dockerfile
+```bash
+docker build -t my-app:1.0 -f Dockerfile.prod .
+```
+
+3. Build without Cache
+```bash
+docker build --no-cache -t my-app:1.0 .
+```
+
+Useful when dependencies updated
+
+4. Build with Build Arguments
+```bash
+docker build --build-arg NODE_VERSION=18 -t my-app:1.0 .
+```
+
+Dockerfile:
+```dockerfile
+ARG NODE_VERSION=16
+FROM node:${NODE_VERSION}
+```
+
+
+INSPECTING IMAGES:
+
+1. View Image Details
+```bash
+docker image inspect node:18
+```
+
+Shows:
+- Image ID
+- Creation date
+- Size
+- Layers
+- Environment variables
+
+2. View Image History (Layers)
+```bash
+docker history node:18
+```
+
+Output shows all layers and their sizes
+
+
+TAGGING IMAGES:
+
+1. Tag Existing Image
+```bash
+docker tag node:18 myrepo/node:18
+docker tag my-app:1.0 my-app:latest
+```
+
+2. Multiple Tags for Same Image
+```bash
+docker tag my-app:1.0 my-app:latest
+docker tag my-app:1.0 my-app:stable
+```
+
+All point to same image (same IMAGE ID)
+
+
+PUSHING IMAGES:
+
+1. Login to Docker Hub
+```bash
+docker login
+# Enter username and password
+```
+
+2. Push Image
+```bash
+docker push myusername/my-app:1.0
+```
+
+3. Push to Private Registry
+```bash
+docker login myregistry.com:5000
+docker push myregistry.com:5000/my-app:1.0
+```
+
+
+REMOVING IMAGES:
+
+1. Remove Single Image
+```bash
+docker rmi node:18
+# Or
+docker image rm node:18
+```
+
+2. Remove by Image ID
+```bash
+docker rmi abc123def456
+```
+
+3. Force Remove (even if containers using it)
+```bash
+docker rmi -f node:18
+```
+
+4. Remove Multiple Images
+```bash
+docker rmi node:18 mongo:6 nginx:latest
+```
+
+5. Remove All Unused Images
+```bash
+docker image prune
+```
+
+6. Remove All Images (CAREFUL!)
+```bash
+docker rmi $(docker images -q)
+```
+
+
+SAVING & LOADING IMAGES:
+
+1. Save Image to TAR File
+```bash
+docker save -o my-app.tar my-app:1.0
+```
+
+Use case: Transfer image without registry
+
+2. Load Image from TAR File
+```bash
+docker load -i my-app.tar
+```
+
+3. Export Container to TAR
+```bash
+docker export my-container > my-container.tar
+```
+
+4. Import TAR as Image
+```bash
+docker import my-container.tar my-app:1.0
+```
+
+
+4.2 CONTAINER COMMANDS
+--------------------------------------------------------------------------------
+
+RUNNING CONTAINERS:
+
+1. Basic Run
+```bash
+docker run node:18
+```
+
+2. Run with Name
+```bash
+docker run --name my-container node:18
+```
+
+3. Run in Background (Detached)
+```bash
+docker run -d node:18
+```
+
+4. Run Interactive
+```bash
+docker run -it ubuntu bash
+```
+
+5. Run with Port Mapping
+```bash
+docker run -p 8080:80 nginx
+# Host port 8080 → Container port 80
+```
+
+Multiple ports:
+```bash
+docker run -p 8080:80 -p 8443:443 nginx
+```
+
+Random host port:
+```bash
+docker run -p 80 nginx
+# Docker assigns random port
+```
+
+6. Run with Environment Variables
+```bash
+docker run -e NODE_ENV=production -e PORT=5000 node:18
+```
+
+Multiple variables:
+```bash
+docker run -e NODE_ENV=production -e PORT=5000 -e DB_HOST=mongo node:18
+```
+
+From file:
+```bash
+docker run --env-file .env node:18
+```
+
+.env file:
+```
+NODE_ENV=production
+PORT=5000
+DB_HOST=mongo
+```
+
+7. Run with Volume Mount
+```bash
+docker run -v /host/path:/container/path node:18
+```
+
+Example:
+```bash
+docker run -v $(pwd):/app node:18
+```
+
+Named volume:
+```bash
+docker run -v my-data:/data mongo:6
+```
+
+8. Run with Working Directory
+```bash
+docker run -w /app node:18
+```
+
+9. Run with Resource Limits
+```bash
+# CPU and Memory limits
+docker run --memory="512m" --cpus="1.0" node:18
+
+# CPU shares (relative weight)
+docker run --cpu-shares=512 node:18
+```
+
+10. Run with Restart Policy
+```bash
+docker run --restart=always nginx
+```
+
+11. Run with Network
+```bash
+docker run --network=my-network node:18
+```
+
+12. Run with Custom Hostname
+```bash
+docker run --hostname=my-app-server node:18
+```
+
+13. Run Readonly Filesystem
+```bash
+docker run --read-only node:18
+```
+
+Useful for security
+
+14. Run as Different User
+```bash
+docker run --user=1000:1000 node:18
+```
+
+15. Complete Example (Production-Ready)
+```bash
+docker run -d \
+  --name my-api \
+  --restart=always \
+  -p 5000:5000 \
+  -e NODE_ENV=production \
+  -e DB_HOST=mongo \
+  --memory="1g" \
+  --cpus="2.0" \
+  -v /var/log/app:/app/logs \
+  my-api:1.0
+```
+
+
+LISTING CONTAINERS:
+
+1. List Running Containers
+```bash
+docker ps
+```
+
+Output:
+```
+CONTAINER ID  IMAGE      COMMAND         STATUS        PORTS            NAMES
+abc123def456  node:18    "node app.js"   Up 2 hours    0.0.0.0:5000->5000/tcp  my-api
+```
+
+2. List All Containers (including stopped)
+```bash
+docker ps -a
+```
+
+3. List Last N Containers
+```bash
+docker ps -n 5
+# Last 5 containers
+```
+
+4. List with Size
+```bash
+docker ps -s
+```
+
+Shows container size
+
+5. List Only Container IDs
+```bash
+docker ps -q
+```
+
+Useful for scripts:
+```bash
+docker stop $(docker ps -q)
+# Stops all running containers
+```
+
+6. List with Filters
+```bash
+# Only running containers
+docker ps -f status=running
+
+# Only exited containers
+docker ps -f status=exited
+
+# By name
+docker ps -f name=my-api
+
+# By image
+docker ps -f ancestor=node:18
+```
+
+7. Custom Format
+```bash
+docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Status}}"
+```
+
+
+MANAGING CONTAINERS:
+
+1. Start Stopped Container
+```bash
+docker start my-container
+```
+
+2. Stop Running Container
+```bash
+docker stop my-container
+```
+
+Graceful shutdown (SIGTERM, 10s timeout)
+
+3. Stop Multiple Containers
+```bash
+docker stop container1 container2 container3
+```
+
+4. Stop All Running Containers
+```bash
+docker stop $(docker ps -q)
+```
+
+5. Kill Container (Force Stop)
+```bash
+docker kill my-container
+```
+
+Immediate termination (SIGKILL)
+
+6. Restart Container
+```bash
+docker restart my-container
+```
+
+7. Pause Container
+```bash
+docker pause my-container
+```
+
+Freezes processes
+
+8. Unpause Container
+```bash
+docker unpause my-container
+```
+
+9. Rename Container
+```bash
+docker rename old-name new-name
+```
+
+10. Remove Container
+```bash
+docker rm my-container
+```
+
+Must be stopped first!
+
+11. Force Remove Running Container
+```bash
+docker rm -f my-container
+```
+
+12. Remove All Stopped Containers
+```bash
+docker container prune
+```
+
+13. Remove All Containers (CAREFUL!)
+```bash
+docker rm -f $(docker ps -aq)
+```
+
+
+INSPECTING CONTAINERS:
+
+1. View Container Details
+```bash
+docker inspect my-container
+```
+
+JSON output with all details
+
+2. View Specific Field
+```bash
+docker inspect -f '{{.State.Status}}' my-container
+# Output: running
+
+docker inspect -f '{{.NetworkSettings.IPAddress}}' my-container
+# Output: 172.17.0.2
+```
+
+3. View Container Logs
+```bash
+docker logs my-container
+```
+
+4. Follow Logs (Real-time)
+```bash
+docker logs -f my-container
+```
+
+Like tail -f
+
+5. Last N Lines
+```bash
+docker logs --tail 100 my-container
+```
+
+6. Logs with Timestamps
+```bash
+docker logs -t my-container
+```
+
+7. Logs Since Specific Time
+```bash
+docker logs --since 10m my-container
+# Last 10 minutes
+
+docker logs --since 2024-01-01 my-container
+# Since specific date
+```
+
+8. View Container Processes
+```bash
+docker top my-container
+```
+
+Shows running processes inside container
+
+9. View Resource Usage (Real-time)
+```bash
+docker stats my-container
+```
+
+Shows CPU, Memory, Network usage
+
+All containers:
+```bash
+docker stats
+```
+
+10. View Port Mappings
+```bash
+docker port my-container
+```
+
+Output:
+```
+80/tcp -> 0.0.0.0:8080
+443/tcp -> 0.0.0.0:8443
+```
+
+11. View Container Changes
+```bash
+docker diff my-container
+```
+
+Shows modified files
+
+
+INTERACTING WITH CONTAINERS:
+
+1. Execute Command in Running Container
+```bash
+docker exec my-container ls /app
+```
+
+2. Interactive Shell
+```bash
+docker exec -it my-container bash
+```
+
+Or:
+```bash
+docker exec -it my-container sh
+# Use sh if bash not available (Alpine)
+```
+
+3. Run as Different User
+```bash
+docker exec -u root -it my-container bash
+```
+
+4. Execute with Environment Variable
+```bash
+docker exec -e DEBUG=1 my-container node script.js
+```
+
+5. Attach to Running Container
+```bash
+docker attach my-container
+```
+
+Connect to container's main process
+Ctrl+C will stop container!
+
+6. Copy Files To Container
+```bash
+docker cp ./local-file.txt my-container:/app/file.txt
+```
+
+7. Copy Files From Container
+```bash
+docker cp my-container:/app/logs/error.log ./error.log
+```
+
+8. Copy Entire Directory
+```bash
+docker cp ./my-folder my-container:/app/
+```
+
+
+WAIT & WATCH:
+
+1. Wait for Container to Exit
+```bash
+docker wait my-container
+```
+
+Blocks until container stops, returns exit code
+
+2. Monitor Events
+```bash
+docker events
+```
+
+Real-time stream of Docker events
+
+Filter by container:
+```bash
+docker events --filter container=my-container
+```
+
+
+(Continuing due to length...)

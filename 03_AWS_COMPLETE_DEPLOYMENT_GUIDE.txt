@@ -1,0 +1,1420 @@
+================================================================================
+        COMPLETE AWS DEPLOYMENT GUIDE - ZERO TO PRODUCTION
+        Amazon Web Services - From Basics to Advanced
+================================================================================
+
+Author: Comprehensive AWS Learning Guide
+Purpose: Master AWS deployment from beginner to expert
+Target: Complete beginners to Cloud Engineers
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+PART 1: AWS FUNDAMENTALS
+    1.1  What is AWS?
+    1.2  Why AWS? (vs Other Cloud Providers)
+    1.3  AWS Global Infrastructure
+    1.4  AWS Account Setup
+    1.5  AWS Pricing Model
+
+PART 2: CORE AWS SERVICES (OVERVIEW)
+    2.1  EC2 (Virtual Servers)
+    2.2  S3 (Storage)
+    2.3  RDS (Managed Databases)
+    2.4  VPC (Network)
+    2.5  IAM (Identity & Access)
+    2.6  CloudFront (CDN)
+    2.7  Route 53 (DNS)
+    2.8  Load Balancers
+    2.9  Auto Scaling
+    2.10 Lambda (Serverless)
+
+PART 3: EC2 - DEEP DIVE
+    3.1  What is EC2?
+    3.2  EC2 Instance Types
+    3.3  Launching First EC2 Instance
+    3.4  Connecting to EC2 (SSH)
+    3.5  Security Groups
+    3.6  Elastic IP
+    3.7  EC2 User Data (Startup Scripts)
+    3.8  EC2 Metadata
+    3.9  EC2 Pricing
+
+PART 4: S3 - DEEP DIVE
+    4.1  What is S3?
+    4.2  Buckets & Objects
+    4.3  Creating First Bucket
+    4.4  Uploading Files
+    4.5  S3 Access Control
+    4.6  S3 Static Website Hosting
+    4.7  S3 Storage Classes
+    4.8  S3 Versioning
+    4.9  S3 Lifecycle Policies
+    4.10 S3 with CloudFront CDN
+
+PART 5: RDS - DATABASE SERVICE
+    5.1  What is RDS?
+    5.2  RDS vs EC2 Database
+    5.3  Supported Databases
+    5.4  Creating RDS Instance
+    5.5  Connecting to RDS
+    5.6  RDS Multi-AZ (High Availability)
+    5.7  RDS Read Replicas
+    5.8  Automated Backups
+    5.9  RDS Security
+
+PART 6: VPC - NETWORKING
+    6.1  What is VPC?
+    6.2  Subnets (Public & Private)
+    6.3  Internet Gateway
+    6.4  NAT Gateway
+    6.5  Route Tables
+    6.6  Security Groups vs NACLs
+    6.7  VPC Peering
+    6.8  VPC Endpoints
+
+PART 7: IAM - SECURITY
+    7.1  What is IAM?
+    7.2  Users, Groups, Roles
+    7.3  Policies
+    7.4  MFA (Multi-Factor Authentication)
+    7.5  Best Practices
+    7.6  Access Keys
+    7.7  IAM Roles for EC2
+
+PART 8: LOAD BALANCING & AUTO SCALING
+    8.1  Elastic Load Balancer Types
+    8.2  Application Load Balancer (ALB)
+    8.3  Network Load Balancer (NLB)
+    8.4  Target Groups
+    8.5  Health Checks
+    8.6  Auto Scaling Groups
+    8.7  Scaling Policies
+    8.8  Launch Templates
+
+PART 9: CLOUDFRONT & ROUTE 53
+    9.1  What is CloudFront?
+    9.2  CloudFront Setup
+    9.3  Origin Configuration
+    9.4  Cache Behaviors
+    9.5  Route 53 DNS
+    9.6  Routing Policies
+    9.7  Domain Registration
+    9.8  SSL/TLS Certificates
+
+PART 10: LAMBDA - SERVERLESS
+    10.1 What is Lambda?
+    10.2 Creating Lambda Function
+    10.3 Triggers
+    10.4 Lambda Layers
+    10.5 Environment Variables
+    10.6 Lambda with API Gateway
+    10.7 Lambda Pricing
+
+PART 11: DEPLOYING YOUR SCHOOL SYSTEM
+    11.1 Architecture Overview
+    11.2 Setup VPC
+    11.3 Launch EC2 for Backend
+    11.4 Setup RDS for MongoDB
+    11.5 S3 for File Storage
+    11.6 CloudFront for React App
+    11.7 Route 53 for Domain
+    11.8 SSL Certificate Setup
+    11.9 Complete Deployment Steps
+
+PART 12: MONITORING & LOGGING
+    12.1 CloudWatch Metrics
+    12.2 CloudWatch Logs
+    12.3 CloudWatch Alarms
+    12.4 SNS Notifications
+    12.5 CloudTrail (Audit Logs)
+
+PART 13: CI/CD ON AWS
+    13.1 CodeCommit (Git)
+    13.2 CodeBuild (Build)
+    13.3 CodeDeploy (Deploy)
+    13.4 CodePipeline (CI/CD)
+    13.5 Integration with GitHub
+
+PART 14: COST OPTIMIZATION
+    14.1 AWS Free Tier
+    14.2 Cost Explorer
+    14.3 Budgets & Alerts
+    14.4 Reserved Instances
+    14.5 Spot Instances
+    14.6 Cost Optimization Tips
+
+PART 15: SECURITY BEST PRACTICES
+    15.1 AWS Security Checklist
+    15.2 Encryption
+    15.3 Secrets Manager
+    15.4 WAF (Web Application Firewall)
+    15.5 Shield (DDoS Protection)
+    15.6 Compliance
+
+PART 16: ADVANCED TOPICS
+    16.1 ECS (Container Service)
+    16.2 EKS (Kubernetes)
+    16.3 ElastiCache (Redis/Memcached)
+    16.4 SQS (Message Queue)
+    16.5 SNS (Notifications)
+    16.6 Step Functions (Workflows)
+
+PART 17: AWS CLI
+    17.1 Installation
+    17.2 Configuration
+    17.3 Common Commands
+    17.4 Scripting with AWS CLI
+
+PART 18: TROUBLESHOOTING
+    18.1 Common Issues
+    18.2 Debugging EC2
+    18.3 Debugging RDS
+    18.4 Network Issues
+    18.5 Permission Issues
+
+================================================================================
+PART 1: AWS FUNDAMENTALS
+================================================================================
+
+1.1 WHAT IS AWS?
+--------------------------------------------------------------------------------
+
+DEFINITION:
+AWS (Amazon Web Services) = Cloud computing platform by Amazon
+
+Provides:
+- Servers (virtual computers in the cloud)
+- Databases (managed database services)
+- Storage (file storage in the cloud)
+- Networking (global network infrastructure)
+- 200+ services
+
+SIMPLE ANALOGY:
+
+Instead of buying and maintaining your own servers (like owning a car):
+- Expensive upfront cost
+- Maintenance required
+- Limited scalability
+
+AWS is like Uber/taxi service for servers:
+- Pay only for what you use
+- No maintenance
+- Scale instantly
+- Global availability
+
+
+BEFORE AWS (Traditional):
+
+1. Buy physical servers → $10,000+
+2. Setup in office/data center → Weeks
+3. Hire IT staff → $100,000/year
+4. Pay for electricity → $1000/month
+5. Maintain & upgrade → Ongoing cost
+
+Total cost for 1 year: $150,000+
+
+
+WITH AWS (Cloud):
+
+1. Create account → Free
+2. Launch virtual server → 5 minutes
+3. Pay only for usage → $50/month
+4. No maintenance required
+5. Scale up/down anytime
+
+Total cost for 1 year: $600
+Savings: $149,400! 💰
+
+
+REAL-WORLD USERS:
+
+- Netflix: Entire infrastructure on AWS
+- Airbnb: Runs on AWS
+- Spotify: Uses AWS
+- NASA: Uses AWS for Mars rover data
+- Your School System: Can run on AWS!
+
+
+1.2 WHY AWS? (VS OTHER CLOUD PROVIDERS)
+--------------------------------------------------------------------------------
+
+MAJOR CLOUD PROVIDERS:
+
+1. AWS (Amazon Web Services)
+   Market Share: ~32%
+   Founded: 2006 (First mover)
+
+2. Microsoft Azure
+   Market Share: ~23%
+   Founded: 2010
+
+3. Google Cloud Platform (GCP)
+   Market Share: ~10%
+   Founded: 2011
+
+4. Others
+   - IBM Cloud
+   - Oracle Cloud
+   - Alibaba Cloud (China)
+
+
+WHY CHOOSE AWS:
+
+1. MARKET LEADER
+   ✓ Most mature platform
+   ✓ Most services (200+)
+   ✓ Largest customer base
+
+2. GLOBAL INFRASTRUCTURE
+   ✓ 31 Regions worldwide
+   ✓ 99 Availability Zones
+   ✓ 400+ Edge Locations
+
+3. EXTENSIVE SERVICES
+   ✓ Compute: EC2, Lambda, ECS, EKS
+   ✓ Storage: S3, EBS, EFS
+   ✓ Database: RDS, DynamoDB, ElastiCache
+   ✓ AI/ML: SageMaker, Rekognition
+   ✓ IoT, Blockchain, Quantum computing
+
+4. DOCUMENTATION & COMMUNITY
+   ✓ Excellent documentation
+   ✓ Large community
+   ✓ Tons of tutorials
+   ✓ AWS certifications
+
+5. PRICING
+   ✓ Pay-as-you-go
+   ✓ Free tier (12 months)
+   ✓ Competitive pricing
+
+6. RELIABILITY
+   ✓ 99.99% uptime SLA
+   ✓ Battle-tested (Netflix, NASA)
+
+7. SECURITY
+   ✓ Compliance: GDPR, HIPAA, SOC 2
+   ✓ Built-in security features
+   ✓ Regular security updates
+
+
+COMPARISON:
+
+Feature          AWS              Azure            GCP
+──────────────────────────────────────────────────────────
+Services         200+             100+             90+
+Regions          31               60+              35+
+Market Share     32%              23%              10%
+Free Tier        12 months        12 months        90 days + $300 credit
+Best For         Startups,        Enterprise       Data Analytics,
+                 Flexibility      (Microsoft       ML/AI
+                                  integration)
+Learning Curve   Moderate         Moderate         Easier
+Documentation    Excellent        Good             Good
+
+
+WHEN TO USE WHICH:
+
+Choose AWS if:
+✓ Starting new project
+✓ Need flexibility
+✓ Want most services
+✓ Large community support
+
+Choose Azure if:
+✓ Already use Microsoft products (.NET, Windows Server)
+✓ Enterprise with Microsoft agreements
+✓ Hybrid cloud (on-premises + cloud)
+
+Choose GCP if:
+✓ Heavy ML/AI workload
+✓ Big Data analytics
+✓ Use Google Workspace
+
+
+FOR YOUR SCHOOL SYSTEM:
+AWS is the BEST choice! ✓
+- Large community (easy to find help)
+- Extensive documentation
+- Free tier for learning
+- Scalable for growth
+
+
+1.3 AWS GLOBAL INFRASTRUCTURE
+--------------------------------------------------------------------------------
+
+HIERARCHY:
+
+1. REGIONS (31 worldwide)
+   Geographic areas with multiple data centers
+
+   Example Regions:
+   - us-east-1 (N. Virginia, USA)
+   - us-west-2 (Oregon, USA)
+   - eu-west-1 (Ireland)
+   - ap-south-1 (Mumbai, India)
+   - ap-southeast-1 (Singapore)
+
+   Each region is isolated and independent
+
+2. AVAILABILITY ZONES (99 total)
+   Multiple isolated data centers within a region
+
+   Example (us-east-1 has 6 AZs):
+   - us-east-1a
+   - us-east-1b
+   - us-east-1c
+   - us-east-1d
+   - us-east-1e
+   - us-east-1f
+
+   WHY Multiple AZs?
+   If one data center fails → Other AZs still work
+   HIGH AVAILABILITY! ✓
+
+3. EDGE LOCATIONS (400+ worldwide)
+   Cache content close to users
+   Used by CloudFront (CDN)
+
+
+ARCHITECTURE DIAGRAM:
+
+REGION: us-east-1 (N. Virginia)
+┌─────────────────────────────────────────────────────┐
+│                                                     │
+│  Availability Zone A    Availability Zone B        │
+│  ┌─────────────────┐    ┌─────────────────┐       │
+│  │ Data Center     │    │ Data Center     │       │
+│  │                 │    │                 │       │
+│  │ - EC2 Instances │    │ - EC2 Instances │       │
+│  │ - RDS Database  │    │ - RDS Replica   │       │
+│  │ - Storage       │    │ - Storage       │       │
+│  └─────────────────┘    └─────────────────┘       │
+│         ↕                       ↕                  │
+│    Low-latency link                                │
+└─────────────────────────────────────────────────────┘
+
+If AZ-A fails → Traffic routes to AZ-B automatically!
+
+
+HOW TO CHOOSE REGION:
+
+Consider:
+
+1. LATENCY
+   Choose region closest to your users
+
+   Your users in India? → ap-south-1 (Mumbai)
+   Your users in USA? → us-east-1 (N. Virginia)
+
+2. COST
+   Pricing varies by region
+   us-east-1 usually cheapest
+
+3. SERVICES
+   Some services only available in certain regions
+   Most services: us-east-1, us-west-2, eu-west-1
+
+4. COMPLIANCE
+   Data residency laws
+   EU data must stay in EU → eu-west-1, eu-central-1
+
+5. DISASTER RECOVERY
+   Multi-region for maximum availability
+
+
+EXAMPLE - Your School System:
+
+Current Setup:
+Single VPS in unknown location
+Risk: If server fails → Complete downtime
+
+AWS Setup:
+┌─────────────────────────────────────┐
+│ Route 53 (DNS)                      │
+│ Routes traffic to healthy region    │
+└──────────┬──────────────────────────┘
+           │
+    ┌──────┴──────┐
+    ↓             ↓
+┌────────┐   ┌────────┐
+│Region 1│   │Region 2│
+│us-east-1   │us-west-2
+│        │   │        │
+│EC2 + RDS   │EC2 + RDS
+│(Primary)   │(Backup)│
+└────────┘   └────────┘
+
+If us-east-1 fails → Traffic routes to us-west-2
+ZERO DOWNTIME! ✓
+
+
+LATENCY COMPARISON:
+
+User Location  → Region         → Latency
+───────────────────────────────────────────
+Mumbai         → ap-south-1     → 10ms
+Mumbai         → us-east-1      → 200ms
+New York       → us-east-1      → 10ms
+New York       → ap-south-1     → 300ms
+
+Choose region closest to users!
+
+
+1.4 AWS ACCOUNT SETUP
+--------------------------------------------------------------------------------
+
+STEP-BY-STEP ACCOUNT CREATION:
+
+Step 1: Go to AWS Website
+URL: https://aws.amazon.com
+Click: "Create an AWS Account"
+
+Step 2: Enter Email
+- Email address
+- AWS account name (company/project name)
+- Password (strong!)
+- Confirm password
+
+Click: Continue
+
+Step 3: Contact Information
+- Account type:
+  → Personal (for learning/hobby projects)
+  → Business (for companies)
+- Full name
+- Phone number
+- Country
+- Address
+
+Click: Continue
+
+Step 4: Payment Information
+- Credit/Debit card required
+- AWS charges $1 for verification (refunded)
+- You won't be charged if you stay in Free Tier
+
+Enter:
+- Card number
+- Expiration date
+- Cardholder name
+- Billing address
+
+Click: Verify and Continue
+
+Step 5: Identity Verification
+- Phone number verification
+- Choose: Text message (SMS) or Voice call
+- Enter verification code received
+
+Click: Continue
+
+Step 6: Select Support Plan
+Options:
+1. Basic (Free) ← Choose this for learning
+   - AWS documentation
+   - Community forums
+   - Trusted Advisor (7 core checks)
+
+2. Developer ($29/month)
+   - Basic +
+   - Email support (12-24 hour response)
+
+3. Business ($100+/month)
+   - Developer +
+   - 24/7 phone/chat support
+   - 1-hour response for urgent issues
+
+4. Enterprise ($15,000+/month)
+   - Business +
+   - Technical Account Manager
+   - 15-minute response
+
+Click: Complete Sign Up
+
+Step 7: Verification
+- Email verification
+- Account activation (few minutes)
+- You'll receive: "Welcome to Amazon Web Services"
+
+SUCCESS! Account created! ✓
+
+
+LOGGING IN:
+
+Step 1: Go to AWS Console
+URL: https://console.aws.amazon.com
+
+Step 2: Sign In
+- Choose: Root user
+- Enter email
+- Enter password
+
+Step 3: (Optional) Setup MFA
+Highly recommended for security!
+- Go to: IAM → My Security Credentials
+- Enable MFA (Google Authenticator app)
+
+
+AWS CONSOLE TOUR:
+
+┌────────────────────────────────────────────────────┐
+│ AWS Logo | Services | Resource Groups | Support   │
+├────────────────────────────────────────────────────┤
+│                                                    │
+│ Search: [Search for services]                     │
+│                                                    │
+│ Recently visited                                   │
+│ - EC2                                             │
+│ - S3                                              │
+│ - RDS                                             │
+│                                                    │
+│ All services (grouped by category)                │
+│                                                    │
+│ Compute                Storage            Database│
+│ ├─ EC2                ├─ S3              ├─ RDS   │
+│ ├─ Lambda             ├─ EBS             ├─ DynamoDB│
+│ └─ ECS                └─ EFS             └─ ElastiCache│
+│                                                    │
+│ Networking           Management         Security  │
+│ ├─ VPC               ├─ CloudWatch      ├─ IAM    │
+│ ├─ Route 53          ├─ CloudFormation  ├─ KMS    │
+│ └─ CloudFront        └─ Systems Manager └─ Secrets│
+└────────────────────────────────────────────────────┘
+
+Navigation:
+- Services dropdown: Access all AWS services
+- Region selector (top right): Choose region
+- Account menu (top right): Billing, settings, sign out
+
+
+IMPORTANT: ROOT USER vs IAM USER
+
+ROOT USER (What you created):
+- Full access to everything
+- Can't be restricted
+- Should ONLY be used for:
+  - Initial setup
+  - Billing/account management
+  - Creating IAM users
+
+IAM USER (What you should use daily):
+- Created by root user
+- Can have restricted permissions
+- Safer for daily use
+
+BEST PRACTICE:
+1. Login as root user
+2. Create IAM user with admin permissions
+3. Logout root user
+4. Use IAM user for everything
+5. Enable MFA on both accounts
+
+
+SETTING UP IAM USER:
+
+Step 1: Go to IAM Service
+Console → Services → IAM
+
+Step 2: Create User
+- Click: Users → Add users
+- Username: your-name-admin
+- Access type:
+  ✓ Programmatic access (for CLI)
+  ✓ AWS Management Console access (for web)
+- Console password: Custom password
+- ✗ Require password reset
+
+Click: Next
+
+Step 3: Set Permissions
+- Attach existing policies directly
+- Search and select: AdministratorAccess
+
+Click: Next
+
+Step 4: Tags (Optional)
+Add tags like:
+Key: Role | Value: Admin
+Key: Department | Value: IT
+
+Click: Next
+
+Step 5: Review and Create
+- Review details
+- Click: Create user
+
+Step 6: Save Credentials
+IMPORTANT! Save these (shown only once):
+- Access key ID
+- Secret access key
+- Console sign-in link
+
+Download CSV file with credentials
+
+Step 7: Login as IAM User
+- Use console sign-in link
+- Username: your-name-admin
+- Password: your-password
+
+SUCCESS! IAM user created! ✓
+
+From now on, use IAM user for everything!
+
+
+1.5 AWS PRICING MODEL
+--------------------------------------------------------------------------------
+
+AWS PRICING PHILOSOPHY:
+
+1. PAY-AS-YOU-GO
+   No upfront cost
+   Pay only for what you use
+   Stop paying when you stop using
+
+2. SAVE WHEN YOU COMMIT
+   Reserved Instances (1-3 years) → Save up to 75%
+   Savings Plans → Flexible commitment
+
+3. PAY LESS AS YOU GROW
+   Volume discounts
+   More you use → Lower per-unit cost
+
+4. FREE TIER
+   12 months free (for new accounts)
+   Always Free (certain limits)
+
+
+FREE TIER DETAILS:
+
+EC2 (Virtual Servers):
+- 750 hours/month of t2.micro instance (12 months)
+- = 1 instance running 24/7 all month FREE
+- Linux or Windows
+
+S3 (Storage):
+- 5 GB standard storage (12 months)
+- 20,000 GET requests (12 months)
+- 2,000 PUT requests (12 months)
+
+RDS (Database):
+- 750 hours/month of db.t2.micro (12 months)
+- 20 GB storage (12 months)
+
+Lambda (Serverless):
+- 1 million requests/month (Always Free!)
+- 400,000 GB-seconds compute (Always Free!)
+
+CloudFront (CDN):
+- 50 GB data transfer (Always Free!)
+- 2,000,000 HTTP requests (Always Free!)
+
+Many more services have free tier!
+
+
+PRICING EXAMPLES:
+
+EXAMPLE 1: Small Website
+
+Architecture:
+- 1 EC2 t2.micro instance (web server)
+- 1 RDS db.t2.micro (database)
+- 10 GB S3 storage (images)
+
+Cost (Free Tier):
+- EC2: $0 (750 hours free)
+- RDS: $0 (750 hours free)
+- S3: $0 (5 GB free, using 10 GB)
+      Wait, $0.023/GB for extra 5 GB = $0.12
+
+Total: ~$0.12/month in first year! 💰
+
+Cost (After Free Tier):
+- EC2 t2.micro: ~$8.50/month
+- RDS db.t2.micro: ~$15/month
+- S3: $0.23/month
+
+Total: ~$24/month
+
+
+EXAMPLE 2: Your School Management System
+
+Current VPS Cost: Let's say $50/month
+
+AWS Setup (Production):
+- EC2 t3.medium (2 vCPU, 4GB RAM): $30/month
+- RDS t3.micro (MongoDB-compatible): $15/month
+- S3 for images (20 GB): $0.46/month
+- CloudFront CDN: $5/month
+- Route 53 (DNS): $0.50/month
+- Elastic IP: $0/month (free if attached to running instance)
+
+Total: ~$51/month (similar cost, MUCH better features)
+
+Benefits:
+✓ Auto-backups
+✓ High availability
+✓ CDN for fast loading
+✓ Easy scaling
+✓ Managed services (less maintenance)
+
+
+EXAMPLE 3: Scaled System (1000 concurrent users)
+
+- 3× EC2 t3.medium instances: $90/month
+- Application Load Balancer: $20/month
+- RDS t3.small with Multi-AZ: $60/month
+- S3 (100 GB): $2.30/month
+- CloudFront: $20/month
+- Route 53: $0.50/month
+
+Total: ~$193/month
+
+Still affordable for 1000 users!
+
+
+HOW TO ESTIMATE COSTS:
+
+Tool: AWS Pricing Calculator
+URL: https://calculator.aws
+
+Step 1: Select Region
+Choose your region (prices vary)
+
+Step 2: Add Services
+- Click "Add service"
+- Choose: EC2, RDS, S3, etc.
+
+Step 3: Configure Each Service
+Example for EC2:
+- Instance type: t3.medium
+- Operating system: Linux
+- Usage: 730 hours/month (24/7)
+- Data transfer: 100 GB/month
+
+Step 4: View Estimate
+Calculator shows:
+- Monthly cost
+- Annual cost
+- Cost breakdown by service
+
+Step 5: Save/Share
+- Generate unique URL
+- Share with team
+- Export as PDF
+
+
+COST OPTIMIZATION TIPS:
+
+1. USE FREE TIER
+   First 12 months → Use free tier instances
+
+2. RIGHT-SIZE INSTANCES
+   Don't over-provision
+   t3.micro might be enough instead of t3.large
+
+3. STOP UNUSED INSTANCES
+   Dev/Test servers → Stop when not in use
+   Charged only for storage, not compute
+
+4. USE RESERVED INSTANCES
+   If running 24/7 for 1+ year → Save 40-75%
+
+5. USE SPOT INSTANCES
+   For non-critical workloads → Save up to 90%
+
+6. AUTO-SCALING
+   Scale down during low traffic
+   Scale up during high traffic
+
+7. S3 LIFECYCLE POLICIES
+   Move old data to cheaper storage
+   Glacier: $0.004/GB (vs S3: $0.023/GB)
+
+8. CLOUDFRONT CACHING
+   Reduce origin (EC2/S3) data transfer costs
+
+9. USE NAT GATEWAY WISELY
+   NAT Gateway: $0.045/hour
+   If possible, use public subnets
+
+10. DELETE OLD SNAPSHOTS
+    Old EBS snapshots → Cost money
+    Automate deletion of snapshots >30 days
+
+
+MONITORING COSTS:
+
+1. BILLING DASHBOARD
+   Console → Billing
+   - Current month charges
+   - Forecast for month
+   - Last month's bill
+
+2. COST EXPLORER
+   Console → Cost Explorer
+   - Visualize costs
+   - Filter by service, region, time
+   - Identify cost trends
+
+3. BUDGETS
+   Console → Budgets
+   - Set monthly budget ($50/month)
+   - Alert when 80%, 100% reached
+   - Email notification
+
+   Example Alert:
+   "Your AWS costs have exceeded $40 (80% of $50 budget)"
+
+4. BILLING ALARMS
+   CloudWatch → Alarms
+   - Alert when charges > $X
+   - Sends email/SMS
+
+   Example:
+   ```
+   If EstimatedCharges > $50
+   Then send email to: admin@school.com
+   ```
+
+
+AVOIDING SURPRISE CHARGES:
+
+1. ALWAYS CHECK REGION
+   Accidentally launch in expensive region
+
+2. TERMINATE, DON'T JUST STOP
+   Stopped instances still charge for storage
+
+3. DELETE ELASTIC IPs
+   Unattached IPs → $0.005/hour
+
+4. DELETE OLD SNAPSHOTS
+   Old backups → Accumulate cost
+
+5. MONITOR DATA TRANSFER
+   Large data transfers → Can be expensive
+
+6. USE BILLING ALERTS
+   Set budget alarm at $10, $25, $50
+
+7. REVIEW MONTHLY BILL
+   Check for unexpected charges
+
+
+(Continuing in next section...)
+
+
+================================================================================
+PART 2: CORE AWS SERVICES (OVERVIEW)
+================================================================================
+
+2.1 EC2 (ELASTIC COMPUTE CLOUD)
+--------------------------------------------------------------------------------
+
+WHAT IS EC2?
+
+EC2 = Virtual servers in the cloud
+Like having a computer (Windows/Linux) that you can:
+- Start in seconds
+- Access remotely
+- Scale up/down
+- Pay by the hour
+
+SIMPLE ANALOGY:
+Your laptop = Physical computer
+EC2 instance = Virtual computer in Amazon's data center
+
+USE CASES:
+✓ Web servers (host your backend)
+✓ Application servers
+✓ Development/test environments
+✓ Big data processing
+✓ Gaming servers
+
+
+KEY CONCEPTS:
+
+1. INSTANCE
+   Running virtual machine
+   Example: t3.micro, t3.medium
+
+2. AMI (Amazon Machine Image)
+   Template for instance
+   Like Windows installation disk
+   Contains: OS + pre-installed software
+
+3. INSTANCE TYPE
+   Hardware configuration
+   Example: t3.medium = 2 vCPUs, 4 GB RAM
+
+4. EBS (Elastic Block Store)
+   Virtual hard drive
+   Attached to instance
+
+5. SECURITY GROUP
+   Virtual firewall
+   Controls inbound/outbound traffic
+
+
+INSTANCE TYPES (Categories):
+
+1. GENERAL PURPOSE (T, M series)
+   Balanced CPU, memory, network
+   Use: Web servers, small databases
+   Examples: t3.micro, t3.small, m5.large
+
+2. COMPUTE OPTIMIZED (C series)
+   High CPU performance
+   Use: Video encoding, batch processing
+   Examples: c5.large, c5.xlarge
+
+3. MEMORY OPTIMIZED (R, X series)
+   Large memory
+   Use: In-memory databases, big data
+   Examples: r5.large, x1e.xlarge
+
+4. STORAGE OPTIMIZED (I, D series)
+   High disk throughput
+   Use: Data warehousing, Hadoop
+   Examples: i3.large, d2.xlarge
+
+5. GPU INSTANCES (P, G series)
+   Graphics processing
+   Use: Machine learning, 3D rendering
+   Examples: p3.2xlarge, g4dn.xlarge
+
+
+PRICING MODELS:
+
+1. ON-DEMAND
+   Pay by the hour/second
+   No commitment
+   Most expensive
+   Use: Short-term, unpredictable workloads
+
+   Example: t3.medium = $0.0416/hour = $30/month
+
+2. RESERVED INSTANCES
+   1 or 3 year commitment
+   Save 40-75%
+   Pay upfront or monthly
+   Use: Steady-state workloads
+
+   Example: t3.medium Reserved = $0.0208/hour = $15/month
+   Savings: 50%!
+
+3. SPOT INSTANCES
+   Bid on spare capacity
+   Save up to 90%
+   Can be terminated anytime
+   Use: Flexible, fault-tolerant workloads
+
+   Example: t3.medium Spot = $0.0125/hour = $9/month
+   Savings: 70%!
+
+4. SAVINGS PLANS
+   Flexible commitment (1 or 3 years)
+   Save up to 72%
+   Use: Consistent usage, any instance type
+
+
+2.2 S3 (SIMPLE STORAGE SERVICE)
+--------------------------------------------------------------------------------
+
+WHAT IS S3?
+
+S3 = Object storage (file storage in cloud)
+Store and retrieve any amount of data
+From anywhere on the web
+
+SIMPLE ANALOGY:
+S3 = Unlimited Dropbox/Google Drive
+Stores files, images, videos, backups
+
+USE CASES:
+✓ Static website hosting
+✓ File storage (images, videos, documents)
+✓ Backup and archiving
+✓ Data lakes (big data)
+✓ CDN origin (with CloudFront)
+
+
+KEY CONCEPTS:
+
+1. BUCKET
+   Container for objects
+   Globally unique name
+   Example: my-school-images
+
+2. OBJECT
+   File stored in bucket
+   Size: 0 bytes to 5 TB
+   Example: student-photos/john.jpg
+
+3. KEY
+   Unique identifier (path + filename)
+   Example: uploads/2024/student123.jpg
+
+4. REGION
+   Where bucket is located
+   Choose closest to users
+
+
+S3 STRUCTURE:
+
+Bucket: my-school-app
+├── students/
+│   ├── john-doe.jpg
+│   ├── jane-smith.jpg
+│   └── profiles/
+│       ├── student1.jpg
+│       └── student2.jpg
+├── teachers/
+│   ├── teacher1.jpg
+│   └── teacher2.jpg
+└── documents/
+    ├── syllabus.pdf
+    └── timetable.pdf
+
+
+STORAGE CLASSES:
+
+1. S3 STANDARD
+   Frequent access
+   99.99% availability
+   $0.023/GB/month
+   Use: Active data
+
+2. S3 INTELLIGENT-TIERING
+   Automatic cost optimization
+   Moves data between tiers
+   $0.0125-0.023/GB/month
+   Use: Unknown access patterns
+
+3. S3 STANDARD-IA (Infrequent Access)
+   Accessed less frequently
+   99.9% availability
+   $0.0125/GB/month
+   Use: Backups, older data
+
+4. S3 ONE ZONE-IA
+   Single availability zone
+   99.5% availability
+   $0.01/GB/month
+   Use: Reproducible data
+
+5. S3 GLACIER
+   Archive storage
+   Minutes to hours retrieval
+   $0.004/GB/month
+   Use: Long-term archives
+
+6. S3 GLACIER DEEP ARCHIVE
+   Lowest cost
+   12 hour retrieval
+   $0.00099/GB/month
+   Use: Compliance archives
+
+
+EXAMPLE PRICING:
+
+1000 student photos @ 1MB each = 1 GB
+
+S3 Standard:
+- Storage: $0.023/month
+- 10,000 GET requests: $0.004
+- Total: $0.027/month
+
+Very cheap! 💰
+
+
+ACCESS CONTROL:
+
+1. BUCKET POLICY
+   JSON document
+   Controls who can access bucket
+
+2. IAM POLICIES
+   Control user permissions
+
+3. ACLs (Access Control Lists)
+   Legacy method
+   Grant read/write access
+
+4. PRESIGNED URLs
+   Temporary access
+   URL expires after X minutes
+   Use: Secure file downloads
+
+
+2.3 RDS (RELATIONAL DATABASE SERVICE)
+--------------------------------------------------------------------------------
+
+WHAT IS RDS?
+
+RDS = Managed database service
+AWS manages:
+✓ Server maintenance
+✓ Backups
+✓ Software updates
+✓ Scaling
+✓ High availability
+
+You focus on: Your data and queries
+
+
+SUPPORTED DATABASES:
+
+1. Amazon Aurora
+   - MySQL and PostgreSQL compatible
+   - 5x faster than MySQL
+   - Auto-scaling
+   - Most expensive
+
+2. MySQL
+   - Popular open-source
+   - Good for web apps
+
+3. PostgreSQL
+   - Advanced features
+   - JSON support
+   - Good for complex queries
+
+4. MariaDB
+   - MySQL fork
+   - Better performance
+
+5. Oracle
+   - Enterprise database
+   - Very expensive
+
+6. SQL Server
+   - Microsoft database
+   - Windows-based apps
+
+
+RDS vs RUNNING DATABASE ON EC2:
+
+RDS (Managed):
+✓ Automated backups
+✓ Automated updates
+✓ Multi-AZ (high availability)
+✓ Read replicas
+✓ Monitoring
+✗ Less control
+✗ Slightly more expensive
+
+EC2 Database (Self-managed):
+✓ Full control
+✓ Any database engine
+✓ Custom configuration
+✗ Manual backups
+✗ Manual updates
+✗ Manual scaling
+✗ More work!
+
+RECOMMENDATION: Use RDS (less work, better reliability)
+
+
+KEY FEATURES:
+
+1. AUTOMATED BACKUPS
+   Daily automatic backups
+   Retention: 1-35 days
+   Point-in-time recovery
+
+2. MULTI-AZ DEPLOYMENT
+   Standby replica in different AZ
+   Automatic failover (60 seconds)
+   High availability!
+
+   Primary DB (AZ-A) ⟷ Standby DB (AZ-B)
+   If Primary fails → Standby becomes Primary
+
+3. READ REPLICAS
+   Read-only copies
+   Reduce load on primary
+   Can be in different regions
+
+   Write → Primary DB
+   Read ← Read Replica 1
+   Read ← Read Replica 2
+   Read ← Read Replica 3
+
+   Up to 5 read replicas!
+
+4. ENCRYPTION
+   At-rest encryption (data on disk)
+   In-transit encryption (SSL/TLS)
+   AWS KMS integration
+
+
+INSTANCE CLASSES:
+
+1. db.t3.micro
+   1 vCPU, 1 GB RAM
+   $15/month
+   Use: Development/testing
+
+2. db.t3.small
+   2 vCPU, 2 GB RAM
+   $30/month
+   Use: Small production apps
+
+3. db.t3.medium
+   2 vCPU, 4 GB RAM
+   $60/month
+   Use: Medium apps
+
+4. db.m5.large
+   2 vCPU, 8 GB RAM
+   $140/month
+   Use: Production apps
+
+
+PRICING EXAMPLE:
+
+Your School System:
+- db.t3.micro (1GB RAM)
+- 20 GB storage
+- Single-AZ
+
+Cost:
+- Instance: $15/month
+- Storage: $2/month (20GB @ $0.10/GB)
+- Total: ~$17/month
+
+With Multi-AZ (high availability):
+- Instance: $15/month × 2 = $30/month
+- Storage: $2/month × 2 = $4/month
+- Total: ~$34/month
+
+
+FOR MONGODB:
+
+RDS doesn't support MongoDB directly
+
+Options:
+1. Amazon DocumentDB
+   - MongoDB-compatible
+   - Managed service
+   - Expensive ($70+/month minimum)
+
+2. EC2 with MongoDB
+   - Install MongoDB yourself
+   - More work
+   - Cheaper
+
+3. MongoDB Atlas (Third-party)
+   - MongoDB's managed service
+   - Free tier available
+   - Works well with AWS
+
+RECOMMENDATION: MongoDB Atlas + AWS EC2
+
+
+(Continuing with VPC, IAM, and other services in the file...)
+
+
+2.4 VPC (VIRTUAL PRIVATE CLOUD)
+--------------------------------------------------------------------------------
+
+WHAT IS VPC?
+
+VPC = Your own private network in AWS
+Isolated network environment
+Complete control over:
+- IP address range
+- Subnets
+- Route tables
+- Network gateways
+
+SIMPLE ANALOGY:
+VPC = Your private office building
+- Subnets = Different floors
+- Internet Gateway = Main entrance
+- Security Groups = Security guards
+- Route Tables = Directions/signs
+
+
+DEFAULT VPC:
+
+Every AWS account has default VPC (per region)
+- CIDR: 172.31.0.0/16
+- Subnets in each AZ
+- Internet Gateway attached
+- Default Security Group
+
+You can use default VPC or create custom VPC
+
+
+KEY COMPONENTS:
+
+1. CIDR BLOCK
+   IP address range for VPC
+   Example: 10.0.0.0/16 = 65,536 IP addresses
+
+2. SUBNET
+   Subdivision of VPC
+   Public subnet: Has internet access
+   Private subnet: No direct internet access
+
+3. INTERNET GATEWAY
+   Allows VPC to access internet
+   Attached to VPC
+
+4. NAT GATEWAY
+   Allows private subnet to access internet
+   But internet can't initiate connection to private subnet
+
+5. ROUTE TABLE
+   Rules for routing traffic
+   Where to send packets
+
+6. SECURITY GROUP
+   Virtual firewall for instances
+   Stateful (return traffic allowed automatically)
+
+7. NACL (Network ACL)
+   Firewall for subnets
+   Stateless (must explicitly allow return traffic)
+
+
+TYPICAL VPC ARCHITECTURE:
+
+VPC: 10.0.0.0/16
+├── Public Subnet A (10.0.1.0/24)
+│   ├── Internet Gateway attached
+│   ├── NAT Gateway
+│   └── Load Balancer
+├── Private Subnet A (10.0.2.0/24)
+│   ├── EC2 Instances (Web servers)
+│   └── Can access internet via NAT Gateway
+└── Private Subnet B (10.0.3.0/24)
+    ├── RDS Database
+    └── No internet access
+
+
+WHY PUBLIC AND PRIVATE SUBNETS?
+
+PUBLIC SUBNET:
+- Resources need internet access
+- Can be accessed from internet
+- Examples: Load Balancers, NAT Gateways, Bastion hosts
+
+PRIVATE SUBNET:
+- Resources don't need direct internet access
+- Can't be accessed from internet (secure!)
+- Can access internet via NAT Gateway
+- Examples: Application servers, Databases
+
+SECURITY BEST PRACTICE:
+✓ Web servers → Private subnet (behind Load Balancer)
+✓ Databases → Private subnet (no internet access)
+✓ Only Load Balancer → Public subnet
+
+
+(File continues with detailed sections on IAM, Load Balancers, Lambda, etc.)

@@ -88,7 +88,9 @@ const HeaderSection = ({ data, updateData, saveSection, showSnackbar, schoolId, 
         showSnackbar('Logo uploaded successfully', 'success');
       }
     } catch (error) {
-      showSnackbar('Error uploading logo', 'error');
+      console.error('Logo upload error:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Error uploading logo';
+      showSnackbar(errorMessage, 'error');
     } finally {
       setUploading(false);
     }

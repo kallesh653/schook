@@ -43,9 +43,8 @@ import NoticeSchool from "./school/components/notice/NoticeSchool";
 import NoticeTeacher from "./teacher/components/notice/Notice";
 import NoticeStudent from "./student/components/notice/NoticeStudent";
 import StudentRecords from "./school/components/student-records/StudentRecords";
-import FrontPageManagement from "./school/components/front-page-management/FrontPageManagement";
-import PublicHomePageManagement from "./school/components/public-home-management/PublicHomePageManagement";
 import HomePageManagement from "./school/components/home-page-management/HomePageManagement";
+import PublicHomePage from "./client/components/public-home/PublicHomePage";
 import FeesManagement from "./school/components/fees/FeesManagement";
 import MarkSheetGenerator from "./school/components/marksheet/MarkSheetGenerator";
 import SmsManagement from "./school/components/sms/SmsManagement";
@@ -67,8 +66,6 @@ function App() {
           <Route path="school"  element={<ProtectedRoute allowedRoles={['SCHOOL']}><School/></ProtectedRoute>}>
               <Route index element={<SchoolDashboard />} />
               <Route path="home-page-management" element={<HomePageManagement />} />
-              <Route path="front-page" element={<FrontPageManagement />} />
-              <Route path="public-home" element={<PublicHomePageManagement />} />
               <Route path="courses" element={<Courses />} />
               <Route path="class" element={<Class />} />
               <Route path="class-details" element={<ClassDetails />} />
@@ -111,6 +108,7 @@ function App() {
             <Route path="/" element={<Client />}>
               <Route index element={<Navigate to="/home" replace />} />
               <Route path="home" element={<Home />} />
+              <Route path="public-home" element={<PublicHomePage />} />
               <Route path="contact" element={<Contact />} />
               <Route path="login" element={<Login />} />
               <Route path="student-login" element={<StudentLogin />} />

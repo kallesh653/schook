@@ -1,0 +1,1394 @@
+================================================================================
+        COMPLETE SYSTEM DESIGN GUIDE - BASIC TO ADVANCED
+        From Zero to System Design Expert
+================================================================================
+
+Author: Comprehensive Learning Guide
+Purpose: Master system design from fundamentals to advanced concepts
+Target: Beginners to Senior Engineers preparing for system design interviews
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+PART 1: FUNDAMENTALS
+    1.1  What is System Design?
+    1.2  Why System Design Matters
+    1.3  Key Concepts Overview
+    1.4  Scalability Basics
+    1.5  Performance Metrics
+
+PART 2: BUILDING BLOCKS
+    2.1  Client-Server Architecture
+    2.2  Load Balancing
+    2.3  Caching
+    2.4  Database Fundamentals
+    2.5  Message Queues
+    2.6  API Design
+    2.7  CDN (Content Delivery Network)
+
+PART 3: DATABASE DESIGN
+    3.1  SQL vs NoSQL
+    3.2  Database Sharding
+    3.3  Database Replication
+    3.4  CAP Theorem
+    3.5  ACID vs BASE
+    3.6  Indexing Strategies
+    3.7  Database Partitioning
+
+PART 4: SCALABILITY
+    4.1  Horizontal vs Vertical Scaling
+    4.2  Stateless vs Stateful
+    4.3  Microservices Architecture
+    4.4  Service Discovery
+    4.5  Auto-scaling
+
+PART 5: RELIABILITY & AVAILABILITY
+    5.1  High Availability
+    5.2  Fault Tolerance
+    5.3  Disaster Recovery
+    5.4  Redundancy
+    5.5  Health Checks & Monitoring
+
+PART 6: PERFORMANCE OPTIMIZATION
+    6.1  Latency vs Throughput
+    6.2  Caching Strategies
+    6.3  Database Optimization
+    6.4  Connection Pooling
+    6.5  Compression
+
+PART 7: SECURITY
+    7.1  Authentication vs Authorization
+    7.2  OAuth 2.0 & JWT
+    7.3  Rate Limiting
+    7.4  DDoS Protection
+    7.5  Encryption
+
+PART 8: REAL-WORLD SYSTEM DESIGN
+    8.1  Design URL Shortener (like bit.ly)
+    8.2  Design Twitter
+    8.3  Design Instagram
+    8.4  Design WhatsApp
+    8.5  Design Netflix
+    8.6  Design School Management System (Your Project)
+
+PART 9: ADVANCED CONCEPTS
+    9.1  Consistent Hashing
+    9.2  Bloom Filters
+    9.3  Gossip Protocol
+    9.4  Leader Election
+    9.5  Distributed Transactions
+    9.6  Event Sourcing & CQRS
+
+PART 10: INTERVIEW PREPARATION
+    10.1 How to Approach System Design Questions
+    10.2 Common Patterns
+    10.3 Trade-offs Discussion
+    10.4 Practice Problems
+
+================================================================================
+PART 1: FUNDAMENTALS
+================================================================================
+
+1.1 WHAT IS SYSTEM DESIGN?
+--------------------------------------------------------------------------------
+
+DEFINITION:
+System Design is the process of defining the architecture, components,
+modules, interfaces, and data for a system to satisfy specified requirements.
+
+SIMPLE EXPLANATION:
+Imagine you're building a house. You need:
+- Blueprint (Architecture)
+- Foundation (Database)
+- Walls & Roof (Servers)
+- Plumbing (Data Flow)
+- Electricity (Communication between components)
+- Security System (Authentication/Authorization)
+
+System Design is creating this blueprint for software applications.
+
+EXAMPLE - Small Scale (Personal Blog):
+┌─────────────┐
+│   Browser   │ (User)
+└──────┬──────┘
+       │ HTTP Request
+       ↓
+┌─────────────┐
+│   Server    │ (Node.js)
+└──────┬──────┘
+       │ Query
+       ↓
+┌─────────────┐
+│  Database   │ (MongoDB)
+└─────────────┘
+
+This works for 10 users, but what about 1,000,000 users?
+
+
+EXAMPLE - Large Scale (Facebook):
+                        ┌──────────────┐
+                        │ Load Balancer│
+                        └──────┬───────┘
+                               │
+                ┌──────────────┼──────────────┐
+                ↓              ↓              ↓
+         ┌──────────┐   ┌──────────┐   ┌──────────┐
+         │ Server 1 │   │ Server 2 │   │ Server 3 │
+         └────┬─────┘   └────┬─────┘   └────┬─────┘
+              │              │              │
+              └──────────────┼──────────────┘
+                             ↓
+                      ┌─────────────┐
+                      │   Cache     │ (Redis)
+                      │  (Fast)     │
+                      └──────┬──────┘
+                             ↓
+                      ┌─────────────┐
+                      │  Database   │ (Distributed)
+                      │   Cluster   │
+                      └─────────────┘
+
+This handles millions of users!
+
+
+1.2 WHY SYSTEM DESIGN MATTERS
+--------------------------------------------------------------------------------
+
+1. SCALABILITY
+   - Your app grows from 100 to 10,000,000 users
+   - Without good design: System crashes
+   - With good design: System scales smoothly
+
+2. RELIABILITY
+   - Good design ensures 99.99% uptime
+   - Bad design: Frequent downtime = Lost revenue
+
+3. PERFORMANCE
+   - Users expect <2 second load times
+   - Poor design = Slow = Users leave
+
+4. COST EFFICIENCY
+   - Good design = Optimal resource usage
+   - Bad design = Wasted money on servers
+
+5. MAINTAINABILITY
+   - Easy to add new features
+   - Easy to fix bugs
+   - Easy for new developers to understand
+
+REAL-WORLD EXAMPLE:
+Twitter's "Fail Whale" (2008-2010)
+- Poor initial design couldn't handle growth
+- Frequent crashes during peak hours
+- Had to completely redesign architecture
+- Cost: Millions of dollars + Lost users
+
+
+1.3 KEY CONCEPTS OVERVIEW
+--------------------------------------------------------------------------------
+
+┌────────────────────────────────────────────────────────────────────┐
+│                     SYSTEM DESIGN PILLARS                          │
+├────────────────────────────────────────────────────────────────────┤
+│                                                                    │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐            │
+│  │ SCALABILITY  │  │ RELIABILITY  │  │  PERFORMANCE │            │
+│  │              │  │              │  │              │            │
+│  │ Can it grow? │  │ Always on?   │  │ How fast?    │            │
+│  └──────────────┘  └──────────────┘  └──────────────┘            │
+│                                                                    │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐            │
+│  │ MAINTAINABILITY│ │  SECURITY   │  │     COST     │            │
+│  │              │  │              │  │              │            │
+│  │ Easy to fix? │  │ Protected?   │  │ Affordable?  │            │
+│  └──────────────┘  └──────────────┘  └──────────────┘            │
+└────────────────────────────────────────────────────────────────────┘
+
+These 6 pillars guide ALL system design decisions.
+
+
+1.4 SCALABILITY BASICS
+--------------------------------------------------------------------------------
+
+DEFINITION:
+Scalability = System's ability to handle increased load
+
+TWO TYPES:
+
+1. VERTICAL SCALING (Scale UP)
+   ┌─────────────┐         ┌─────────────┐
+   │   Server    │   →     │   Server    │
+   │  2GB RAM    │         │  16GB RAM   │
+   │  2 CPUs     │         │  16 CPUs    │
+   └─────────────┘         └─────────────┘
+
+   Pros:
+   ✓ Simple (just upgrade hardware)
+   ✓ No code changes needed
+
+   Cons:
+   ✗ Limited (can't infinitely upgrade)
+   ✗ Expensive
+   ✗ Single point of failure
+   ✗ Requires downtime
+
+
+2. HORIZONTAL SCALING (Scale OUT)
+   ┌─────────────┐         ┌─────┐  ┌─────┐  ┌─────┐
+   │   Server    │   →     │ S1  │  │ S2  │  │ S3  │
+   │  4GB RAM    │         │ 4GB │  │ 4GB │  │ 4GB │
+   └─────────────┘         └─────┘  └─────┘  └─────┘
+
+   Pros:
+   ✓ Unlimited growth
+   ✓ No single point of failure
+   ✓ No downtime for upgrades
+
+   Cons:
+   ✗ Complex (load balancing needed)
+   ✗ Code must be stateless
+
+
+WHEN TO USE EACH:
+
+Vertical Scaling:
+- Early stage startups
+- Simple applications
+- Databases (initial phase)
+
+Horizontal Scaling:
+- High traffic applications
+- Need high availability
+- Modern cloud applications
+
+
+REAL EXAMPLE - Your School Management System:
+
+Current (Vertical):
+VPS: 72.60.202.218
+- 2 CPU cores
+- 4GB RAM
+- Handles ~1000 concurrent users
+
+If you get 100,000 users:
+
+Vertical Scaling:
+- Upgrade to 32 CPU, 128GB RAM
+- Cost: $500-1000/month
+- Still single point of failure
+
+Horizontal Scaling:
+- 10 servers @ 2 CPU, 4GB each
+- Load balancer distributes traffic
+- Cost: $300-500/month
+- High availability
+- Better approach!
+
+
+1.5 PERFORMANCE METRICS
+--------------------------------------------------------------------------------
+
+KEY METRICS:
+
+1. LATENCY
+   Definition: Time to complete single request
+
+   Example:
+   User clicks "View Students" → 200ms → Data displayed
+
+   Target Latency:
+   - Excellent: <100ms
+   - Good: 100-300ms
+   - Acceptable: 300-1000ms
+   - Poor: >1000ms (1 second)
+
+   How to measure:
+   - Chrome DevTools → Network tab
+   - Backend: console.time()
+
+   ```javascript
+   console.time('database-query');
+   const students = await Student.find();
+   console.timeEnd('database-query');
+   // Output: database-query: 45.232ms
+   ```
+
+
+2. THROUGHPUT
+   Definition: Requests handled per second (RPS)
+
+   Example:
+   Server can handle 1000 requests/second
+
+   Target Throughput:
+   - Small app: 10-100 RPS
+   - Medium app: 100-1000 RPS
+   - Large app: 1000-10000 RPS
+   - Massive app: 10000+ RPS (Facebook, Google)
+
+   How to improve:
+   - Caching
+   - Load balancing
+   - Database indexing
+
+
+3. AVAILABILITY
+   Definition: Percentage of time system is operational
+
+   Calculation:
+   Availability = (Uptime / Total Time) × 100
+
+   Industry Standards:
+   - 99% = 3.65 days downtime/year (Not good)
+   - 99.9% = 8.76 hours downtime/year (Good)
+   - 99.99% = 52.56 minutes downtime/year (Excellent)
+   - 99.999% = 5.26 minutes downtime/year (Five 9s - Amazing)
+
+   How to achieve:
+   - Redundancy (multiple servers)
+   - Load balancing
+   - Auto-recovery
+   - Health checks
+
+
+4. ERROR RATE
+   Definition: Percentage of failed requests
+
+   Calculation:
+   Error Rate = (Failed Requests / Total Requests) × 100
+
+   Target:
+   - Excellent: <0.1%
+   - Good: 0.1-1%
+   - Poor: >1%
+
+   Common Errors:
+   - 500 Internal Server Error
+   - 503 Service Unavailable
+   - Timeout errors
+
+
+5. RESPONSE TIME (P50, P95, P99)
+
+   P50 (50th percentile / Median):
+   - 50% of requests faster than this
+
+   P95 (95th percentile):
+   - 95% of requests faster than this
+
+   P99 (99th percentile):
+   - 99% of requests faster than this
+
+   Example:
+   1000 requests with response times ranging 10ms to 5000ms
+
+   After sorting:
+   P50 = 200ms (500th request)
+   P95 = 800ms (950th request)
+   P99 = 2000ms (990th request)
+
+   Why P99 matters:
+   - Even if average is fast, some users have bad experience
+   - Outliers indicate problems
+
+
+================================================================================
+PART 2: BUILDING BLOCKS
+================================================================================
+
+2.1 CLIENT-SERVER ARCHITECTURE
+--------------------------------------------------------------------------------
+
+BASIC CONCEPT:
+
+Client (Frontend)              Server (Backend)
+┌─────────────┐                ┌─────────────┐
+│   Browser   │                │  Node.js    │
+│             │ ─── Request──→ │  Express    │
+│  React UI   │                │             │
+│             │ ←── Response── │  Business   │
+│             │                │   Logic     │
+└─────────────┘                └──────┬──────┘
+                                      │
+                                      ↓
+                               ┌─────────────┐
+                               │  Database   │
+                               │   MongoDB   │
+                               └─────────────┘
+
+DETAILED EXPLANATION:
+
+1. CLIENT (Frontend)
+   - Runs in user's browser
+   - Handles UI/UX
+   - Makes HTTP requests
+   - Technologies: React, Vue, Angular
+
+   Example Request:
+   ```javascript
+   // User clicks "View Students"
+   axios.get('https://api.gentime.in/api/student/all', {
+       headers: {
+           Authorization: 'Bearer eyJ...'
+       }
+   })
+   .then(response => {
+       // Display students
+       setStudents(response.data);
+   });
+   ```
+
+
+2. SERVER (Backend)
+   - Runs on remote machine (VPS/Cloud)
+   - Handles business logic
+   - Processes requests
+   - Connects to database
+   - Technologies: Node.js, Python, Java
+
+   Example Handler:
+   ```javascript
+   app.get('/api/student/all', authMiddleware, async (req, res) => {
+       try {
+           const students = await Student.find();
+           res.json({ success: true, data: students });
+       } catch (error) {
+           res.status(500).json({ error: 'Server error' });
+       }
+   });
+   ```
+
+
+3. DATABASE
+   - Stores persistent data
+   - Runs on database server
+   - Technologies: MongoDB, PostgreSQL, MySQL
+
+
+COMMUNICATION FLOW:
+
+Step 1: User Action
+User clicks "View Students" button
+
+Step 2: HTTP Request
+Browser sends: GET https://api.gentime.in/api/student/all
+
+Step 3: Server Receives
+Express router matches route → Runs middleware → Calls controller
+
+Step 4: Database Query
+Controller queries: Student.find({ school: schoolId })
+
+Step 5: Database Response
+MongoDB returns: Array of student documents
+
+Step 6: Server Response
+Server formats data → Sends JSON response
+
+Step 7: Client Receives
+Browser receives data → React updates UI
+
+
+PROTOCOLS:
+
+1. HTTP/HTTPS (Most Common)
+   - Request-Response model
+   - Stateless
+   - Methods: GET, POST, PUT, DELETE
+
+   Example:
+   GET /api/students         → Get all students
+   POST /api/students        → Create student
+   PUT /api/students/123     → Update student 123
+   DELETE /api/students/123  → Delete student 123
+
+
+2. WebSocket (Real-time)
+   - Persistent connection
+   - Bi-directional
+   - Use case: Chat, notifications
+
+   Example:
+   ```javascript
+   const socket = new WebSocket('ws://api.gentime.in');
+
+   socket.onmessage = (event) => {
+       console.log('New message:', event.data);
+   };
+   ```
+
+
+3. Server-Sent Events (SSE)
+   - Server pushes updates to client
+   - One-directional (server → client)
+   - Use case: Live scores, stock prices
+
+
+2.2 LOAD BALANCING
+--------------------------------------------------------------------------------
+
+PROBLEM:
+Single server can handle limited requests (e.g., 1000 RPS)
+What if you have 10,000 RPS?
+
+SOLUTION: Load Balancer
+
+WITHOUT Load Balancer:
+All users → Single Server → Overloaded → Crashes ❌
+
+WITH Load Balancer:
+┌──────────┐
+│  Users   │ (10,000 requests/second)
+└────┬─────┘
+     │
+     ↓
+┌────────────────┐
+│ Load Balancer  │ (Distributes traffic)
+└───────┬────────┘
+        │
+   ┌────┼────┬────┬────┐
+   ↓    ↓    ↓    ↓    ↓
+ ┌───┐┌───┐┌───┐┌───┐┌───┐
+ │S1 ││S2 ││S3 ││S4 ││S5 │ (2000 RPS each)
+ └───┘└───┘└───┘└───┘└───┘
+
+Each server handles 2000 RPS → No overload ✓
+
+
+LOAD BALANCING ALGORITHMS:
+
+1. ROUND ROBIN (Most Common)
+   Distributes requests sequentially
+
+   Request 1 → Server 1
+   Request 2 → Server 2
+   Request 3 → Server 3
+   Request 4 → Server 1
+   Request 5 → Server 2
+   ...
+
+   Pros:
+   ✓ Simple
+   ✓ Even distribution
+
+   Cons:
+   ✗ Doesn't consider server load
+   ✗ Doesn't consider request complexity
+
+
+2. LEAST CONNECTIONS
+   Routes to server with fewest active connections
+
+   Server 1: 10 connections
+   Server 2: 5 connections  ← New request goes here
+   Server 3: 8 connections
+
+   Pros:
+   ✓ Better for long-lived connections
+   ✓ Considers server load
+
+   Cons:
+   ✗ More complex
+   ✗ Requires tracking connections
+
+
+3. IP HASH
+   Same client always goes to same server
+
+   Hash(Client IP) % Number of Servers = Server
+
+   Hash(192.168.1.1) % 3 = 1 → Server 1
+   Hash(192.168.1.2) % 3 = 2 → Server 2
+
+   Pros:
+   ✓ Session persistence (sticky sessions)
+
+   Cons:
+   ✗ Uneven distribution
+   ✗ Problematic if server goes down
+
+
+4. WEIGHTED ROUND ROBIN
+   More powerful servers get more requests
+
+   Server 1 (4GB RAM): Weight 1
+   Server 2 (8GB RAM): Weight 2
+   Server 3 (16GB RAM): Weight 4
+
+   Distribution:
+   S1: 1/7 requests (~14%)
+   S2: 2/7 requests (~29%)
+   S3: 4/7 requests (~57%)
+
+
+TYPES OF LOAD BALANCERS:
+
+1. HARDWARE LOAD BALANCER
+   - Physical device
+   - Very fast
+   - Expensive ($10,000+)
+   - Examples: F5 Networks, Citrix ADC
+
+
+2. SOFTWARE LOAD BALANCER
+   - Runs on regular servers
+   - Flexible
+   - Affordable
+   - Examples: Nginx, HAProxy, Apache
+
+
+3. CLOUD LOAD BALANCER
+   - Managed service
+   - Auto-scaling
+   - Pay-per-use
+   - Examples: AWS ELB, Google Cloud Load Balancer
+
+
+IMPLEMENTATION EXAMPLE - Nginx:
+
+nginx.conf:
+```nginx
+http {
+    upstream backend_servers {
+        # Round robin by default
+        server 192.168.1.10:5000;  # Server 1
+        server 192.168.1.11:5000;  # Server 2
+        server 192.168.1.12:5000;  # Server 3
+    }
+
+    server {
+        listen 80;
+        server_name api.gentime.in;
+
+        location / {
+            proxy_pass http://backend_servers;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+        }
+    }
+}
+```
+
+With Health Checks:
+```nginx
+upstream backend_servers {
+    server 192.168.1.10:5000 max_fails=3 fail_timeout=30s;
+    server 192.168.1.11:5000 max_fails=3 fail_timeout=30s;
+    server 192.168.1.12:5000 max_fails=3 fail_timeout=30s;
+}
+```
+
+Explanation:
+- max_fails=3: Mark server as down after 3 failed requests
+- fail_timeout=30s: Try again after 30 seconds
+
+
+LOAD BALANCING LAYERS:
+
+LAYER 4 (Transport Layer)
+- Routes based on IP and Port
+- Faster (doesn't inspect content)
+- Can't route based on URL
+- Example: TCP/UDP load balancing
+
+LAYER 7 (Application Layer)
+- Routes based on HTTP headers, URL, cookies
+- Slower (inspects content)
+- More flexible
+- Example: Route /api/students to Server 1, /api/teachers to Server 2
+
+
+REAL-WORLD EXAMPLE - Your School System:
+
+Current Setup:
+All traffic → 72.60.202.218:5000 (Single server)
+
+Scaled Setup:
+                  ┌──────────────────┐
+                  │  Load Balancer   │
+                  │  (Nginx)         │
+                  │  72.60.202.218   │
+                  └────────┬─────────┘
+                           │
+        ┌──────────────────┼──────────────────┐
+        ↓                  ↓                  ↓
+   ┌─────────┐       ┌─────────┐       ┌─────────┐
+   │ Server 1│       │ Server 2│       │ Server 3│
+   │ :5001   │       │ :5002   │       │ :5003   │
+   └─────────┘       └─────────┘       └─────────┘
+        │                  │                  │
+        └──────────────────┴──────────────────┘
+                           │
+                    ┌──────────────┐
+                    │   MongoDB    │
+                    │   Cluster    │
+                    └──────────────┘
+
+Benefits:
+✓ 3x capacity
+✓ High availability (if one fails, others handle traffic)
+✓ Zero-downtime deployments (update servers one by one)
+
+
+2.3 CACHING
+--------------------------------------------------------------------------------
+
+DEFINITION:
+Caching = Storing frequently accessed data in fast storage
+
+WHY CACHE?
+
+Without Cache:
+User requests data → Query database → Return data
+Time: 50ms (database query time)
+
+With Cache:
+First request → Query database → Save to cache → Return data (50ms)
+Subsequent requests → Get from cache → Return data (1ms)
+
+50x faster! ⚡
+
+
+CACHE LAYERS:
+
+┌──────────────────────────────────────────────────┐
+│                    Browser                       │
+│              (Browser Cache: 0.1ms)              │
+└────────────────────┬─────────────────────────────┘
+                     │
+┌────────────────────┴─────────────────────────────┐
+│                     CDN                          │
+│              (CDN Cache: 10ms)                   │
+└────────────────────┬─────────────────────────────┘
+                     │
+┌────────────────────┴─────────────────────────────┐
+│               Application Server                 │
+│          (In-Memory Cache: 1ms)                  │
+│              (Redis/Memcached)                   │
+└────────────────────┬─────────────────────────────┘
+                     │
+┌────────────────────┴─────────────────────────────┐
+│                   Database                       │
+│            (Disk Storage: 50ms)                  │
+└──────────────────────────────────────────────────┘
+
+Faster as you go up! ↑
+
+
+TYPES OF CACHING:
+
+1. CLIENT-SIDE CACHING (Browser)
+
+   HTTP Headers:
+   ```
+   Cache-Control: max-age=3600
+   ```
+   Browser caches for 1 hour
+
+   LocalStorage:
+   ```javascript
+   // Save to cache
+   localStorage.setItem('students', JSON.stringify(students));
+
+   // Get from cache
+   const cached = JSON.parse(localStorage.getItem('students'));
+   ```
+
+
+2. SERVER-SIDE CACHING (Redis/Memcached)
+
+   Redis Example:
+   ```javascript
+   const redis = require('redis');
+   const client = redis.createClient();
+
+   // Get students
+   app.get('/api/students', async (req, res) => {
+       const cacheKey = `students:${req.user.schoolId}`;
+
+       // Try cache first
+       const cached = await client.get(cacheKey);
+       if (cached) {
+           console.log('Cache HIT');
+           return res.json(JSON.parse(cached));
+       }
+
+       console.log('Cache MISS');
+       // Query database
+       const students = await Student.find({ school: req.user.schoolId });
+
+       // Save to cache (expire in 1 hour)
+       await client.setex(cacheKey, 3600, JSON.stringify(students));
+
+       res.json(students);
+   });
+   ```
+
+   First request: 50ms (database)
+   Subsequent requests: 1ms (cache)
+
+
+3. DATABASE CACHING
+
+   Query Result Cache:
+   ```javascript
+   // MongoDB caches frequent queries internally
+   Student.find({ age: { $gte: 18 } }).cache(60); // Cache for 60 seconds
+   ```
+
+
+4. CDN CACHING
+
+   Static assets cached at edge locations
+
+   Without CDN:
+   User in India → US Server → 300ms latency
+
+   With CDN:
+   User in India → India CDN Edge → 10ms latency
+
+   CDN providers: Cloudflare, AWS CloudFront, Akamai
+
+
+CACHING STRATEGIES:
+
+1. CACHE-ASIDE (Lazy Loading)
+
+   Flow:
+   1. Check cache
+   2. If found (HIT): Return from cache
+   3. If not found (MISS): Query database → Save to cache → Return
+
+   ```javascript
+   async function getStudent(id) {
+       // 1. Check cache
+       const cached = await cache.get(`student:${id}`);
+       if (cached) return cached;
+
+       // 2. Query database
+       const student = await Student.findById(id);
+
+       // 3. Save to cache
+       await cache.set(`student:${id}`, student, 3600);
+
+       return student;
+   }
+   ```
+
+   Pros:
+   ✓ Only caches what's needed
+   ✓ Cache failure doesn't break app
+
+   Cons:
+   ✗ Initial request is slow (cache miss)
+   ✗ Stale data possible
+
+
+2. WRITE-THROUGH
+
+   Flow:
+   1. Write to cache AND database simultaneously
+   2. Read always from cache
+
+   ```javascript
+   async function updateStudent(id, data) {
+       // Update database
+       const student = await Student.findByIdAndUpdate(id, data);
+
+       // Update cache immediately
+       await cache.set(`student:${id}`, student);
+
+       return student;
+   }
+   ```
+
+   Pros:
+   ✓ Cache always up-to-date
+   ✓ Fast reads
+
+   Cons:
+   ✗ Slow writes (write to 2 places)
+   ✗ May cache data that's never read
+
+
+3. WRITE-BEHIND (Write-Back)
+
+   Flow:
+   1. Write to cache immediately
+   2. Write to database asynchronously
+
+   ```javascript
+   async function updateStudent(id, data) {
+       // Update cache immediately
+       await cache.set(`student:${id}`, data);
+
+       // Queue database write
+       writeQueue.add({ id, data });
+
+       return data;
+   }
+   ```
+
+   Pros:
+   ✓ Fast writes
+   ✓ Reduces database load
+
+   Cons:
+   ✗ Risk of data loss (if cache fails before DB write)
+   ✗ Complex implementation
+
+
+CACHE INVALIDATION (Hardest Problem in CS!)
+
+When to invalidate cache?
+
+1. TIME-BASED (TTL - Time To Live)
+   ```javascript
+   cache.set('students', data, 3600); // Expire after 1 hour
+   ```
+
+   Pros: Simple
+   Cons: Stale data for TTL duration
+
+
+2. EVENT-BASED
+   ```javascript
+   // When student is created/updated/deleted
+   async function deleteStudent(id) {
+       await Student.findByIdAndDelete(id);
+
+       // Invalidate cache
+       await cache.del(`student:${id}`);
+       await cache.del('students:all');
+   }
+   ```
+
+   Pros: Always fresh data
+   Cons: More complex
+
+
+3. CACHE STAMPEDE PREVENTION
+
+   Problem:
+   100 requests hit simultaneously → All miss cache → 100 DB queries
+
+   Solution: Lock
+   ```javascript
+   async function getStudents() {
+       const lockKey = 'lock:students';
+
+       // Try to acquire lock
+       const locked = await cache.set(lockKey, '1', 'EX', 10, 'NX');
+
+       if (locked) {
+           // Only this request queries DB
+           const students = await Student.find();
+           await cache.set('students', students, 3600);
+           await cache.del(lockKey);
+           return students;
+       } else {
+           // Wait and retry
+           await sleep(100);
+           return getStudents();
+       }
+   }
+   ```
+
+
+REAL-WORLD METRICS:
+
+Facebook:
+- Cache Hit Rate: >95%
+- Memcached clusters: 800+ servers
+- Saves millions of DB queries per second
+
+Your School System:
+Without Redis:
+- 1000 students → Query time: 50ms
+- 100 requests/second → 5 seconds of DB load
+
+With Redis:
+- First request: 50ms (cache miss)
+- Next 99 requests: 1ms each (cache hits)
+- DB load: 0.05 seconds
+- 100x improvement!
+
+
+CACHE SIZING:
+
+How much cache do you need?
+
+Working Set = Data accessed in 24 hours
+
+Example:
+- 10,000 students
+- Average student document: 1KB
+- 80% accessed daily
+- Cache needed: 10,000 × 1KB × 0.8 = 8MB
+
+Add 20% buffer: 10MB
+
+Redis server with 1GB RAM can handle 100 schools!
+
+
+WHEN NOT TO CACHE:
+
+1. Frequently changing data
+   Example: Real-time stock prices
+
+2. User-specific data with high cardinality
+   Example: Shopping carts (millions of unique carts)
+
+3. Data that must be 100% accurate
+   Example: Financial transactions
+
+
+(Continuing in next section...)
+
+
+2.4 DATABASE FUNDAMENTALS
+--------------------------------------------------------------------------------
+
+TYPES OF DATABASES:
+
+1. RELATIONAL (SQL)
+   Examples: MySQL, PostgreSQL, Oracle
+
+   Structure: Tables with rows and columns
+
+   Students Table:
+   ┌────┬──────────┬─────┬──────────┐
+   │ id │ name     │ age │ class_id │
+   ├────┼──────────┼─────┼──────────┤
+   │ 1  │ John Doe │ 18  │ 10       │
+   │ 2  │ Jane Doe │ 17  │ 9        │
+   └────┴──────────┴─────┴──────────┘
+
+   Classes Table:
+   ┌────┬──────────┐
+   │ id │ name     │
+   ├────┼──────────┤
+   │ 9  │ Class 9A │
+   │ 10 │ Class 10A│
+   └────┴──────────┘
+
+   Query:
+   ```sql
+   SELECT s.name, c.name as class_name
+   FROM students s
+   JOIN classes c ON s.class_id = c.id
+   WHERE s.age >= 18;
+   ```
+
+   Pros:
+   ✓ ACID transactions
+   ✓ Complex queries (JOINs)
+   ✓ Data integrity
+   ✓ Mature ecosystem
+
+   Cons:
+   ✗ Rigid schema
+   ✗ Harder to scale horizontally
+   ✗ Not great for unstructured data
+
+
+2. DOCUMENT DATABASE (NoSQL)
+   Examples: MongoDB, CouchDB
+
+   Structure: JSON-like documents
+
+   ```json
+   {
+       "_id": "507f1f77bcf86cd799439011",
+       "name": "John Doe",
+       "age": 18,
+       "class": {
+           "id": "507f1f77bcf86cd799439012",
+           "name": "Class 10A"
+       },
+       "attendance": [
+           { "date": "2024-01-01", "status": "present" },
+           { "date": "2024-01-02", "status": "absent" }
+       ]
+   }
+   ```
+
+   Query:
+   ```javascript
+   db.students.find({ age: { $gte: 18 } })
+   ```
+
+   Pros:
+   ✓ Flexible schema
+   ✓ Easy to scale horizontally
+   ✓ Fast for simple queries
+   ✓ Good for unstructured data
+
+   Cons:
+   ✗ No JOINs (need population)
+   ✗ Data duplication
+   ✗ Eventual consistency
+
+
+3. KEY-VALUE STORE
+   Examples: Redis, Memcached, DynamoDB
+
+   Structure: Simple key-value pairs
+
+   ```
+   student:1 → { "name": "John", "age": 18 }
+   student:2 → { "name": "Jane", "age": 17 }
+   session:abc123 → { "userId": 1, "expires": 1234567890 }
+   ```
+
+   Pros:
+   ✓ Extremely fast (in-memory)
+   ✓ Simple API
+   ✓ Great for caching
+
+   Cons:
+   ✗ No complex queries
+   ✗ Limited data structures
+
+
+4. COLUMN-FAMILY STORE
+   Examples: Cassandra, HBase
+
+   Used for: Time-series data, analytics
+
+   Structure: Column families
+   ```
+   Row Key: student:1
+   ├─ personal:name → "John Doe"
+   ├─ personal:age → 18
+   ├─ academic:class → "10A"
+   └─ academic:grade → "A"
+   ```
+
+   Pros:
+   ✓ Great for writes
+   ✓ Handles massive data
+   ✓ Distributed by design
+
+   Cons:
+   ✗ Complex
+   ✗ Limited query capabilities
+
+
+5. GRAPH DATABASE
+   Examples: Neo4j, Amazon Neptune
+
+   Used for: Social networks, recommendations
+
+   Structure: Nodes and relationships
+   ```
+   (John) -[FRIEND_OF]-> (Jane)
+   (John) -[ENROLLED_IN]-> (Class 10A)
+   (Jane) -[ENROLLED_IN]-> (Class 10A)
+   ```
+
+   Query (Cypher):
+   ```cypher
+   MATCH (s:Student)-[:FRIEND_OF]->(friend)
+   WHERE s.name = "John"
+   RETURN friend
+   ```
+
+   Pros:
+   ✓ Perfect for relationships
+   ✓ Fast for graph traversal
+
+   Cons:
+   ✗ Not for general-purpose use
+   ✗ Steep learning curve
+
+
+WHEN TO USE WHICH:
+
+Use Case                          → Database
+────────────────────────────────────────────────
+E-commerce transactions           → PostgreSQL (ACID)
+Social media posts                → MongoDB (Flexible)
+Session storage                   → Redis (Fast)
+Analytics, Logs                   → Cassandra (Write-heavy)
+Friend recommendations            → Neo4j (Relationships)
+Your School Management System     → MongoDB (Good fit!)
+
+
+DATABASE OPERATIONS (CRUD):
+
+CREATE:
+```javascript
+// MongoDB
+const newStudent = new Student({
+    name: "John Doe",
+    age: 18,
+    email: "john@student.com"
+});
+await newStudent.save();
+
+// SQL
+INSERT INTO students (name, age, email)
+VALUES ('John Doe', 18, 'john@student.com');
+```
+
+READ:
+```javascript
+// MongoDB
+const students = await Student.find({ age: { $gte: 18 } });
+const student = await Student.findById(id);
+
+// SQL
+SELECT * FROM students WHERE age >= 18;
+SELECT * FROM students WHERE id = 1;
+```
+
+UPDATE:
+```javascript
+// MongoDB
+await Student.findByIdAndUpdate(id, { age: 19 });
+
+// SQL
+UPDATE students SET age = 19 WHERE id = 1;
+```
+
+DELETE:
+```javascript
+// MongoDB
+await Student.findByIdAndDelete(id);
+
+// SQL
+DELETE FROM students WHERE id = 1;
+```
+
+
+INDEXING (Critical for Performance!):
+
+Without Index:
+```
+Find student with email "john@student.com"
+→ Scan all 10,000 documents (Sequential scan)
+→ Time: 100ms
+```
+
+With Index:
+```
+Create index: db.students.createIndex({ email: 1 })
+→ B-Tree lookup
+→ Time: 1ms
+```
+
+100x faster! ⚡
+
+Types of Indexes:
+
+1. Single Field:
+   ```javascript
+   studentSchema.index({ email: 1 }); // Ascending
+   ```
+
+2. Compound:
+   ```javascript
+   studentSchema.index({ school: 1, class: 1 });
+   // Fast for: find({ school: X, class: Y })
+   // Also fast for: find({ school: X })
+   // NOT fast for: find({ class: Y }) alone
+   ```
+
+3. Text:
+   ```javascript
+   studentSchema.index({ name: 'text' });
+   // Enables: Student.find({ $text: { $search: "John" } })
+   ```
+
+4. Unique:
+   ```javascript
+   studentSchema.index({ email: 1 }, { unique: true });
+   // Prevents duplicate emails
+   ```
+
+Index Trade-offs:
+Pros:
+✓ Faster reads
+
+Cons:
+✗ Slower writes (index must be updated)
+✗ Uses disk space
+✗ Too many indexes hurts performance
+
+Rule of thumb: Index fields used in WHERE clauses
+
+
+TRANSACTIONS:
+
+ACID Properties:
+
+A - Atomicity
+  All operations succeed or all fail (no partial)
+
+  Example:
+  ```javascript
+  // Transfer money
+  deductFromAccount(A, 100);  // If this succeeds
+  addToAccount(B, 100);       // This must also succeed
+  // If either fails, both rollback
+  ```
+
+C - Consistency
+  Database stays in valid state
+
+  Example:
+  ```javascript
+  // If rule is: age >= 5
+  Student.create({ age: 3 }); // Rejected!
+  ```
+
+I - Isolation
+  Concurrent transactions don't interfere
+
+  Example:
+  ```
+  User A reads balance: $100
+  User B reads balance: $100
+  User A withdraws $50 → Balance: $50
+  User B withdraws $50 → Should fail (not enough)
+  ```
+
+D - Durability
+  Once committed, data persists (even if power fails)
+
+
+MongoDB Transaction Example:
+```javascript
+const session = await mongoose.startSession();
+session.startTransaction();
+
+try {
+    // Deduct fees from student
+    await Student.updateOne(
+        { _id: studentId },
+        { $inc: { feeBalance: -500 } },
+        { session }
+    );
+
+    // Add fee record
+    await Fee.create([{
+        student: studentId,
+        amount: 500,
+        date: new Date()
+    }], { session });
+
+    // Both succeeded → Commit
+    await session.commitTransaction();
+} catch (error) {
+    // Something failed → Rollback
+    await session.abortTransaction();
+    throw error;
+} finally {
+    session.endSession();
+}
+```
+
+
+(Continuing in next file due to length...)

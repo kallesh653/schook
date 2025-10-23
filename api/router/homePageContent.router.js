@@ -31,7 +31,10 @@ const {
   uploadFile
 } = require("../controller/homePageContent.controller");
 
-// Get home page content
+// Public endpoint - Get home page content (no auth required)
+router.get("/public/:schoolId", getHomePageContent);
+
+// Get home page content (admin)
 router.get("/:schoolId", getHomePageContent);
 
 // Create or update entire content
