@@ -119,6 +119,7 @@ const PublicHomePage = () => {
   }
 
   const { header, sliders, statistics, about, exploreCampus, news, videos, gallery, programs, whyChooseUs, testimonials, sectionVisibility } = homeData;
+  const testimonialsArray = testimonials?.items || [];
 
   return (
     <Box>
@@ -137,28 +138,30 @@ const PublicHomePage = () => {
                 </Box>
               </Box>
               <Box display="flex" gap={2} alignItems="center">
-                {header.phone && (
+                {header.contactPhone && (
                   <Box display="flex" alignItems="center" gap={0.5}>
                     <PhoneIcon fontSize="small" />
-                    <Typography variant="body2">{header.phone}</Typography>
+                    <Typography variant="body2">{header.contactPhone}</Typography>
                   </Box>
                 )}
-                {header.email && (
+                {header.contactEmail && (
                   <Box display="flex" alignItems="center" gap={0.5}>
                     <EmailIcon fontSize="small" />
-                    <Typography variant="body2">{header.email}</Typography>
+                    <Typography variant="body2">{header.contactEmail}</Typography>
                   </Box>
                 )}
-                {header.socialMedia?.map((social, index) => (
-                  <IconButton
-                    key={index}
-                    size="small"
-                    sx={{ color: 'white' }}
-                    href={social.url}
-                    target="_blank"
-                  >
-                    {getSocialIcon(social.platform)}
-                  </IconButton>
+                {header.socialMedia && Object.entries(header.socialMedia).map(([platform, url]) => (
+                  url && (
+                    <IconButton
+                      key={platform}
+                      size="small"
+                      sx={{ color: 'white' }}
+                      href={url}
+                      target="_blank"
+                    >
+                      {getSocialIcon(platform)}
+                    </IconButton>
+                  )
                 ))}
               </Box>
             </Box>
@@ -286,13 +289,13 @@ const PublicHomePage = () => {
       )}
 
       {/* Testimonials */}
-      {sectionVisibility?.showTestimonials && testimonials && testimonials.length > 0 && (
+      {sectionVisibility?.showTestimonials && testimonialsArray && testimonialsArray.length > 0 && (
         <Container maxWidth="xl" sx={{ py: 8 }}>
           <Typography variant="h3" fontWeight="bold" textAlign="center" gutterBottom>
             What Parents Say
           </Typography>
           <Grid container spacing={4} sx={{ mt: 2 }}>
-            {testimonials.slice(0, 3).map((testimonial, index) => (
+            {testimonialsArray.slice(0, 3).map((testimonial, index) => (
               <Grid item xs={12} md={4} key={index}>
                 <Card elevation={3} sx={{ height: '100%', p: 2 }}>
                   <CardContent>
@@ -335,8 +338,8 @@ const PublicHomePage = () => {
               <Typography variant="h6" fontWeight="bold" gutterBottom>
                 Contact
               </Typography>
-              {header?.phone && <Typography variant="body2">Phone: {header.phone}</Typography>}
-              {header?.email && <Typography variant="body2">Email: {header.email}</Typography>}
+              {header?.contactPhone && <Typography variant="body2">Phone: {header.contactPhone}</Typography>}
+              {header?.contactEmail && <Typography variant="body2">Email: {header.contactEmail}</Typography>}
               {header?.address && <Typography variant="body2">Address: {header.address}</Typography>}
             </Grid>
             <Grid item xs={12} md={4}>
