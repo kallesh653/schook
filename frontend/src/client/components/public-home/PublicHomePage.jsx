@@ -1,1 +1,1002 @@
-import React,{useState,useEffect}from'react';import{Container,Typography,Grid,Card,CardContent,Box,Paper,Button,Chip,Avatar,IconButton,Fade,CircularProgress}from'@mui/material';import{School as SchoolIcon,Phone as PhoneIcon,Email as EmailIcon,LocationOn as LocationIcon,Facebook,Twitter,Instagram,YouTube,LinkedIn,ArrowForward,EmojiEvents,People,MenuBook,ChevronLeft,ChevronRight,Star}from'@mui/icons-material';import{styled,keyframes}from'@mui/material/styles';import axios from'axios';import{baseUrl}from'../../../environment';import{useNavigate}from'react-router-dom';const fadeInUp=keyframes`from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}`;const pulse=keyframes`0%,100%{transform:scale(1)}50%{transform:scale(1.05)}`;const HeroSection=styled(Box)({position:'relative',minHeight:'600px',display:'flex',alignItems:'center',justifyContent:'center',color:'white',overflow:'hidden',background:'linear-gradient(135deg,#667eea 0%,#764ba2 100%)'});const HeroImage=styled('img')({position:'absolute',top:0,left:0,width:'100%',height:'100%',objectFit:'cover',zIndex:0});const HeroOverlay=styled(Box)({position:'absolute',top:0,left:0,right:0,bottom:0,background:'linear-gradient(135deg,rgba(102,126,234,0.9)0%,rgba(118,75,162,0.9)100%)',zIndex:1});const HeroContent=styled(Container)({position:'relative',zIndex:2,textAlign:'center',padding:'2rem'});const StatCard=styled(Paper)(({theme})=>({padding:theme.spacing(4),textAlign:'center',background:'linear-gradient(135deg,#667eea 0%,#764ba2 100%)',color:'white',borderRadius:'16px',transition:'all 0.3s ease','&:hover':{transform:'translateY(-10px)',boxShadow:'0 20px 40px rgba(102,126,234,0.4)'}}));const ProgramCard=styled(Card)({height:'100%',borderRadius:'16px',transition:'all 0.3s ease','&:hover':{transform:'translateY(-10px)',boxShadow:'0 20px 40px rgba(0,0,0,0.1)'}});const PublicHomePage=()=>{const navigate=useNavigate();const[loading,setLoading]=useState(!0);const[homeData,setHomeData]=useState(null);const[error,setError]=useState(null);const[currentSlide,setCurrentSlide]=useState(0);useEffect(()=>{fetchHomePageContent()},[]);useEffect(()=>{if(homeData?.sliders?.length>1){const timer=setInterval(()=>{setCurrentSlide(e=>(e+1)%homeData.sliders.length)},5e3);return()=>clearInterval(timer)}},[homeData]);const fetchHomePageContent=async()=>{try{setLoading(!0);const e=await axios.get(`${baseUrl}/home-page-content/public`);e.data.success&&setHomeData(e.data.data)}catch(e){console.error('Error:',e),setError('Unable to load')}finally{setLoading(!1)}};const getSocialIcon=e=>({facebook:<Facebook/>,twitter:<Twitter/>,instagram:<Instagram/>,youtube:<YouTube/>,linkedin:<LinkedIn/>}[e]);const getImageUrl=e=>{if(!e)return'';if(e.startsWith('http'))return e;return baseUrl.replace('/api','')+e};if(loading)return<Box display="flex"flexDirection="column"justifyContent="center"alignItems="center"minHeight="100vh"sx={{background:'linear-gradient(135deg,#667eea 0%,#764ba2 100%)'}}><CircularProgress sx={{color:'white',mb:2}}size={60}/><Typography variant="h6"sx={{color:'white'}}>Loading...</Typography></Box>;if(error||!homeData)return<Container maxWidth="md"sx={{py:8,textAlign:'center'}}><SchoolIcon sx={{fontSize:80,color:'#667eea',mb:2}}/><Typography variant="h4"gutterBottom>Welcome</Typography><Typography variant="body1"color="text.secondary"sx={{mb:4}}>Website setup in progress!</Typography><Button variant="contained"size="large"onClick={()=>navigate('/login')}sx={{background:'linear-gradient(135deg,#667eea 0%,#764ba2 100%)'}}>Login</Button></Container>;const{header,sliders=[],statistics=[],about,programs=[],whyChooseUs,testimonials,gallery=[],sectionVisibility}=homeData;const testimonialsArray=testimonials?.items||[];return<Box sx={{bgcolor:'#f8f9fa'}}>{header&&<Box sx={{bgcolor:header.primaryColor||'#667eea',color:'white',py:1.5}}><Container maxWidth="xl"><Box display="flex"justifyContent="space-between"alignItems="center"flexWrap="wrap"gap={2}><Box display="flex"gap={3}alignItems="center"flexWrap="wrap">{header.contactPhone&&<Box display="flex"alignItems="center"gap={.5}><PhoneIcon fontSize="small"/><Typography variant="body2">{header.contactPhone}</Typography></Box>}{header.contactEmail&&<Box display="flex"alignItems="center"gap={.5}><EmailIcon fontSize="small"/><Typography variant="body2">{header.contactEmail}</Typography></Box>}{header.address&&<Box display="flex"alignItems="center"gap={.5}><LocationIcon fontSize="small"/><Typography variant="body2">{header.address}</Typography></Box>}</Box><Box display="flex"gap={1}>{header.socialMedia&&Object.entries(header.socialMedia).map(([e,a])=>a&&<IconButton key={e}size="small"sx={{color:'white'}}href={a}target="_blank">{getSocialIcon(e)}</IconButton>)}</Box></Box></Container></Box>}{header&&<Box sx={{bgcolor:'white',boxShadow:'0 2px 10px rgba(0,0,0,0.1)',position:'sticky',top:0,zIndex:100}}><Container maxWidth="xl"><Box display="flex"justifyContent="space-between"alignItems="center"py={2}><Box display="flex"alignItems="center"gap={2}>{header.logo&&<Avatar src={getImageUrl(header.logo)}alt={header.schoolName}sx={{width:60,height:60,border:`3px solid ${header.primaryColor||'#667eea'}`}}/>}<Box><Typography variant="h5"fontWeight="bold"sx={{color:header.primaryColor||'#667eea'}}>{header.schoolName||'School'}</Typography><Typography variant="body2"color="text.secondary">{header.tagline||'Excellence'}</Typography></Box></Box><Box display="flex"gap={2}><Button variant="outlined"onClick={()=>navigate('/login')}sx={{borderColor:header.primaryColor,color:header.primaryColor}}>Login</Button><Button variant="contained"onClick={()=>navigate('/contact')}sx={{background:`linear-gradient(135deg,${header.primaryColor||'#667eea'}0%,${header.secondaryColor||'#764ba2'}100%)`}}>Contact</Button></Box></Box></Container></Box>}{sectionVisibility?.showSlider&&sliders?.length>0?<HeroSection>{sliders.map((e,a)=><Fade key={a}in={currentSlide===a}timeout={1e3}><Box sx={{position:'absolute',width:'100%',height:'100%',display:currentSlide===a?'block':'none'}}>{e.image&&<HeroImage src={getImageUrl(e.image)}alt={e.title}/>}<HeroOverlay/></Box></Fade>)}<HeroContent maxWidth="md"><Fade in timeout={1e3}><Box><Typography variant="h2"fontWeight="bold"gutterBottom sx={{fontSize:{xs:'2rem',md:'3.5rem'}}}>{sliders[currentSlide]?.title||header?.schoolName}</Typography><Typography variant="h5"sx={{mb:4,fontSize:{xs:'1rem',md:'1.5rem'}}}>{sliders[currentSlide]?.description||header?.tagline}</Typography>{sliders[currentSlide]?.buttonText&&<Button variant="contained"size="large"endIcon={<ArrowForward/>}href={sliders[currentSlide].buttonLink||'#'}sx={{bgcolor:'white',color:header?.primaryColor,px:4,py:1.5}}>{sliders[currentSlide].buttonText}</Button>}</Box></Fade></HeroContent>{sliders.length>1&&<><IconButton onClick={()=>setCurrentSlide(e=>(e-1+sliders.length)%sliders.length)}sx={{position:'absolute',left:20,top:'50%',transform:'translateY(-50%)',bgcolor:'rgba(255,255,255,0.3)',color:'white',zIndex:3}}><ChevronLeft fontSize="large"/></IconButton><IconButton onClick={()=>setCurrentSlide(e=>(e+1)%sliders.length)}sx={{position:'absolute',right:20,top:'50%',transform:'translateY(-50%)',bgcolor:'rgba(255,255,255,0.3)',color:'white',zIndex:3}}><ChevronRight fontSize="large"/></IconButton><Box sx={{position:'absolute',bottom:30,left:'50%',transform:'translateX(-50%)',display:'flex',gap:1,zIndex:3}}>{sliders.map((e,a)=><Box key={a}onClick={()=>setCurrentSlide(a)}sx={{width:12,height:12,borderRadius:'50%',bgcolor:currentSlide===a?'white':'rgba(255,255,255,0.5)',cursor:'pointer'}}/>)}</Box></>}</HeroSection>:<HeroSection><HeroOverlay/><HeroContent maxWidth="md"><Typography variant="h2"fontWeight="bold"gutterBottom sx={{fontSize:{xs:'2rem',md:'3.5rem'}}}>{header?.schoolName||'Welcome'}</Typography><Typography variant="h5"sx={{mb:4}}>{header?.tagline||'Excellence'}</Typography><Button variant="contained"size="large"endIcon={<ArrowForward/>}onClick={()=>navigate('/register')}sx={{bgcolor:'white',color:header?.primaryColor,px:4,py:1.5}}>Enroll</Button></HeroContent></HeroSection>}{sectionVisibility?.showStatistics&&statistics?.length>0&&<Container maxWidth="xl"sx={{py:8,mt:-4,position:'relative',zIndex:10}}><Grid container spacing={3}>{statistics.map((e,a)=><Grid item xs={12}sm={6}md={3}key={a}><StatCard elevation={6}><Typography variant="h2"fontWeight="bold"sx={{fontSize:'3rem'}}>{e.value}{e.suffix||''}</Typography><Typography variant="h6"sx={{mt:1}}>{e.label}</Typography></StatCard></Grid>)}</Grid></Container>}{sectionVisibility?.showAbout&&about&&<Box sx={{bgcolor:'white',py:8}}><Container maxWidth="xl"><Box textAlign="center"mb={6}><Typography variant="h3"fontWeight="bold"sx={{color:header?.primaryColor}}>{about.heading||'About'}</Typography></Box><Grid container spacing={4}><Grid item xs={12}md={6}><Typography variant="body1"paragraph>{about.description}</Typography>{about.mission&&<Box sx={{mt:3,p:3,bgcolor:'#f8f9fa',borderLeft:`4px solid ${header?.primaryColor}`}}><Typography variant="h6"fontWeight="bold">Mission</Typography><Typography variant="body2">{about.mission}</Typography></Box>}</Grid><Grid item xs={12}md={6}>{about.images?.length>0&&<Grid container spacing={2}>{about.images.slice(0,4).map((e,a)=><Grid item xs={6}key={a}><img src={getImageUrl(e)}alt="About"style={{width:'100%',height:'200px',objectFit:'cover',borderRadius:'12px'}}/></Grid>)}</Grid>}</Grid></Grid></Container></Box>}{sectionVisibility?.showPrograms&&programs?.length>0&&<Box sx={{bgcolor:'#f8f9fa',py:8}}><Container maxWidth="xl"><Box textAlign="center"mb={6}><Typography variant="h3"fontWeight="bold"sx={{color:header?.primaryColor}}>Programs</Typography></Box><Grid container spacing={4}>{programs.map((e,a)=><Grid item xs={12}sm={6}md={4}key={a}><ProgramCard><CardContent sx={{p:4}}><MenuBook sx={{fontSize:50,color:header?.primaryColor,mb:2}}/><Typography variant="h5"fontWeight="bold">{e.title}</Typography><Typography variant="body2"color="text.secondary">{e.description}</Typography>{e.ageGroup&&<Chip label={'Age: '+e.ageGroup}color="primary"sx={{mt:2}}/>}</CardContent></ProgramCard></Grid>)}</Grid></Container></Box>}{sectionVisibility?.showGallery&&gallery?.length>0&&<Box sx={{bgcolor:'white',py:8}}><Container maxWidth="xl"><Box textAlign="center"mb={6}><Typography variant="h3"fontWeight="bold"sx={{color:header?.primaryColor}}>Gallery</Typography></Box><Grid container spacing={2}>{gallery.slice(0,8).map((e,a)=><Grid item xs={12}sm={6}md={3}key={a}><Box sx={{overflow:'hidden',borderRadius:'12px',height:250,'&:hover img':{transform:'scale(1.1)'}}}><img src={getImageUrl(e.url)}alt={e.title}style={{width:'100%',height:'100%',objectFit:'cover',transition:'transform 0.3s'}}/></Box></Grid>)}</Grid></Container></Box>}{sectionVisibility?.showTestimonials&&testimonialsArray?.length>0&&<Box sx={{bgcolor:'#f8f9fa',py:8}}><Container maxWidth="xl"><Box textAlign="center"mb={6}><Typography variant="h3"fontWeight="bold"sx={{color:header?.primaryColor}}>Testimonials</Typography></Box><Grid container spacing={4}>{testimonialsArray.slice(0,3).map((e,a)=><Grid item xs={12}md={4}key={a}><Card elevation={3}sx={{p:3,height:'100%',borderTop:`4px solid ${header?.primaryColor}`}}><Box display="flex"alignItems="center"gap={2}mb={2}><Avatar sx={{width:60,height:60,bgcolor:header?.primaryColor}}>{e.parentName?.[0]}</Avatar><Box><Typography variant="subtitle1"fontWeight="bold">{e.parentName}</Typography><Typography variant="caption"color="text.secondary">Parent of {e.studentName}</Typography></Box></Box><Box mb={2}>{[...Array(5)].map((e,a)=><Star key={a}sx={{color:a<(e.rating||5)?'#FFC107':'#E0E0E0',fontSize:20}}/>)}</Box><Typography variant="body2"sx={{fontStyle:'italic'}}>"{e.comment}"</Typography></Card></Grid>)}</Grid></Container></Box>}<Box sx={{bgcolor:header?.primaryColor||'#667eea',color:'white',py:6}}><Container maxWidth="xl"><Grid container spacing={4}><Grid item xs={12}md={4}><Box display="flex"alignItems="center"gap={2}mb={2}>{header?.logo&&<Avatar src={getImageUrl(header.logo)}sx={{width:50,height:50}}/>}<Typography variant="h6"fontWeight="bold">{header?.schoolName}</Typography></Box><Typography variant="body2">{header?.tagline}</Typography></Grid><Grid item xs={12}md={4}><Typography variant="h6"fontWeight="bold"gutterBottom>Contact</Typography>{header?.contactPhone&&<Box display="flex"alignItems="center"gap={1}mb={1}><PhoneIcon fontSize="small"/><Typography variant="body2">{header.contactPhone}</Typography></Box>}{header?.contactEmail&&<Box display="flex"alignItems="center"gap={1}mb={1}><EmailIcon fontSize="small"/><Typography variant="body2">{header.contactEmail}</Typography></Box>}{header?.address&&<Box display="flex"alignItems="center"gap={1}><LocationIcon fontSize="small"/><Typography variant="body2">{header.address}</Typography></Box>}</Grid><Grid item xs={12}md={4}><Typography variant="h6"fontWeight="bold"gutterBottom>Links</Typography><Button sx={{color:'white',display:'block'}}onClick={()=>navigate('/login')}>Admin</Button><Button sx={{color:'white',display:'block'}}onClick={()=>navigate('/student-login')}>Student</Button></Grid></Grid><Box sx={{mt:4,pt:4,borderTop:'1px solid rgba(255,255,255,0.2)',textAlign:'center'}}><Typography variant="body2">© {new Date().getFullYear()} {header?.schoolName}</Typography></Box></Container></Box></Box>};export default PublicHomePage;
+import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Container,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  CardMedia,
+  Button,
+  IconButton,
+  Avatar,
+  Paper,
+  Divider,
+  AppBar,
+  Toolbar,
+  useScrollTrigger,
+  Slide,
+} from '@mui/material';
+import {
+  School,
+  EmojiEvents,
+  Groups,
+  LocalLibrary,
+  ArrowForward,
+  ArrowBack,
+  Phone,
+  Email,
+  Facebook,
+  Twitter,
+  Instagram,
+  LinkedIn,
+  YouTube,
+  PlayCircleOutline,
+  FormatQuote,
+} from '@mui/icons-material';
+import { styled, keyframes } from '@mui/material/styles';
+import axios from 'axios';
+
+const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+// Helper function to get image URL
+const getImageUrl = (path) => {
+  if (!path) return '';
+  const apiBaseUrl = baseUrl.replace('/api', '');
+  return `${apiBaseUrl}${path}`;
+};
+
+// Animations
+const fadeInUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const slideIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+`;
+
+const float = keyframes`
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+`;
+
+const pulse = keyframes`
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+`;
+
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+`;
+
+// Styled Components
+const HeroSection = styled(Box)(({ theme }) => ({
+  position: 'relative',
+  minHeight: '100vh',
+  width: '100%',
+  overflow: 'hidden',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
+
+const HeroSlide = styled(Box)(({ active }) => ({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  opacity: active ? 1 : 0,
+  transition: 'opacity 1s ease-in-out',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%)',
+    zIndex: 1,
+  },
+}));
+
+const HeroMedia = styled('img')({
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+});
+
+const HeroVideo = styled('video')({
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+});
+
+const HeroContent = styled(Box)(({ theme }) => ({
+  position: 'relative',
+  zIndex: 2,
+  textAlign: 'center',
+  color: '#fff',
+  padding: theme.spacing(4),
+  animation: `${fadeInUp} 1s ease-out`,
+}));
+
+const NavigationArrow = styled(IconButton)(({ theme }) => ({
+  position: 'absolute',
+  top: '50%',
+  transform: 'translateY(-50%)',
+  zIndex: 3,
+  color: '#fff',
+  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  backdropFilter: 'blur(10px)',
+  width: '60px',
+  height: '60px',
+  '&:hover': {
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    transform: 'translateY(-50%) scale(1.1)',
+  },
+  transition: 'all 0.3s ease',
+}));
+
+const SliderDots = styled(Box)(({ theme }) => ({
+  position: 'absolute',
+  bottom: '30px',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  zIndex: 3,
+  display: 'flex',
+  gap: '12px',
+}));
+
+const Dot = styled(Box)(({ active }) => ({
+  width: active ? '40px' : '12px',
+  height: '12px',
+  borderRadius: '6px',
+  backgroundColor: active ? '#fff' : 'rgba(255, 255, 255, 0.5)',
+  cursor: 'pointer',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    backgroundColor: '#fff',
+  },
+}));
+
+const TopContactBar = styled(Box)(({ theme }) => ({
+  backgroundColor: '#1a237e',
+  color: '#fff',
+  padding: theme.spacing(1, 0),
+}));
+
+const StickyAppBar = styled(AppBar)(({ theme }) => ({
+  backgroundColor: '#fff',
+  color: '#333',
+  boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+}));
+
+const LogoContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(2),
+}));
+
+const LogoImage = styled('img')({
+  height: '50px',
+  width: 'auto',
+});
+
+const Section = styled(Box)(({ theme, bgcolor }) => ({
+  padding: theme.spacing(10, 0),
+  backgroundColor: bgcolor || '#fff',
+  width: '100%',
+}));
+
+const SectionTitle = styled(Typography)(({ theme }) => ({
+  fontSize: '2.5rem',
+  fontWeight: 700,
+  marginBottom: theme.spacing(2),
+  textAlign: 'center',
+  background: 'linear-gradient(135deg, #1a237e 0%, #3f51b5 100%)',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  animation: `${fadeInUp} 0.8s ease-out`,
+}));
+
+const SectionSubtitle = styled(Typography)(({ theme }) => ({
+  fontSize: '1.1rem',
+  color: '#666',
+  textAlign: 'center',
+  marginBottom: theme.spacing(6),
+  maxWidth: '800px',
+  margin: '0 auto',
+  marginBottom: theme.spacing(6),
+  animation: `${fadeInUp} 1s ease-out`,
+}));
+
+const StatCard = styled(Card)(({ theme }) => ({
+  textAlign: 'center',
+  padding: theme.spacing(4),
+  height: '100%',
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  color: '#fff',
+  borderRadius: '16px',
+  animation: `${float} 3s ease-in-out infinite`,
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-10px)',
+    boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+  },
+}));
+
+const AboutBox = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(4),
+  height: '100%',
+  borderRadius: '16px',
+  background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-5px)',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+  },
+}));
+
+const ProgramCard = styled(Card)(({ theme }) => ({
+  height: '100%',
+  borderRadius: '16px',
+  overflow: 'hidden',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-10px)',
+    boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+  },
+}));
+
+const GalleryItem = styled(Box)(({ theme }) => ({
+  position: 'relative',
+  paddingTop: '75%',
+  overflow: 'hidden',
+  borderRadius: '16px',
+  cursor: 'pointer',
+  '&:hover .gallery-image': {
+    transform: 'scale(1.1)',
+  },
+  '&:hover .gallery-overlay': {
+    opacity: 1,
+  },
+}));
+
+const GalleryImage = styled('img')({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  transition: 'transform 0.5s ease',
+});
+
+const GalleryOverlay = styled(Box)({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  background: 'rgba(0,0,0,0.5)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  opacity: 0,
+  transition: 'opacity 0.3s ease',
+});
+
+const TestimonialCard = styled(Card)(({ theme }) => ({
+  padding: theme.spacing(4),
+  borderRadius: '16px',
+  position: 'relative',
+  height: '100%',
+  background: '#fff',
+  boxShadow: '0 5px 20px rgba(0,0,0,0.1)',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-5px)',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+  },
+}));
+
+const QuoteIcon = styled(FormatQuote)(({ theme }) => ({
+  fontSize: '4rem',
+  color: '#1a237e',
+  opacity: 0.2,
+  position: 'absolute',
+  top: theme.spacing(2),
+  left: theme.spacing(2),
+}));
+
+const Footer = styled(Box)(({ theme }) => ({
+  backgroundColor: '#1a237e',
+  color: '#fff',
+  padding: theme.spacing(6, 0, 3, 0),
+}));
+
+const SocialIcon = styled(IconButton)(({ theme }) => ({
+  color: '#fff',
+  '&:hover': {
+    color: '#3f51b5',
+    transform: 'translateY(-3px)',
+  },
+  transition: 'all 0.3s ease',
+}));
+
+function HideOnScroll(props) {
+  const { children } = props;
+  const trigger = useScrollTrigger();
+
+  return (
+    <Slide appear={false} direction="down" in={!trigger}>
+      {children}
+    </Slide>
+  );
+}
+
+const PublicHomePage = () => {
+  const [content, setContent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    fetchContent();
+  }, []);
+
+  const fetchContent = async () => {
+    try {
+      const response = await axios.get(`${baseUrl}/home-page-content/public`);
+      setContent(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching home page content:', error);
+      setLoading(false);
+    }
+  };
+
+  // Auto-rotate hero slider every 5 seconds
+  useEffect(() => {
+    if (content?.heroSlider?.slides?.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentSlide((prev) =>
+          prev === content.heroSlider.slides.length - 1 ? 0 : prev + 1
+        );
+      }, 5000);
+
+      return () => clearInterval(interval);
+    }
+  }, [content]);
+
+  const handlePrevSlide = () => {
+    setCurrentSlide((prev) =>
+      prev === 0 ? content.heroSlider.slides.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextSlide = () => {
+    setCurrentSlide((prev) =>
+      prev === content.heroSlider.slides.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const handleDotClick = (index) => {
+    setCurrentSlide(index);
+  };
+
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+      >
+        <Typography variant="h4">Loading...</Typography>
+      </Box>
+    );
+  }
+
+  if (!content) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+      >
+        <Typography variant="h4">No content available</Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box>
+      {/* Top Contact Bar */}
+      <TopContactBar>
+        <Container maxWidth="lg">
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            flexWrap="wrap"
+          >
+            <Box display="flex" gap={3} flexWrap="wrap">
+              {content.contactPhone && (
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Phone fontSize="small" />
+                  <Typography variant="body2">{content.contactPhone}</Typography>
+                </Box>
+              )}
+              {content.contactEmail && (
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Email fontSize="small" />
+                  <Typography variant="body2">{content.contactEmail}</Typography>
+                </Box>
+              )}
+            </Box>
+            <Box display="flex" gap={1}>
+              {content.socialMedia?.facebook && (
+                <SocialIcon
+                  size="small"
+                  component="a"
+                  href={content.socialMedia.facebook}
+                  target="_blank"
+                >
+                  <Facebook fontSize="small" />
+                </SocialIcon>
+              )}
+              {content.socialMedia?.twitter && (
+                <SocialIcon
+                  size="small"
+                  component="a"
+                  href={content.socialMedia.twitter}
+                  target="_blank"
+                >
+                  <Twitter fontSize="small" />
+                </SocialIcon>
+              )}
+              {content.socialMedia?.instagram && (
+                <SocialIcon
+                  size="small"
+                  component="a"
+                  href={content.socialMedia.instagram}
+                  target="_blank"
+                >
+                  <Instagram fontSize="small" />
+                </SocialIcon>
+              )}
+              {content.socialMedia?.linkedin && (
+                <SocialIcon
+                  size="small"
+                  component="a"
+                  href={content.socialMedia.linkedin}
+                  target="_blank"
+                >
+                  <LinkedIn fontSize="small" />
+                </SocialIcon>
+              )}
+              {content.socialMedia?.youtube && (
+                <SocialIcon
+                  size="small"
+                  component="a"
+                  href={content.socialMedia.youtube}
+                  target="_blank"
+                >
+                  <YouTube fontSize="small" />
+                </SocialIcon>
+              )}
+            </Box>
+          </Box>
+        </Container>
+      </TopContactBar>
+
+      {/* Sticky Navigation */}
+      <StickyAppBar position="sticky">
+        <Toolbar>
+          <Container maxWidth="lg">
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              width="100%"
+            >
+              <LogoContainer>
+                {content.header?.logo && (
+                  <LogoImage
+                    src={getImageUrl(content.header.logo)}
+                    alt={content.header?.schoolName || 'School Logo'}
+                  />
+                )}
+                <Typography
+                  variant="h6"
+                  component="div"
+                  sx={{ fontWeight: 700, color: '#1a237e' }}
+                >
+                  {content.header?.schoolName || 'School Name'}
+                </Typography>
+              </LogoContainer>
+              <Box display="flex" gap={3}>
+                <Button color="inherit" href="#about">
+                  About
+                </Button>
+                <Button color="inherit" href="#programs">
+                  Programs
+                </Button>
+                <Button color="inherit" href="#gallery">
+                  Gallery
+                </Button>
+                <Button color="inherit" href="#testimonials">
+                  Testimonials
+                </Button>
+                <Button
+                  variant="contained"
+                  sx={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  }}
+                >
+                  Contact Us
+                </Button>
+              </Box>
+            </Box>
+          </Container>
+        </Toolbar>
+      </StickyAppBar>
+
+      {/* Hero Section with Slider */}
+      <HeroSection>
+        {content.heroSlider?.slides?.map((slide, index) => (
+          <HeroSlide key={index} active={currentSlide === index}>
+            {slide.mediaType === 'video' && slide.video ? (
+              <HeroVideo
+                src={getImageUrl(slide.video)}
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
+            ) : slide.image ? (
+              <HeroMedia src={getImageUrl(slide.image)} alt={slide.title} />
+            ) : null}
+          </HeroSlide>
+        ))}
+
+        <HeroContent>
+          <Container maxWidth="md">
+            <Typography
+              variant="h1"
+              sx={{
+                fontSize: { xs: '2.5rem', md: '4rem', lg: '5rem' },
+                fontWeight: 800,
+                marginBottom: 2,
+                textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+              }}
+            >
+              {content.heroSlider?.slides?.[currentSlide]?.title || 'Welcome'}
+            </Typography>
+            <Typography
+              variant="h5"
+              sx={{
+                fontSize: { xs: '1.2rem', md: '1.5rem', lg: '1.8rem' },
+                marginBottom: 4,
+                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+              }}
+            >
+              {content.heroSlider?.slides?.[currentSlide]?.subtitle || ''}
+            </Typography>
+            <Button
+              variant="contained"
+              size="large"
+              sx={{
+                padding: '15px 40px',
+                fontSize: '1.1rem',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                },
+                transition: 'all 0.3s ease',
+              }}
+            >
+              Learn More
+            </Button>
+          </Container>
+        </HeroContent>
+
+        {/* Navigation Arrows */}
+        {content.heroSlider?.slides?.length > 1 && (
+          <>
+            <NavigationArrow
+              onClick={handlePrevSlide}
+              sx={{ left: { xs: '10px', md: '30px' } }}
+            >
+              <ArrowBack fontSize="large" />
+            </NavigationArrow>
+            <NavigationArrow
+              onClick={handleNextSlide}
+              sx={{ right: { xs: '10px', md: '30px' } }}
+            >
+              <ArrowForward fontSize="large" />
+            </NavigationArrow>
+          </>
+        )}
+
+        {/* Slider Dots */}
+        {content.heroSlider?.slides?.length > 1 && (
+          <SliderDots>
+            {content.heroSlider.slides.map((_, index) => (
+              <Dot
+                key={index}
+                active={currentSlide === index}
+                onClick={() => handleDotClick(index)}
+              />
+            ))}
+          </SliderDots>
+        )}
+      </HeroSection>
+
+      {/* Statistics Section */}
+      {content.statistics && (
+        <Section bgcolor="#f5f5f5">
+          <Container maxWidth="lg">
+            <Grid container spacing={4}>
+              {content.statistics.totalStudents && (
+                <Grid item xs={12} sm={6} md={3}>
+                  <StatCard>
+                    <Groups sx={{ fontSize: '4rem', marginBottom: 2 }} />
+                    <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                      {content.statistics.totalStudents}
+                    </Typography>
+                    <Typography variant="h6">Students</Typography>
+                  </StatCard>
+                </Grid>
+              )}
+              {content.statistics.totalTeachers && (
+                <Grid item xs={12} sm={6} md={3}>
+                  <StatCard sx={{ animationDelay: '0.2s' }}>
+                    <School sx={{ fontSize: '4rem', marginBottom: 2 }} />
+                    <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                      {content.statistics.totalTeachers}
+                    </Typography>
+                    <Typography variant="h6">Teachers</Typography>
+                  </StatCard>
+                </Grid>
+              )}
+              {content.statistics.totalPrograms && (
+                <Grid item xs={12} sm={6} md={3}>
+                  <StatCard sx={{ animationDelay: '0.4s' }}>
+                    <LocalLibrary sx={{ fontSize: '4rem', marginBottom: 2 }} />
+                    <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                      {content.statistics.totalPrograms}
+                    </Typography>
+                    <Typography variant="h6">Programs</Typography>
+                  </StatCard>
+                </Grid>
+              )}
+              {content.statistics.awards && (
+                <Grid item xs={12} sm={6} md={3}>
+                  <StatCard sx={{ animationDelay: '0.6s' }}>
+                    <EmojiEvents sx={{ fontSize: '4rem', marginBottom: 2 }} />
+                    <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                      {content.statistics.awards}
+                    </Typography>
+                    <Typography variant="h6">Awards</Typography>
+                  </StatCard>
+                </Grid>
+              )}
+            </Grid>
+          </Container>
+        </Section>
+      )}
+
+      {/* About Section */}
+      {content.about && (
+        <Section id="about">
+          <Container maxWidth="lg">
+            <SectionTitle variant="h2">About Us</SectionTitle>
+            <SectionSubtitle>{content.about.description}</SectionSubtitle>
+
+            <Grid container spacing={4} sx={{ marginTop: 4 }}>
+              {content.about.mission && (
+                <Grid item xs={12} md={6}>
+                  <AboutBox elevation={0}>
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        fontWeight: 700,
+                        marginBottom: 2,
+                        color: '#1a237e',
+                      }}
+                    >
+                      Our Mission
+                    </Typography>
+                    <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
+                      {content.about.mission}
+                    </Typography>
+                  </AboutBox>
+                </Grid>
+              )}
+              {content.about.vision && (
+                <Grid item xs={12} md={6}>
+                  <AboutBox elevation={0}>
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        fontWeight: 700,
+                        marginBottom: 2,
+                        color: '#1a237e',
+                      }}
+                    >
+                      Our Vision
+                    </Typography>
+                    <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
+                      {content.about.vision}
+                    </Typography>
+                  </AboutBox>
+                </Grid>
+              )}
+            </Grid>
+          </Container>
+        </Section>
+      )}
+
+      {/* Programs Section */}
+      {content.programs?.items?.length > 0 && (
+        <Section id="programs" bgcolor="#f5f5f5">
+          <Container maxWidth="lg">
+            <SectionTitle variant="h2">Our Programs</SectionTitle>
+            <SectionSubtitle>
+              Explore our diverse range of educational programs
+            </SectionSubtitle>
+
+            <Grid container spacing={4}>
+              {content.programs.items.map((program, index) => (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <ProgramCard>
+                    {program.image && (
+                      <CardMedia
+                        component="img"
+                        height="200"
+                        image={getImageUrl(program.image)}
+                        alt={program.name}
+                      />
+                    )}
+                    <CardContent sx={{ padding: 3 }}>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          fontWeight: 700,
+                          marginBottom: 2,
+                          color: '#1a237e',
+                        }}
+                      >
+                        {program.name}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: '#666', lineHeight: 1.8 }}
+                      >
+                        {program.description}
+                      </Typography>
+                    </CardContent>
+                  </ProgramCard>
+                </Grid>
+              ))}
+            </Grid>
+          </Container>
+        </Section>
+      )}
+
+      {/* Gallery Section */}
+      {content.gallery?.items?.length > 0 && (
+        <Section id="gallery">
+          <Container maxWidth="lg">
+            <SectionTitle variant="h2">Gallery</SectionTitle>
+            <SectionSubtitle>
+              Glimpses of our vibrant school community
+            </SectionSubtitle>
+
+            <Grid container spacing={3}>
+              {content.gallery.items.map((item, index) => (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <GalleryItem>
+                    {item.type === 'video' ? (
+                      <>
+                        <GalleryImage
+                          src={getImageUrl(item.thumbnail || item.url)}
+                          alt={item.caption}
+                          className="gallery-image"
+                        />
+                        <GalleryOverlay className="gallery-overlay">
+                          <PlayCircleOutline
+                            sx={{ fontSize: '4rem', color: '#fff' }}
+                          />
+                        </GalleryOverlay>
+                      </>
+                    ) : (
+                      <GalleryImage
+                        src={getImageUrl(item.url)}
+                        alt={item.caption}
+                        className="gallery-image"
+                      />
+                    )}
+                  </GalleryItem>
+                </Grid>
+              ))}
+            </Grid>
+          </Container>
+        </Section>
+      )}
+
+      {/* Testimonials Section */}
+      {content.testimonials?.items?.length > 0 && (
+        <Section id="testimonials" bgcolor="#f5f5f5">
+          <Container maxWidth="lg">
+            <SectionTitle variant="h2">Testimonials</SectionTitle>
+            <SectionSubtitle>
+              What our students and parents say about us
+            </SectionSubtitle>
+
+            <Grid container spacing={4}>
+              {content.testimonials.items.map((testimonial, index) => (
+                <Grid item xs={12} md={4} key={index}>
+                  <TestimonialCard>
+                    <QuoteIcon />
+                    <Box sx={{ marginTop: 4 }}>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontStyle: 'italic',
+                          marginBottom: 3,
+                          lineHeight: 1.8,
+                          color: '#555',
+                        }}
+                      >
+                        "{testimonial.text}"
+                      </Typography>
+                      <Box display="flex" alignItems="center" gap={2}>
+                        {testimonial.image && (
+                          <Avatar
+                            src={getImageUrl(testimonial.image)}
+                            alt={testimonial.name}
+                            sx={{ width: 50, height: 50 }}
+                          />
+                        )}
+                        <Box>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ fontWeight: 700, color: '#1a237e' }}
+                          >
+                            {testimonial.name}
+                          </Typography>
+                          {testimonial.role && (
+                            <Typography variant="body2" sx={{ color: '#666' }}>
+                              {testimonial.role}
+                            </Typography>
+                          )}
+                        </Box>
+                      </Box>
+                    </Box>
+                  </TestimonialCard>
+                </Grid>
+              ))}
+            </Grid>
+          </Container>
+        </Section>
+      )}
+
+      {/* Footer */}
+      <Footer>
+        <Container maxWidth="lg">
+          <Grid container spacing={4}>
+            <Grid item xs={12} md={4}>
+              <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 2 }}>
+                {content.header?.schoolName || 'School Name'}
+              </Typography>
+              <Typography variant="body2" sx={{ marginBottom: 2, opacity: 0.9 }}>
+                {content.about?.description || 'Empowering students to excel'}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 2 }}>
+                Quick Links
+              </Typography>
+              <Box display="flex" flexDirection="column" gap={1}>
+                <Button color="inherit" href="#about" sx={{ justifyContent: 'flex-start' }}>
+                  About Us
+                </Button>
+                <Button color="inherit" href="#programs" sx={{ justifyContent: 'flex-start' }}>
+                  Programs
+                </Button>
+                <Button color="inherit" href="#gallery" sx={{ justifyContent: 'flex-start' }}>
+                  Gallery
+                </Button>
+                <Button color="inherit" href="#testimonials" sx={{ justifyContent: 'flex-start' }}>
+                  Testimonials
+                </Button>
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 2 }}>
+                Contact Us
+              </Typography>
+              {content.contactPhone && (
+                <Box display="flex" alignItems="center" gap={1} sx={{ marginBottom: 1 }}>
+                  <Phone fontSize="small" />
+                  <Typography variant="body2">{content.contactPhone}</Typography>
+                </Box>
+              )}
+              {content.contactEmail && (
+                <Box display="flex" alignItems="center" gap={1} sx={{ marginBottom: 2 }}>
+                  <Email fontSize="small" />
+                  <Typography variant="body2">{content.contactEmail}</Typography>
+                </Box>
+              )}
+              <Box display="flex" gap={1} sx={{ marginTop: 2 }}>
+                {content.socialMedia?.facebook && (
+                  <SocialIcon component="a" href={content.socialMedia.facebook} target="_blank">
+                    <Facebook />
+                  </SocialIcon>
+                )}
+                {content.socialMedia?.twitter && (
+                  <SocialIcon component="a" href={content.socialMedia.twitter} target="_blank">
+                    <Twitter />
+                  </SocialIcon>
+                )}
+                {content.socialMedia?.instagram && (
+                  <SocialIcon component="a" href={content.socialMedia.instagram} target="_blank">
+                    <Instagram />
+                  </SocialIcon>
+                )}
+                {content.socialMedia?.linkedin && (
+                  <SocialIcon component="a" href={content.socialMedia.linkedin} target="_blank">
+                    <LinkedIn />
+                  </SocialIcon>
+                )}
+                {content.socialMedia?.youtube && (
+                  <SocialIcon component="a" href={content.socialMedia.youtube} target="_blank">
+                    <YouTube />
+                  </SocialIcon>
+                )}
+              </Box>
+            </Grid>
+          </Grid>
+          <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.2)', margin: '30px 0 20px 0' }} />
+          <Typography variant="body2" sx={{ textAlign: 'center', opacity: 0.8 }}>
+            &copy; {new Date().getFullYear()} {content.header?.schoolName || 'School Name'}. All rights reserved.
+          </Typography>
+        </Container>
+      </Footer>
+    </Box>
+  );
+};
+
+export default PublicHomePage;
