@@ -22,6 +22,7 @@ const frontPageRouter = require('./router/frontPage.router');
 const publicHomePageRouter = require('./router/publicHomePage.router');
 const marksheetRouter = require('./router/marksheet.router');
 const smsRouter = require('./router/sms.router');
+const homePageContentRouter = require('./router/homePageContent.router');
 const authMiddleware = require("./auth/auth");
 const { authCheck } = require("./controller/auth.controller");
 
@@ -77,6 +78,10 @@ app.use("/api/front-page", frontPageRouter);
 app.use("/api/public-home", publicHomePageRouter);
 app.use("/api/marksheets", marksheetRouter);
 app.use("/api/sms", smsRouter);
+app.use("/api/home-page-content", homePageContentRouter);
+
+// Serve static files for uploads
+app.use('/uploads', express.static('uploads'));
 
 app.get('/api/auth/check',authCheck)
 

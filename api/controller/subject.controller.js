@@ -47,14 +47,21 @@ module.exports = {
     // Not providing the  schoolId as subject Id will be unique.
         try {
             let id = req.params.id;
-            console.log(req.body)
-            await Subject.findOneAndUpdate({_id:id},{$set:{...req.body}});
-            const SubjectAfterUpdate =await Subject.findOne({_id:id});
-            res.status(200).json({success:true, message:"Subject Updated", data:SubjectAfterUpdate})
+            console.log("Update request body:", req.body);
+
+            // Only allow updating specific fields, not school
+            const { subject_name, subject_codename } = req.body;
+            const updateData = {};
+            if (subject_name !== undefined) updateData.subject_name = subject_name;
+            if (subject_codename !== undefined) updateData.subject_codename = subject_codename;
+
+            await Subject.findOneAndUpdate({_id:id},{$set:updateData});
+            const SubjectAfterUpdate =await Subject.findOne({_id:id}).populate('school');
+            res.status(200).json({success:true, message:"Subject Updated Successfully", data:SubjectAfterUpdate})
         } catch (error) {
-            
+
             console.log("Error in updateSubjectWithId", error);
-            res.status(500).json({success:false, message:"Server Error in Update Subject. Try later"})
+            res.status(500).json({success:false, message:"Server Error in Update Subject. Try later", error: error.message})
         }
 
     },

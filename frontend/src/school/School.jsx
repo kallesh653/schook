@@ -42,6 +42,7 @@ import PaymentIcon from '@mui/icons-material/Payment';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import SchoolIcon from '@mui/icons-material/School';
 import SmsIcon from '@mui/icons-material/Sms';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 const drawerWidth = 280;
 
@@ -275,6 +276,7 @@ export default function School() {
     const navArr = [
         {link:"/", component:"Home", icon:HomeIcon, category: "main"},
         { link: "/school", component: "Dashboard", icon: DashboardIcon, category: "main" },
+        { link: "/school/home-page-management", component: "Home Page Management", icon: SettingsIcon, category: "main" },
         { link: "/school/front-page", component: "Front Page Management", icon: WebIcon, category: "main" },
         { link: "/school/public-home", component: "Public Home Page", icon: WebIcon, category: "main" },
         { link: "/school/courses", component: "Courses", icon: SchoolIcon, category: "academic" },

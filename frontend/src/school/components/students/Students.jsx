@@ -207,6 +207,8 @@ export default function Students() {
     student_class: "",
     course: "",
     gender: "",
+    date_of_birth: "",
+    date_of_admission: new Date().toISOString().split('T')[0],
     age: "",
     guardian: "",
     guardian_phone: "",
@@ -214,6 +216,38 @@ export default function Students() {
     password: "",
     total_fees: "",
     paid_fees: "",
+  };
+
+  // Function to calculate age from date of birth
+  const calculateAge = (dateOfBirth) => {
+    if (!dateOfBirth) return "";
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    return age;
+  };
+
+  // Handle date of birth change and auto-calculate age
+  const handleDateOfBirthChange = (e) => {
+    const dob = e.target.value;
+    Formik.setFieldValue('date_of_birth', dob);
+
+    const calculatedAge = calculateAge(dob);
+    if (calculatedAge !== "") {
+      Formik.setFieldValue('age', calculatedAge);
+
+      // Check if age is less than 4 years
+      if (calculatedAge < 4) {
+        setMessage("Student must be at least 4 years old");
+        setType("error");
+      }
+    }
   };
 
   const Formik = useFormik({
@@ -515,16 +549,57 @@ export default function Students() {
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Age"
+                  label="Date of Birth"
+                  variant="outlined"
+                  type="date"
+                  name="date_of_birth"
+                  value={Formik.values.date_of_birth}
+                  onChange={handleDateOfBirthChange}
+                  onBlur={Formik.handleBlur}
+                  InputLabelProps={{ shrink: true }}
+                  inputProps={{
+                    max: new Date().toISOString().split('T')[0]
+                  }}
+                />
+                {Formik.touched.date_of_birth && Formik.errors.date_of_birth && (
+                  <Typography variant="caption" color="error">
+                    {Formik.errors.date_of_birth}
+                  </Typography>
+                )}
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Age (Auto-calculated)"
                   variant="outlined"
                   name="age"
                   value={Formik.values.age}
+                  InputProps={{ readOnly: true }}
+                  disabled
+                  helperText={Formik.values.age && Formik.values.age < 4 ? "Student must be at least 4 years old" : ""}
+                  error={Formik.values.age && Formik.values.age < 4}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Date of Admission"
+                  variant="outlined"
+                  type="date"
+                  name="date_of_admission"
+                  value={Formik.values.date_of_admission}
                   onChange={Formik.handleChange}
                   onBlur={Formik.handleBlur}
+                  InputLabelProps={{ shrink: true }}
+                  inputProps={{
+                    max: new Date().toISOString().split('T')[0]
+                  }}
                 />
-                {Formik.touched.age && Formik.errors.age && (
+                {Formik.touched.date_of_admission && Formik.errors.date_of_admission && (
                   <Typography variant="caption" color="error">
-                    {Formik.errors.age}
+                    {Formik.errors.date_of_admission}
                   </Typography>
                 )}
               </Grid>
