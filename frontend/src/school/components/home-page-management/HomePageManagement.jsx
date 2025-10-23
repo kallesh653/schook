@@ -50,13 +50,39 @@ const HomePageManagement = () => {
   const [homePageData, setHomePageData] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
-  const schoolId = JSON.parse(localStorage.getItem('loginData'))?.school_id;
+  // Get schoolId from user data (school admin's ID is the schoolId)
+  const getUserSchoolId = () => {
+    const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        return user.id; // School admin's ID is the schoolId
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const schoolId = getUserSchoolId();
 
   useEffect(() => {
-    fetchHomePageContent();
+    if (schoolId) {
+      fetchHomePageContent();
+    } else {
+      showSnackbar('School ID not found. Please login again.', 'error');
+      setLoading(false);
+    }
   }, []);
 
   const fetchHomePageContent = async () => {
+    if (!schoolId) {
+      showSnackbar('School ID not found. Please login again.', 'error');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const response = await axios.get(
@@ -76,7 +102,8 @@ const HomePageManagement = () => {
         // Initialize with default data if not found
         initializeDefaultData();
       } else {
-        showSnackbar('Error loading home page content', 'error');
+        console.error('Error loading home page content:', error);
+        showSnackbar('Error loading home page content: ' + (error.response?.data?.message || error.message), 'error');
       }
     } finally {
       setLoading(false);
@@ -201,6 +228,11 @@ const HomePageManagement = () => {
   };
 
   const saveSection = async (endpoint, data, successMessage) => {
+    if (!schoolId) {
+      showSnackbar('School ID not found. Please login again.', 'error');
+      return false;
+    }
+
     try {
       setSaving(true);
       const response = await axios.put(
@@ -219,6 +251,7 @@ const HomePageManagement = () => {
         return true;
       }
     } catch (error) {
+      console.error('Error saving data:', error);
       showSnackbar('Error saving data: ' + (error.response?.data?.message || error.message), 'error');
       return false;
     } finally {
@@ -290,7 +323,7 @@ const HomePageManagement = () => {
         </Tabs>
 
         <Box sx={{ p: 3 }}>
-          {homePageData && (
+          {homePageData ? (
             <CurrentSectionComponent
               data={homePageData}
               updateData={updateHomePageData}
@@ -299,6 +332,23 @@ const HomePageManagement = () => {
               schoolId={schoolId}
               saving={saving}
             />
+          ) : (
+            <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="300px">
+              <Typography variant="h6" color="text.secondary" gutterBottom>
+                No home page content found
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Initialize default content to get started
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={initializeDefaultData}
+                disabled={!schoolId}
+              >
+                Initialize Default Content
+              </Button>
+            </Box>
           )}
         </Box>
       </Paper>
