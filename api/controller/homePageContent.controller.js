@@ -1,5 +1,5 @@
 const HomePageContent = require("../model/homePageContent.model");
-const { formidable } = require("formidable");
+const formidableLib = require("formidable");
 const fs = require("fs");
 const path = require("path");
 
@@ -996,7 +996,7 @@ const updateSEO = async (req, res) => {
 
 // File upload handler
 const uploadFile = async (req, res) => {
-  const form = formidable({
+  const form = formidableLib.formidable({
     multiples: true,
     uploadDir: path.join(__dirname, "../uploads/home-page"),
     keepExtensions: true,
