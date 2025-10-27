@@ -126,15 +126,37 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
 
       // For images, compress them
       if (file.type.startsWith('image/')) {
+        // Check if image is too large before compression
+        const maxImageSize = 10 * 1024 * 1024; // 10MB before compression
+        if (file.size > maxImageSize) {
+          alert(`Image is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Please use an image smaller than 10MB.`);
+          setUploading(false);
+          return;
+        }
+
         console.log('🔄 Compressing image...');
-        fileData = await compressImage(file);
-        console.log(`✅ Compressed image (base64 length: ${fileData.length} characters)`);
+        try {
+          fileData = await compressImage(file);
+          console.log(`✅ Compressed image successfully`);
+
+          // Check compressed size
+          const compressedSizeMB = (fileData.length * 0.75) / (1024 * 1024); // Approximate size in MB
+          if (compressedSizeMB > 5) {
+            console.warn('⚠️ Compressed image is still large, applying additional compression...');
+            fileData = await compressImage(file, 1920, 0.6); // More aggressive compression
+          }
+        } catch (compressionError) {
+          console.error('❌ Compression failed:', compressionError);
+          alert('Failed to compress image. Please try a different image or reduce its size before uploading.');
+          setUploading(false);
+          return;
+        }
       }
       // For videos, check size and convert directly
       else if (file.type.startsWith('video/')) {
-        const maxSize = 80 * 1024 * 1024; // 80MB
+        const maxSize = 50 * 1024 * 1024; // Reduced to 50MB
         if (file.size > maxSize) {
-          alert(`Video is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Maximum size is 80MB. Please compress the video or use a smaller one.`);
+          alert(`Video is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Maximum size is 50MB.\n\nTips:\n• Compress the video using online tools\n• Use YouTube/Vimeo and enter the URL instead\n• Reduce video resolution or duration`);
           setUploading(false);
           return;
         }
@@ -146,16 +168,25 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
           reader.onerror = reject;
           reader.readAsDataURL(file);
         });
-        console.log(`✅ Video converted (base64 length: ${fileData.length} characters)`);
+        console.log(`✅ Video converted successfully`);
+      }
+      else {
+        alert('Unsupported file type. Please upload an image (JPG, PNG) or video (MP4, WebM, MOV).');
+        setUploading(false);
+        return;
       }
 
       setFormData(prev => ({
         ...prev,
         url: fileData
       }));
+
+      // Show success message
+      console.log('✅ File uploaded successfully!');
     } catch (error) {
       console.error('❌ Error processing file:', error);
-      alert('Error processing file. Please try again.');
+      const errorMessage = error.message || 'Unknown error occurred';
+      alert(`Error uploading media: ${errorMessage}\n\nPlease try:\n• Using a smaller file\n• A different file format\n• Compressing the file before upload`);
     } finally {
       setUploading(false);
     }
@@ -230,9 +261,14 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
                   ) : (
                     <>
                       <UploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-                      <Typography>Upload Slide Image</Typography>
+                      <Typography variant="h6" fontWeight="600" gutterBottom>
+                        Upload Slide Image
+                      </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Recommended size: 1920x1080px (auto-compressed)
+                        Recommended: 1920x1080px
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
+                        JPG or PNG • Max 10MB • Auto-compressed
                       </Typography>
                     </>
                   )}
@@ -277,9 +313,14 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
                     ) : (
                       <>
                         <VideoLibrary sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-                        <Typography>Upload Video File</Typography>
+                        <Typography variant="h6" fontWeight="600" gutterBottom>
+                          Upload Video File
+                        </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          MP4, WebM, or MOV (Max 80MB)
+                          MP4, WebM, or MOV
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
+                          Max 50MB • For larger videos, use YouTube/Vimeo
                         </Typography>
                       </>
                     )}

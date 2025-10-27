@@ -1,4 +1,7 @@
 const PublicHomePage = require('../model/publicHomePage.model');
+const formidableLib = require('formidable');
+const path = require('path');
+const fs = require('fs');
 
 // Get public home page data (NO authentication required)
 exports.getPublicHomePageData = async (req, res) => {
@@ -464,4 +467,55 @@ exports.updateSocialMedia = async (req, res) => {
       message: 'Error updating social media links'
     });
   }
+};
+
+// File upload handler for public home page
+exports.uploadFile = async (req, res) => {
+  const form = formidableLib.formidable({
+    multiples: true,
+    uploadDir: path.join(__dirname, "../uploads/public-home"),
+    keepExtensions: true,
+    maxFileSize: 50 * 1024 * 1024 // 50MB
+  });
+
+  // Create upload directory if it doesn't exist
+  const uploadDir = path.join(__dirname, "../uploads/public-home");
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+
+  form.parse(req, (err, fields, files) => {
+    if (err) {
+      console.error("❌ File upload error:", err);
+      return res.status(500).json({
+        success: false,
+        message: "File upload failed",
+        error: err.message
+      });
+    }
+
+    const uploadedFiles = [];
+    const fileArray = Array.isArray(files.file) ? files.file : [files.file];
+
+    fileArray.forEach(file => {
+      if (file) {
+        const fileName = file.newFilename || file.originalFilename;
+        const fileUrl = `/uploads/public-home/${fileName}`;
+        uploadedFiles.push({
+          filename: fileName,
+          originalName: file.originalFilename,
+          url: fileUrl,
+          size: file.size,
+          type: file.mimetype
+        });
+        console.log(`✅ File uploaded: ${fileName}`);
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Files uploaded successfully",
+      files: uploadedFiles
+    });
+  });
 };

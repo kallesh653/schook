@@ -281,22 +281,18 @@ function Navbar() {
         <Toolbar disableGutters sx={{ py: 1 }}>
           <Link className="nav-list" style={{textDecoration:"none"}} to={'/'}>
             <LogoContainer sx={{ display: { xs: 'none', md: 'flex' } }}>
-              {!headerSettings.showLogo && (
-                <SchoolIcon sx={{ fontSize: 40, color: headerSettings.textColor || '#333', mr: 1 }} />
-              )}
-              {headerSettings.showLogo && (
+              {headerSettings.showLogo && schoolLogo ? (
                 <img
                   src={schoolLogo}
+                  alt="School Logo"
                   height={"60px"}
                   width={'60px'}
                   onError={(e) => {
                     e.target.style.display = 'none';
-                    e.target.nextElementSibling.style.display = 'inline-block';
                   }}
                 />
-              )}
-              {headerSettings.showLogo && (
-                <SchoolIcon sx={{ fontSize: 40, color: headerSettings.textColor || '#333', mr: 1, display: 'none' }} />
+              ) : (
+                <SchoolIcon sx={{ fontSize: 40, color: headerSettings.textColor || '#333', mr: 1 }} />
               )}
               <BrandText variant="h5" textColor={headerSettings.textColor}>
                 {schoolName}
@@ -325,23 +321,19 @@ function Navbar() {
           {/* Mobile - Logo and Name on RIGHT */}
           <Link className="nav-list" to={'/'} style={{textDecoration:"none"}}>
             <LogoContainer sx={{ display: { xs: 'flex', md: 'none' }, flexGrow: 1, justifyContent: 'flex-end' }}>
-              {!headerSettings.showLogo && (
-                <SchoolIcon sx={{ fontSize: 30, color: headerSettings.textColor || '#333', mr: 1 }} />
-              )}
-              {headerSettings.showLogo && (
+              {headerSettings.showLogo && schoolLogo ? (
                 <img
                   src={schoolLogo}
+                  alt="School Logo"
                   height={"40px"}
                   width={'40px'}
                   style={{ marginRight: '8px' }}
                   onError={(e) => {
                     e.target.style.display = 'none';
-                    e.target.nextElementSibling.style.display = 'inline-block';
                   }}
                 />
-              )}
-              {headerSettings.showLogo && (
-                <SchoolIcon sx={{ fontSize: 30, color: headerSettings.textColor || '#333', mr: 1, display: 'none' }} />
+              ) : (
+                <SchoolIcon sx={{ fontSize: 30, color: headerSettings.textColor || '#333', mr: 1 }} />
               )}
               <BrandText variant="h6" textColor={headerSettings.textColor}>
                 {schoolName.length > 20 ? 'SMS' : schoolName}

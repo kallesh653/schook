@@ -15,7 +15,8 @@ import {
   Login as LoginIcon,
   WhatsApp as WhatsAppIcon,
   Instagram as InstagramIcon,
-  Twitter as TwitterIcon
+  Twitter as TwitterIcon,
+  KeyboardArrowUp as ArrowUpIcon
 } from '@mui/icons-material';
 import { styled, keyframes } from '@mui/material/styles';
 import Carousel from './carousel/Carousel';
@@ -87,6 +88,29 @@ const bounceIn = keyframes`
   }
 `;
 
+const slideInUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const gradientShift = keyframes`
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+`;
+
 const shimmer = keyframes`
   0% {
     background-position: -1000px 0;
@@ -127,15 +151,30 @@ const HeroSection = styled(Box)(({ theme, primaryColor, secondaryColor }) => ({
 }));
 
 const FloatingCard = styled(Card)(({ theme }) => ({
-  background: 'rgba(255, 255, 255, 0.95)',
+  background: 'rgba(255, 255, 255, 0.98)',
   backdropFilter: 'blur(10px)',
   border: '1px solid rgba(255, 255, 255, 0.2)',
-  borderRadius: '20px',
-  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  borderRadius: '24px',
+  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+  overflow: 'hidden',
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: '-100%',
+    width: '100%',
+    height: '100%',
+    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+    transition: 'left 0.5s'
+  },
   '&:hover': {
-    transform: 'translateY(-10px) scale(1.02)',
-    boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-    background: 'rgba(255, 255, 255, 1)'
+    transform: 'translateY(-12px) scale(1.03)',
+    boxShadow: '0 24px 48px rgba(0,0,0,0.12)',
+    background: 'rgba(255, 255, 255, 1)',
+    '&::before': {
+      left: '100%'
+    }
   }
 }));
 
@@ -171,6 +210,8 @@ const Home = () => {
     teachers: 0,
     achievements: 0
   });
+
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   const [schoolInfo, setSchoolInfo] = useState({
     name: '',
@@ -323,6 +364,24 @@ const Home = () => {
     };
   }, []);
 
+  // Handle scroll for back to top button
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 500);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   // PWA Install Handler
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -412,6 +471,33 @@ const Home = () => {
           </Button>
         </Box>
       </Zoom>
+
+      {/* Back to Top Button */}
+      {showBackToTop && (
+        <Zoom in timeout={300}>
+          <IconButton
+            onClick={scrollToTop}
+            sx={{
+              position: 'fixed',
+              bottom: { xs: 90, md: 120 },
+              right: { xs: 20, md: 40 },
+              zIndex: 1000,
+              background: `linear-gradient(135deg, ${theme.primaryColor} 0%, ${theme.secondaryColor} 100%)`,
+              color: 'white',
+              width: { xs: 50, md: 60 },
+              height: { xs: 50, md: 60 },
+              boxShadow: '0 8px 25px rgba(102, 126, 234, 0.5)',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'translateY(-5px) scale(1.1)',
+                boxShadow: '0 12px 35px rgba(102, 126, 234, 0.6)',
+              },
+            }}
+          >
+            <ArrowUpIcon sx={{ fontSize: { xs: 28, md: 32 } }} />
+          </IconButton>
+        </Zoom>
+      )}
 
       {/* Download App Button - Floating */}
       {showInstallButton && (
@@ -581,112 +667,285 @@ const Home = () => {
       )}
 
       {/* School Information Section */}
-      <Box sx={{ py: 8 }}>
+      <Box sx={{ py: 10, position: 'relative', overflow: 'hidden' }}>
         <Container maxWidth="lg">
-          <Typography variant="h3" textAlign="center" gutterBottom sx={{ mb: 6 }}>
-            <GradientText>About Our School</GradientText>
-          </Typography>
-          <Grid container spacing={4} alignItems="center">
+          <Box sx={{ textAlign: 'center', mb: 7 }}>
+            <Typography variant="h3" gutterBottom sx={{ fontWeight: 800, color: '#333' }}>
+              About Our School
+            </Typography>
+            <Typography variant="h6" color="text.secondary">
+              Nurturing minds, building futures
+            </Typography>
+          </Box>
+          <Grid container spacing={6} alignItems="center">
             <Grid item xs={12} md={6}>
-              <img
-                src={media.aboutImage || media.heroImage || "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=600&h=400&fit=crop"}
-                alt="School Campus"
-                style={{
-                  width: '100%',
-                  borderRadius: '15px',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
-                }}
-                onError={(e) => {
-                  e.target.src = "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=600&h=400&fit=crop";
-                }}
-              />
+              <Fade in timeout={1000}>
+                <Box sx={{ position: 'relative' }}>
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: -20,
+                      left: -20,
+                      width: '100%',
+                      height: '100%',
+                      background: `linear-gradient(135deg, ${theme.primaryColor}22 0%, ${theme.secondaryColor}22 100%)`,
+                      borderRadius: '24px',
+                      zIndex: 0
+                    }}
+                  />
+                  <img
+                    src={media.aboutImage || media.heroImage || "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&h=600&fit=crop"}
+                    alt="School Campus"
+                    style={{
+                      width: '100%',
+                      borderRadius: '24px',
+                      boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+                      position: 'relative',
+                      zIndex: 1,
+                      transition: 'transform 0.4s ease',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => e.target.style.transform = 'scale(1.02)'}
+                    onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                    onError={(e) => {
+                      e.target.src = "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&h=600&fit=crop";
+                    }}
+                  />
+                </Box>
+              </Fade>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="h4" gutterBottom color="primary">
-                Excellence in Education
-              </Typography>
-              <Typography variant="body1" paragraph sx={{ lineHeight: 1.8, color: 'text.secondary' }}>
-                For over 25 years, we have been committed to providing exceptional education 
-                that prepares students for success in an ever-changing world. Our innovative 
-                teaching methods and state-of-the-art facilities create an environment where 
-                every student can thrive.
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
-                {['STEM Programs', 'Arts & Culture', 'Sports Excellence', 'Global Perspective'].map((feature) => (
-                  <Chip 
-                    key={feature}
-                    label={feature}
-                    color="primary"
-                    variant="outlined"
-                    sx={{ borderRadius: '15px' }}
-                  />
-                ))}
-              </Box>
+              <Fade in timeout={1200}>
+                <Box>
+                  <Typography
+                    variant="h3"
+                    gutterBottom
+                    sx={{
+                      fontWeight: 800,
+                      background: `linear-gradient(135deg, ${theme.primaryColor} 0%, ${theme.secondaryColor} 100%)`,
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      mb: 3
+                    }}
+                  >
+                    Excellence in Education
+                  </Typography>
+                  <Typography variant="h6" paragraph sx={{ lineHeight: 1.9, color: '#555', mb: 3 }}>
+                    For over 25 years, we have been committed to providing exceptional education
+                    that prepares students for success in an ever-changing world.
+                  </Typography>
+                  <Typography variant="body1" paragraph sx={{ lineHeight: 1.8, color: 'text.secondary', mb: 4 }}>
+                    Our innovative teaching methods and state-of-the-art facilities create an
+                    environment where every student can thrive. We believe in holistic development,
+                    combining academic excellence with character building.
+                  </Typography>
+
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 4 }}>
+                    {[
+                      { label: 'STEM Programs', icon: '🔬', color: '#667eea' },
+                      { label: 'Arts & Culture', icon: '🎨', color: '#f093fb' },
+                      { label: 'Sports Excellence', icon: '⚽', color: '#43e97b' },
+                      { label: 'Global Perspective', icon: '🌍', color: '#4facfe' }
+                    ].map((feature) => (
+                      <Chip
+                        key={feature.label}
+                        icon={<Typography sx={{ fontSize: '1.2rem' }}>{feature.icon}</Typography>}
+                        label={feature.label}
+                        sx={{
+                          borderRadius: '20px',
+                          px: 2,
+                          py: 2.5,
+                          fontSize: '0.95rem',
+                          fontWeight: 600,
+                          background: 'white',
+                          border: `2px solid ${feature.color}30`,
+                          color: feature.color,
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            background: feature.color,
+                            color: 'white',
+                            transform: 'translateY(-4px)',
+                            boxShadow: `0 8px 20px ${feature.color}40`
+                          }
+                        }}
+                      />
+                    ))}
+                  </Box>
+
+                  <Button
+                    variant="contained"
+                    size="large"
+                    endIcon={<ArrowIcon />}
+                    sx={{
+                      background: `linear-gradient(135deg, ${theme.primaryColor} 0%, ${theme.secondaryColor} 100%)`,
+                      borderRadius: '30px',
+                      px: 5,
+                      py: 1.8,
+                      fontSize: '1.1rem',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-3px)',
+                        boxShadow: '0 12px 35px rgba(102, 126, 234, 0.5)'
+                      }
+                    }}
+                  >
+                    Learn More About Us
+                  </Button>
+                </Box>
+              </Fade>
             </Grid>
           </Grid>
         </Container>
       </Box>
 
       {/* Latest News Section */}
-      {theme.showNews && (
-        <Box sx={{ py: 8, bgcolor: '#f8f9fa' }}>
+      {theme.showNews && latestNews.length > 0 && (
+        <Box sx={{ py: 10 }}>
           <Container maxWidth="lg">
-            <Typography variant="h3" textAlign="center" gutterBottom sx={{ mb: 6 }}>
-              <GradientText>Latest News & Events</GradientText>
-            </Typography>
+            <Box sx={{ textAlign: 'center', mb: 7 }}>
+              <Typography variant="h3" gutterBottom sx={{ fontWeight: 800, color: '#333' }}>
+                Latest News & Events
+              </Typography>
+              <Typography variant="h6" color="text.secondary">
+                Stay updated with our latest activities and achievements
+              </Typography>
+            </Box>
             <Grid container spacing={4}>
-              {latestNews.map((news, index) => (
+              {latestNews.slice(0, 3).map((news, index) => (
                 <Grid item xs={12} md={4} key={news._id || news.id}>
                   <Fade in timeout={1000 + index * 300}>
-                    <FloatingCard>
-                      <Box sx={{ position: 'relative', overflow: 'hidden', borderRadius: '20px 20px 0 0' }}>
+                    <Box
+                      sx={{
+                        height: '100%',
+                        background: 'white',
+                        borderRadius: '24px',
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                        transition: 'all 0.4s ease',
+                        cursor: 'pointer',
+                        position: 'relative',
+                        '&:hover': {
+                          transform: 'translateY(-12px)',
+                          boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+                          '& .news-image': {
+                            transform: 'scale(1.08)'
+                          },
+                          '& .news-overlay': {
+                            opacity: 0.3
+                          }
+                        }
+                      }}
+                    >
+                      <Box sx={{ position: 'relative', overflow: 'hidden', height: '240px' }}>
                         <img
-                          src={news.image || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400"}
+                          className="news-image"
+                          src={news.image || "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=600&fit=crop"}
                           alt={news.title}
                           style={{
                             width: '100%',
-                            height: '200px',
+                            height: '100%',
                             objectFit: 'cover',
-                            transition: 'transform 0.3s ease'
+                            transition: 'transform 0.5s ease'
                           }}
                           onError={(e) => {
-                            e.target.src = "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400";
+                            e.target.src = "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=600&fit=crop";
                           }}
                         />
-                        <Box sx={{
-                          position: 'absolute',
-                          top: 10,
-                          right: 10,
-                          bgcolor: 'primary.main',
-                          color: 'white',
-                          px: 2,
-                          py: 0.5,
-                          borderRadius: '15px',
-                          fontSize: '0.8rem'
-                        }}>
-                          {new Date(news.date || news.createdAt).toLocaleDateString()}
-                        </Box>
+                        <Box
+                          className="news-overlay"
+                          sx={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: `linear-gradient(135deg, ${theme.primaryColor}00 0%, ${theme.secondaryColor}00 100%)`,
+                            opacity: 0,
+                            transition: 'opacity 0.4s ease'
+                          }}
+                        />
+                        <Chip
+                          label={new Date(news.date || news.createdAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                          sx={{
+                            position: 'absolute',
+                            top: 15,
+                            right: 15,
+                            bgcolor: 'white',
+                            color: theme.primaryColor,
+                            fontWeight: 'bold',
+                            fontSize: '0.85rem',
+                            boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+                          }}
+                        />
                       </Box>
-                      <CardContent sx={{ p: 3 }}>
-                        <Typography variant="h6" gutterBottom fontWeight="bold">
+                      <CardContent sx={{ p: 3.5 }}>
+                        <Typography variant="h5" gutterBottom fontWeight="bold" sx={{
+                          mb: 2,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical'
+                        }}>
                           {news.title}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        <Typography variant="body1" color="text.secondary" sx={{
+                          mb: 3,
+                          lineHeight: 1.7,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical'
+                        }}>
                           {news.description}
                         </Typography>
                         <Button
-                          size="small"
+                          fullWidth
+                          variant="outlined"
                           endIcon={<ArrowIcon />}
-                          sx={{ color: 'primary.main', fontWeight: 'bold' }}
+                          sx={{
+                            borderRadius: '20px',
+                            py: 1.2,
+                            fontWeight: 600,
+                            textTransform: 'none',
+                            borderWidth: '2px',
+                            borderColor: theme.primaryColor,
+                            color: theme.primaryColor,
+                            '&:hover': {
+                              borderWidth: '2px',
+                              background: theme.primaryColor,
+                              color: 'white',
+                              transform: 'scale(1.02)'
+                            }
+                          }}
                         >
-                          Read More
+                          Read Full Story
                         </Button>
                       </CardContent>
-                    </FloatingCard>
+                    </Box>
                   </Fade>
                 </Grid>
               ))}
             </Grid>
+
+            {latestNews.length === 0 && (
+              <Box sx={{ textAlign: 'center', py: 8 }}>
+                <Typography variant="h5" color="text.secondary" gutterBottom>
+                  📰 No news available yet
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Check back soon for updates and announcements!
+                </Typography>
+              </Box>
+            )}
           </Container>
         </Box>
       )}
@@ -977,62 +1236,169 @@ const Home = () => {
 
       {/* Programs Section */}
       {theme.showPrograms && (
-        <Box sx={{ py: 8 }}>
+        <Box sx={{ py: 10, bgcolor: '#f8f9fa' }}>
           <Container maxWidth="lg">
-            <Typography variant="h3" textAlign="center" gutterBottom sx={{ mb: 6 }}>
-              <GradientText>Our Programs</GradientText>
-            </Typography>
-          <Grid container spacing={4}>
-            {[
-              {
-                title: 'Elementary School',
-                description: 'Building strong foundations for lifelong learning',
-                icon: '🌱',
-                color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-              },
-              {
-                title: 'Middle School',
-                description: 'Developing critical thinking and creativity',
-                icon: '🚀',
-                color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
-              },
-              {
-                title: 'High School',
-                description: 'Preparing for college and career success',
-                icon: '🎓',
-                color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
-              }
-            ].map((program, index) => (
-              <Grid item xs={12} md={4} key={program.title}>
-                <Fade in timeout={1200 + index * 200}>
-                  <FloatingCard sx={{ height: '100%', textAlign: 'center' }}>
-                    <CardContent sx={{ p: 4 }}>
-                      <Box sx={{
-                        width: 80,
-                        height: 80,
-                        borderRadius: '50%',
-                        background: program.color,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '2rem',
-                        mx: 'auto',
-                        mb: 3
-                      }}>
-                        {program.icon}
+            <Box sx={{ textAlign: 'center', mb: 7 }}>
+              <Typography variant="h3" gutterBottom sx={{ fontWeight: 800, color: '#333' }}>
+                Our Academic Programs
+              </Typography>
+              <Typography variant="h6" color="text.secondary">
+                Comprehensive education for every stage of learning
+              </Typography>
+            </Box>
+            <Grid container spacing={4}>
+              {[
+                {
+                  title: 'Elementary School',
+                  grades: 'Grades 1-5',
+                  description: 'Building strong foundations for lifelong learning through play-based and experiential education',
+                  icon: '🌱',
+                  color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  features: ['Interactive Learning', 'Creative Arts', 'Sports & Games']
+                },
+                {
+                  title: 'Middle School',
+                  grades: 'Grades 6-8',
+                  description: 'Developing critical thinking and creativity while fostering independence and responsibility',
+                  icon: '🚀',
+                  color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                  features: ['STEM Focus', 'Leadership Skills', 'Team Projects']
+                },
+                {
+                  title: 'High School',
+                  grades: 'Grades 9-12',
+                  description: 'Preparing for college and career success with advanced academics and career guidance',
+                  icon: '🎓',
+                  color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                  features: ['AP Courses', 'Career Counseling', 'College Prep']
+                }
+              ].map((program, index) => (
+                <Grid item xs={12} md={4} key={program.title}>
+                  <Fade in timeout={1200 + index * 200}>
+                    <Box
+                      sx={{
+                        height: '100%',
+                        background: 'white',
+                        borderRadius: '24px',
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                        position: 'relative',
+                        '&:hover': {
+                          transform: 'translateY(-12px)',
+                          boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+                          '& .program-icon': {
+                            transform: 'scale(1.1) rotate(5deg)'
+                          },
+                          '& .program-gradient': {
+                            opacity: 1
+                          }
+                        }
+                      }}
+                    >
+                      {/* Gradient Header */}
+                      <Box
+                        className="program-gradient"
+                        sx={{
+                          background: program.color,
+                          height: '180px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          position: 'relative',
+                          opacity: 0.95,
+                          transition: 'opacity 0.3s ease',
+                          '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.15) 0%, transparent 70%)'
+                          }
+                        }}
+                      >
+                        <Typography
+                          className="program-icon"
+                          sx={{
+                            fontSize: '5rem',
+                            transition: 'transform 0.4s ease',
+                            position: 'relative',
+                            zIndex: 1,
+                            filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))'
+                          }}
+                        >
+                          {program.icon}
+                        </Typography>
                       </Box>
-                      <Typography variant="h5" gutterBottom fontWeight="bold">
-                        {program.title}
-                      </Typography>
-                      <Typography variant="body1" color="text.secondary">
-                        {program.description}
-                      </Typography>
-                    </CardContent>
-                  </FloatingCard>
-                </Fade>
-              </Grid>
-            ))}
-          </Grid>
+
+                      {/* Content */}
+                      <CardContent sx={{ p: 4 }}>
+                        <Chip
+                          label={program.grades}
+                          size="small"
+                          sx={{
+                            mb: 2,
+                            fontWeight: 'bold',
+                            background: program.color,
+                            color: 'white'
+                          }}
+                        />
+                        <Typography variant="h4" gutterBottom fontWeight="bold" sx={{ mb: 2 }}>
+                          {program.title}
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.7 }}>
+                          {program.description}
+                        </Typography>
+
+                        {/* Features List */}
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                          {program.features.map((feature, idx) => (
+                            <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box
+                                sx={{
+                                  width: 8,
+                                  height: 8,
+                                  borderRadius: '50%',
+                                  background: program.color
+                                }}
+                              />
+                              <Typography variant="body2" fontWeight="600" color="text.secondary">
+                                {feature}
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
+
+                        <Button
+                          fullWidth
+                          variant="outlined"
+                          sx={{
+                            mt: 3,
+                            borderRadius: '20px',
+                            py: 1.5,
+                            fontWeight: 600,
+                            textTransform: 'none',
+                            borderWidth: '2px',
+                            borderColor: 'transparent',
+                            background: program.color,
+                            color: 'white',
+                            '&:hover': {
+                              borderWidth: '2px',
+                              transform: 'scale(1.02)',
+                              boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+                            }
+                          }}
+                        >
+                          Learn More
+                        </Button>
+                      </CardContent>
+                    </Box>
+                  </Fade>
+                </Grid>
+              ))}
+            </Grid>
           </Container>
         </Box>
       )}
@@ -1208,11 +1574,209 @@ const Home = () => {
         </Container>
       </Box>
 
+      {/* Achievements & Awards Section */}
+      <Box sx={{ py: 10 }}>
+        <Container maxWidth="lg">
+          <Box sx={{ textAlign: 'center', mb: 7 }}>
+            <Typography variant="h3" gutterBottom sx={{ fontWeight: 800, color: '#333' }}>
+              Awards & Recognition
+            </Typography>
+            <Typography variant="h6" color="text.secondary">
+              Celebrating excellence and achievements
+            </Typography>
+          </Box>
+
+          <Grid container spacing={4}>
+            {[
+              {
+                icon: '🏆',
+                title: 'Best School Award',
+                year: '2024',
+                description: 'Recognized for academic excellence',
+                color: '#FFD700'
+              },
+              {
+                icon: '⭐',
+                title: 'Excellence in Education',
+                year: '2023',
+                description: 'Outstanding teaching methodology',
+                color: '#667eea'
+              },
+              {
+                icon: '🎖️',
+                title: 'Innovation in Learning',
+                year: '2024',
+                description: 'Digital transformation pioneer',
+                color: '#43e97b'
+              },
+              {
+                icon: '🌟',
+                title: 'Student Success Rate',
+                year: '2024',
+                description: '98% college placement',
+                color: '#fa709a'
+              }
+            ].map((award, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index}>
+                <Fade in timeout={1000 + index * 200}>
+                  <Box
+                    sx={{
+                      textAlign: 'center',
+                      p: 4,
+                      background: 'white',
+                      borderRadius: '24px',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                      transition: 'all 0.4s ease',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      '&:hover': {
+                        transform: 'translateY(-12px)',
+                        boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
+                        '&::before': {
+                          transform: 'scale(1.5)',
+                          opacity: 0.1
+                        }
+                      },
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: -50,
+                        right: -50,
+                        width: 100,
+                        height: 100,
+                        borderRadius: '50%',
+                        background: award.color,
+                        opacity: 0.05,
+                        transition: 'all 0.4s ease'
+                      }
+                    }}
+                  >
+                    <Typography sx={{ fontSize: '4rem', mb: 2 }}>
+                      {award.icon}
+                    </Typography>
+                    <Chip
+                      label={award.year}
+                      size="small"
+                      sx={{
+                        bgcolor: award.color,
+                        color: 'white',
+                        fontWeight: 'bold',
+                        mb: 2
+                      }}
+                    />
+                    <Typography variant="h6" fontWeight="bold" gutterBottom>
+                      {award.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {award.description}
+                    </Typography>
+                  </Box>
+                </Fade>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Quick Facts Section */}
+      <Box sx={{ py: 10, bgcolor: '#f8f9fa' }}>
+        <Container maxWidth="lg">
+          <Box sx={{ textAlign: 'center', mb: 7 }}>
+            <Typography variant="h3" gutterBottom sx={{ fontWeight: 800, color: '#333' }}>
+              Quick Facts
+            </Typography>
+            <Typography variant="h6" color="text.secondary">
+              Numbers that speak for themselves
+            </Typography>
+          </Box>
+
+          <Grid container spacing={3}>
+            {[
+              { number: '25+', label: 'Years of Excellence', icon: '📅', color: '#667eea' },
+              { number: '50+', label: 'Expert Teachers', icon: '👨‍🏫', color: '#f093fb' },
+              { number: '1500+', label: 'Happy Students', icon: '🎓', color: '#4facfe' },
+              { number: '98%', label: 'Success Rate', icon: '📊', color: '#43e97b' },
+              { number: '30+', label: 'Countries Represented', icon: '🌍', color: '#fa709a' },
+              { number: '100%', label: 'Placement Record', icon: '💼', color: '#764ba2' }
+            ].map((fact, index) => (
+              <Grid item xs={6} md={4} lg={2} key={index}>
+                <Zoom in timeout={800 + index * 100}>
+                  <Box
+                    sx={{
+                      textAlign: 'center',
+                      p: 3,
+                      background: 'white',
+                      borderRadius: '20px',
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+                      transition: 'all 0.3s ease',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        transform: 'translateY(-8px) scale(1.05)',
+                        boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+                        background: fact.color,
+                        color: 'white',
+                        '& .fact-icon': {
+                          transform: 'scale(1.2) rotate(10deg)'
+                        },
+                        '& .fact-label': {
+                          color: 'white'
+                        }
+                      }
+                    }}
+                  >
+                    <Typography
+                      className="fact-icon"
+                      sx={{
+                        fontSize: '2.5rem',
+                        mb: 1,
+                        transition: 'transform 0.3s ease'
+                      }}
+                    >
+                      {fact.icon}
+                    </Typography>
+                    <Typography
+                      variant="h4"
+                      fontWeight="bold"
+                      sx={{ mb: 1, color: fact.color }}
+                    >
+                      {fact.number}
+                    </Typography>
+                    <Typography
+                      className="fact-label"
+                      variant="body2"
+                      fontWeight="600"
+                      color="text.secondary"
+                      sx={{ transition: 'color 0.3s ease' }}
+                    >
+                      {fact.label}
+                    </Typography>
+                  </Box>
+                </Zoom>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
       {/* Call to Action */}
       <Box sx={{
         py: 10,
         background: `linear-gradient(135deg, ${theme.primaryColor} 0%, ${theme.secondaryColor} 100%)`,
-        textAlign: 'center'
+        backgroundSize: '200% 200%',
+        animation: `${gradientShift} 8s ease infinite`,
+        textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)',
+          pointerEvents: 'none'
+        }
       }}>
         <Container maxWidth="md">
           <Typography variant="h2" color="white" gutterBottom fontWeight="bold" sx={{ mb: 2 }}>

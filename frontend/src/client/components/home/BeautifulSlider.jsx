@@ -45,6 +45,38 @@ const zoomIn = keyframes`
   }
 `;
 
+const kenBurns = keyframes`
+  0% {
+    transform: scale(1) translateX(0) translateY(0);
+  }
+  50% {
+    transform: scale(1.08) translateX(-2%) translateY(-2%);
+  }
+  100% {
+    transform: scale(1.15) translateX(-4%) translateY(-4%);
+  }
+`;
+
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+`;
+
+const slideUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
 // Styled Components
 const SliderContainer = styled(Box)(({ theme }) => ({
   position: 'relative',
@@ -75,7 +107,8 @@ const SlideImage = styled('img')({
   width: '100%',
   height: '100%',
   objectFit: 'cover',
-  animation: `${zoomIn} 1.2s ease-out`
+  animation: `${kenBurns} 12s ease-out infinite alternate`,
+  transformOrigin: 'center center'
 });
 
 const SlideVideo = styled('video')({
@@ -90,22 +123,23 @@ const GradientOverlay = styled(Box)(({ theme }) => ({
   left: 0,
   right: 0,
   bottom: 0,
-  background: 'linear-gradient(135deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.4) 100%)',
-  pointerEvents: 'none'
+  background: 'linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.5) 100%)',
+  pointerEvents: 'none',
+  animation: `${fadeIn} 1s ease-out`
 }));
 
 const ContentOverlay = styled(Box)(({ theme, direction }) => ({
   position: 'absolute',
-  bottom: '15%',
+  bottom: '20%',
   left: 0,
   right: 0,
   padding: theme.spacing(0, 4),
   color: 'white',
   textAlign: 'center',
   zIndex: 2,
-  animation: direction === 'next' ? `${slideInRight} 0.8s ease-out` : `${slideInLeft} 0.8s ease-out`,
+  animation: `${slideUp} 1s ease-out`,
   [theme.breakpoints.down('md')]: {
-    bottom: '10%',
+    bottom: '15%',
     padding: theme.spacing(0, 2)
   }
 }));
@@ -114,23 +148,24 @@ const NavigationButton = styled(IconButton)(({ theme }) => ({
   position: 'absolute',
   top: '50%',
   transform: 'translateY(-50%)',
-  backgroundColor: 'rgba(255,255,255,0.15)',
-  backdropFilter: 'blur(10px)',
+  backgroundColor: 'rgba(255,255,255,0.2)',
+  backdropFilter: 'blur(15px)',
   color: 'white',
-  width: '60px',
-  height: '60px',
+  width: '65px',
+  height: '65px',
   zIndex: 3,
-  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-  border: '2px solid rgba(255,255,255,0.3)',
+  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+  border: '2px solid rgba(255,255,255,0.4)',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
   '&:hover': {
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    transform: 'translateY(-50%) scale(1.1)',
-    boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
-    borderColor: 'rgba(255,255,255,0.6)'
+    backgroundColor: 'rgba(255,255,255,0.35)',
+    transform: 'translateY(-50%) scale(1.15)',
+    boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
+    borderColor: 'rgba(255,255,255,0.8)'
   },
   [theme.breakpoints.down('md')]: {
-    width: '45px',
-    height: '45px'
+    width: '50px',
+    height: '50px'
   }
 }));
 

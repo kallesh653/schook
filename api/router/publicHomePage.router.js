@@ -20,4 +20,7 @@ router.patch('/testimonials', auth(['SCHOOL']), publicHomePageController.updateT
 router.patch('/about', auth(['SCHOOL']), publicHomePageController.updateAbout);
 router.patch('/social-media', auth(['SCHOOL']), publicHomePageController.updateSocialMedia);
 
+// File upload (requires SCHOOL authentication)
+router.post('/upload', auth(['SCHOOL']), publicHomePageController.uploadFile);
+
 module.exports = router;

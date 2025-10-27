@@ -143,7 +143,9 @@ const SliderSection = ({ data, saveSection, showSnackbar, schoolId, saving }) =>
         showSnackbar('Media uploaded successfully', 'success');
       }
     } catch (error) {
-      showSnackbar('Error uploading media', 'error');
+      console.error('Upload error:', error);
+      const errorMsg = error.response?.data?.message || error.message || 'Error uploading media';
+      showSnackbar(errorMsg, 'error');
     } finally {
       setUploading(false);
     }
