@@ -161,23 +161,37 @@ const WebsiteBuilder = () => {
     setSaving(true);
 
     try {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        setSnackbar({ open: true, message: 'Please login first to save changes', severity: 'error' });
+        setSaving(false);
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = async (e) => {
-        const base64Logo = e.target.result;
-        setLogo(base64Logo);
+        try {
+          const base64Logo = e.target.result;
+          setLogo(base64Logo);
 
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        await axios.patch(`${baseUrl}/public-home/header`, {
-          logo: base64Logo,
-          siteName: siteName
-        }, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+          await axios.patch(`${baseUrl}/public-home/header`, {
+            logo: base64Logo,
+            siteName: siteName
+          }, { headers: { Authorization: `Bearer ${token}` } });
 
-        setSnackbar({ open: true, message: 'Logo uploaded successfully!', severity: 'success' });
+          setSnackbar({ open: true, message: 'Logo uploaded successfully!', severity: 'success' });
+        } catch (error) {
+          console.error('Logo upload error:', error);
+          const errorMsg = error.response?.data?.message || error.message || 'Error uploading logo';
+          setSnackbar({ open: true, message: errorMsg, severity: 'error' });
+        } finally {
+          setSaving(false);
+        }
       };
       reader.readAsDataURL(file);
     } catch (error) {
-      setSnackbar({ open: true, message: 'Error uploading logo', severity: 'error' });
-    } finally {
+      console.error('File read error:', error);
+      setSnackbar({ open: true, message: 'Error reading file', severity: 'error' });
       setSaving(false);
     }
   };
@@ -186,21 +200,29 @@ const WebsiteBuilder = () => {
     setSaving(true);
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        setSnackbar({ open: true, message: 'Please login first to save changes', severity: 'error' });
+        setSaving(false);
+        return;
+      }
+
       await axios.patch(`${baseUrl}/public-home/hero-section`, {
         title: heroTitle,
         subtitle: heroSubtitle,
         description: heroDescription
-      }, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      }, { headers: { Authorization: `Bearer ${token}` } });
 
       await axios.patch(`${baseUrl}/public-home/header`, {
         logo: logo,
         siteName: siteName
-      }, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      }, { headers: { Authorization: `Bearer ${token}` } });
 
-      setSnackbar({ open: true, message: 'Hero section saved!', severity: 'success' });
+      setSnackbar({ open: true, message: 'Hero section saved successfully!', severity: 'success' });
       fetchWebsiteData();
     } catch (error) {
-      setSnackbar({ open: true, message: 'Error saving hero section', severity: 'error' });
+      console.error('Save error:', error);
+      const errorMsg = error.response?.data?.message || error.message || 'Error saving hero section';
+      setSnackbar({ open: true, message: errorMsg, severity: 'error' });
     } finally {
       setSaving(false);
     }
@@ -208,24 +230,31 @@ const WebsiteBuilder = () => {
 
   const handleSaveSlide = async (slideData) => {
     try {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        setSnackbar({ open: true, message: 'Please login first to save changes', severity: 'error' });
+        return;
+      }
+
       const updatedSlides = editingSlide
         ? slides.map(s => s.id === editingSlide.id ? slideData : s)
         : [...slides, slideData];
 
       setSlides(updatedSlides);
 
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       await axios.patch(`${baseUrl}/public-home/slider`, {
         showSlider: true,
         slides: updatedSlides
-      }, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      }, { headers: { Authorization: `Bearer ${token}` } });
 
-      setSnackbar({ open: true, message: 'Slide saved!', severity: 'success' });
+      setSnackbar({ open: true, message: 'Slide saved successfully!', severity: 'success' });
       setOpenSliderDialog(false);
       setEditingSlide(null);
       fetchWebsiteData();
     } catch (error) {
-      setSnackbar({ open: true, message: 'Error saving slide', severity: 'error' });
+      console.error('Save slide error:', error);
+      const errorMsg = error.response?.data?.message || error.message || 'Error saving slide';
+      setSnackbar({ open: true, message: errorMsg, severity: 'error' });
     }
   };
 
@@ -251,15 +280,23 @@ const WebsiteBuilder = () => {
     setSaving(true);
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        setSnackbar({ open: true, message: 'Please login first to save changes', severity: 'error' });
+        setSaving(false);
+        return;
+      }
+
       await axios.patch(`${baseUrl}/public-home/statistics`, {
         showSection: true,
         stats: statistics
-      }, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      }, { headers: { Authorization: `Bearer ${token}` } });
 
-      setSnackbar({ open: true, message: 'Statistics saved!', severity: 'success' });
+      setSnackbar({ open: true, message: 'Statistics saved successfully!', severity: 'success' });
       fetchWebsiteData();
     } catch (error) {
-      setSnackbar({ open: true, message: 'Error saving statistics', severity: 'error' });
+      console.error('Save statistics error:', error);
+      const errorMsg = error.response?.data?.message || error.message || 'Error saving statistics';
+      setSnackbar({ open: true, message: errorMsg, severity: 'error' });
     } finally {
       setSaving(false);
     }
