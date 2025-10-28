@@ -53,21 +53,23 @@ const pulse = keyframes`
   50% { transform: scale(1.05); }
 `;
 
-// Slider Components - FULL WIDTH EDGE TO EDGE
+// Slider Components - FULL WIDTH but fits in one screen
 const SliderContainer = styled(Box)({
   position: 'relative',
   width: '100vw',
-  height: '100vh',
-  minHeight: '800px',
+  height: '85vh', // Reduced from 100vh to fit nicely
+  maxHeight: '700px', // Maximum height
+  minHeight: '500px',
   overflow: 'hidden',
   marginLeft: 'calc(-50vw + 50%)',
   marginRight: 'calc(-50vw + 50%)',
   left: '50%',
   right: '50%',
-  marginTop: '-20px', // Remove any top margin
+  marginTop: '-20px',
   '@media (max-width: 600px)': {
-    height: '80vh',
-    minHeight: '600px'
+    height: '70vh',
+    maxHeight: '500px',
+    minHeight: '400px'
   }
 });
 

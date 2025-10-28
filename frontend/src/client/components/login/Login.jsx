@@ -1,4 +1,4 @@
-import { Box, Button, FormControl, InputLabel, MenuItem, Paper, Select, TextField, Typography } from "@mui/material";
+import { Box, Button, FormControl, InputLabel, MenuItem, Paper, Select, TextField, Typography, Divider } from "@mui/material";
 import { Form, useFormik } from "formik";
 import { loginSchema } from "../../../yupSchema/loginSchema";
 import axios from "axios";
@@ -6,6 +6,7 @@ import { baseUrl } from "../../../environment";
 import CustomizedSnackbars from "../../../basic utility components/CustomizedSnackbars";
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Build as BuildIcon } from "@mui/icons-material";
 
 import "./Login.css"
 import { AuthContext } from "../../../context/AuthContext";
@@ -148,6 +149,34 @@ export default function Login() {
                 <Box sx={{ marginTop: "10px" }} component={'div'}>
                     <Button type="submit" sx={{ marginRight: "10px" }} variant="contained">Submit</Button>
                 </Box>
+
+                <Divider sx={{ my: 3 }}>OR</Divider>
+
+                <Button
+                    fullWidth
+                    variant="outlined"
+                    size="large"
+                    startIcon={<BuildIcon />}
+                    onClick={() => navigate('/website-builder')}
+                    sx={{
+                        py: 1.5,
+                        borderWidth: '2px',
+                        borderColor: '#667eea',
+                        color: '#667eea',
+                        fontWeight: 'bold',
+                        textTransform: 'none',
+                        fontSize: '1.1rem',
+                        '&:hover': {
+                            borderWidth: '2px',
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            color: 'white',
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)'
+                        }
+                    }}
+                >
+                    Access Website Builder
+                </Button>
             </Box>
         </Paper>
         </Box>
