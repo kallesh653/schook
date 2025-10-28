@@ -44,6 +44,7 @@ import NoticeStudent from "./student/components/notice/NoticeStudent";
 import StudentRecords from "./school/components/student-records/StudentRecords";
 import HomePageManagement from "./school/components/home-page-management/HomePageManagement";
 import PublicHomePage from "./client/components/public-home/PublicHomePage";
+import SimpleHome from "./client/components/home/SimpleHome";
 import FeesManagement from "./school/components/fees/FeesManagement";
 import MarkSheetGenerator from "./school/components/marksheet/MarkSheetGenerator";
 import SmsManagement from "./school/components/sms/SmsManagement";
@@ -106,7 +107,7 @@ function App() {
   
             <Route path="/" element={<Client />}>
               <Route index element={<Navigate to="/home" replace />} />
-              <Route path="home" element={<PublicHomePage />} />
+              <Route path="home" element={<SimpleHome />} />
               <Route path="contact" element={<Contact />} />
               <Route path="login" element={<Login />} />
               <Route path="student-login" element={<StudentLogin />} />

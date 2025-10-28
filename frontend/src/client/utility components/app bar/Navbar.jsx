@@ -1,247 +1,153 @@
-import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
-import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
-import AdbIcon from '@mui/icons-material/Adb';
-import { Link } from 'react-router-dom';
-import { styled, keyframes } from '@mui/material/styles';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { AppBar, Toolbar, Container, Box, IconButton, Avatar, Menu, MenuItem, Typography } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
+import { styled } from '@mui/material/styles';
+import {
+  Login as LoginIcon,
+  PersonAdd as PersonAddIcon,
+  Dashboard as DashboardIcon,
+  School as SchoolIcon,
+  GetApp as DownloadIcon,
+  Logout as LogoutIcon
+} from '@mui/icons-material';
 import { baseUrl } from '../../../environment';
-
-// ICONS
-import LoginIcon from '@mui/icons-material/Login';
-import SchoolIcon from '@mui/icons-material/School';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import LogoutIcon from '@mui/icons-material/Logout';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import DownloadIcon from '@mui/icons-material/Download';
-import { useSelector } from 'react-redux';
-import { useTheme } from '@emotion/react';
-import { AuthContext } from '../../../context/AuthContext';
-
-
-import("./Navbar.css")
-
-// Animations
-const fadeInDown = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
-
-const glow = keyframes`
-  0% {
-    box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
-  }
-  100% {
-    box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
-  }
-`;
-
-const pulse = keyframes`
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
-`;
+import axios from 'axios';
 
 // Styled Components
-const StyledAppBar = styled(AppBar)(({ theme, headerBgColor }) => ({
-  background: headerBgColor || '#fefefe',
+const StyledAppBar = styled(AppBar)(({ headerBgColor }) => ({
+  background: headerBgColor || 'rgba(255, 255, 255, 0.95)',
   backdropFilter: 'blur(10px)',
-  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-  animation: `${fadeInDown} 0.8s ease-out`,
+  boxShadow: '0 2px 20px rgba(0,0,0,0.08)',
   position: 'sticky',
   top: 0,
-  zIndex: 1100,
-  borderBottom: '1px solid #e0e0e0'
+  zIndex: 1100
 }));
 
-const LogoContainer = styled(Box)(({ theme }) => ({
+const LogoContainer = styled(Box)({
   display: 'flex',
   alignItems: 'center',
-  gap: theme.spacing(2),
-  '& img': {
-    borderRadius: '50%',
-    border: '2px solid #e0e0e0',
-    transition: 'all 0.3s ease',
-    '&:hover': {
-      transform: 'scale(1.05)',
-      border: '2px solid #333'
-    }
-  }
-}));
-
-const StyledButton = styled(Button)(({ theme }) => ({
-  borderRadius: '8px',
-  padding: '8px 20px',
-  margin: '0 4px',
-  background: '#f8f9fa',
-  border: '1px solid #dee2e6',
-  color: '#333',
-  fontWeight: 500,
-  textTransform: 'none',
-  transition: 'all 0.2s ease',
+  gap: '12px',
+  cursor: 'pointer',
+  transition: 'transform 0.3s ease',
   '&:hover': {
-    background: '#e9ecef',
-    transform: 'translateY(-1px)',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-  },
-  '& .MuiSvgIcon-root': {
-    marginRight: theme.spacing(1),
-    fontSize: '1.1rem'
+    transform: 'scale(1.05)'
   }
-}));
+});
 
-const DashboardButton = styled(StyledButton)(({ theme }) => ({
-  background: '#495057',
-  color: '#fff',
-  border: '1px solid #495057',
-  '&:hover': {
-    background: '#343a40',
-    border: '1px solid #343a40'
-  }
-}));
+const Logo = styled('img')({
+  height: '50px',
+  width: '50px',
+  objectFit: 'contain',
+  borderRadius: '8px'
+});
 
-const LogoutButton = styled(StyledButton)(({ theme }) => ({
-  background: '#6c757d',
-  color: '#fff',
-  border: '1px solid #6c757d',
-  '&:hover': {
-    background: '#5a6268',
-    border: '1px solid #5a6268'
-  }
-}));
-
-const BrandText = styled(Typography)(({ theme, textColor }) => ({
-  color: textColor || '#333',
+const BrandText = styled(Typography)(({ textColor }) => ({
   fontWeight: 700,
-  letterSpacing: '0.05rem',
-  textDecoration: 'none',
-  '&:hover': {
-    color: textColor ? `${textColor}dd` : '#495057'
+  fontSize: '1.5rem',
+  color: textColor || '#333',
+  letterSpacing: '0.5px',
+  '@media (max-width: 600px)': {
+    fontSize: '1.2rem'
   }
 }));
 
-function Navbar() {
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
-  const [schoolName, setSchoolName] = React.useState('GenTime');
-  const [schoolLogo, setSchoolLogo] = React.useState(null);
-  const [headerSettings, setHeaderSettings] = React.useState({
+const StyledButton = styled(Box)({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '10px 20px',
+  borderRadius: '25px',
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  color: 'white',
+  fontWeight: 600,
+  fontSize: '0.95rem',
+  cursor: 'pointer',
+  transition: 'all 0.3s ease',
+  boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: '0 6px 20px rgba(102, 126, 234, 0.6)'
+  },
+  '@media (max-width: 600px)': {
+    padding: '8px 16px',
+    fontSize: '0.85rem'
+  }
+});
+
+const DashboardButton = styled(StyledButton)({
+  background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+  boxShadow: '0 4px 15px rgba(67, 233, 123, 0.4)',
+  '&:hover': {
+    boxShadow: '0 6px 20px rgba(67, 233, 123, 0.6)'
+  }
+});
+
+const Navbar = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+  // Header settings
+  const [headerSettings, setHeaderSettings] = useState({
     showLogo: true,
     showLoginButton: true,
     showRegisterButton: true,
     showDashboardButton: true,
-    backgroundColor: '#fefefe',
+    showDownloadButton: true,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     textColor: '#333'
   });
-  const { authenticated, user } = React.useContext(AuthContext);
-  const  [dashboardLink, setDashboardLink] = React.useState('/');
-  const [deferredPrompt, setDeferredPrompt] = React.useState(null);
-  const [showInstallButton, setShowInstallButton] = React.useState(false)
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget);
-  };
-  const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
-  };
 
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
+  const [schoolLogo, setSchoolLogo] = useState('');
+  const [schoolName, setSchoolName] = useState('GenTime School');
 
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
-
-  // Function to fetch school info for header from PUBLIC HOME PAGE
-  const fetchSchoolInfo = React.useCallback(async () => {
-    try {
-      // Fetch from PUBLIC HOME PAGE endpoint
-      const response = await axios.get(`${baseUrl}/public-home/data`);
-
-      if (response.data.success && response.data.data) {
-        const data = response.data.data;
-
-        // Update header from public home page data
-        if (data.header) {
-          setSchoolName(data.header.siteName || 'GenTime');
-          setSchoolLogo(data.header.logo || null);
-          setHeaderSettings(prev => ({
-            ...prev,
-            showLoginButton: data.header.showLoginButton !== false,
-            showRegisterButton: data.header.showRegisterButton !== false,
-            backgroundColor: data.header.backgroundColor || '#fefefe',
-            textColor: data.header.textColor || '#333'
-          }));
+  // Fetch public home page data
+  useEffect(() => {
+    const fetchPublicData = async () => {
+      try {
+        const response = await axios.get(`${baseUrl}/public-home/data`);
+        if (response.data.success) {
+          const data = response.data.data;
+          if (data.header) {
+            setSchoolName(data.header.siteName || 'GenTime School');
+            setSchoolLogo(data.header.logo || '');
+          }
         }
+      } catch (error) {
+        console.error('Error fetching public data:', error);
       }
-    } catch (error) {
-      console.error('Error fetching public home page header:', error);
-    }
+    };
+
+    fetchPublicData();
   }, []);
 
-  // Function to update header from API data
-  const updateHeaderFromData = (data) => {
-    // Update header settings
-    if (data.headerSettings) {
-      setHeaderSettings(prev => ({ ...prev, ...data.headerSettings }));
-    }
-
-    // Update school name
-    if (data.headerSettings?.schoolName) {
-      setSchoolName(data.headerSettings.schoolName);
-    } else if (data.schoolInfo?.name) {
-      setSchoolName(data.schoolInfo.name.toUpperCase());
-    }
-
-    // Update school logo
-    if (data.media?.logo) {
-      setSchoolLogo(data.media.logo);
-    }
-  };
-
-  // Fetch school info for header on mount and set up refresh
-  React.useEffect(() => {
-    fetchSchoolInfo();
-
-    // Listen for custom refresh event from admin panel
-    const handleRefresh = () => {
-      fetchSchoolInfo();
+  // Check authentication
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await axios.get(`${baseUrl}/auth/check`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.data.success) {
+            setUser(response.data.user);
+            setAuthenticated(true);
+          }
+        } catch (error) {
+          setAuthenticated(false);
+        }
+      }
     };
 
-    window.addEventListener('frontpage-refresh', handleRefresh);
-
-    return () => {
-      window.removeEventListener('frontpage-refresh', handleRefresh);
-    };
-  }, [fetchSchoolInfo]);
+    checkAuth();
+  }, []);
 
   // PWA Install Handler
-  React.useEffect(() => {
+  useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -250,113 +156,87 @@ function Navbar() {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setShowInstallButton(false);
-    }
-
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) {
-      alert('To install GenTime:\n\niOS: Tap Share button → Add to Home Screen\n\nAndroid: This app is already installed or your browser does not support installation');
-      return;
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setShowInstallButton(false);
+      }
+      setDeferredPrompt(null);
     }
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-    }
-    setDeferredPrompt(null);
-    setShowInstallButton(false);
   };
 
-  const theme = useTheme();
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    setAuthenticated(false);
+    handleMenuClose();
+    navigate('/');
+  };
 
   return (
-    <StyledAppBar position="static" headerBgColor={headerSettings.backgroundColor}>
+    <StyledAppBar headerBgColor={headerSettings.backgroundColor}>
       <Container maxWidth="xl">
-        <Toolbar disableGutters sx={{ py: 1 }}>
-          <Link className="nav-list" style={{textDecoration:"none"}} to={'/'}>
-            <LogoContainer sx={{ display: { xs: 'none', md: 'flex' } }}>
-              {headerSettings.showLogo && schoolLogo ? (
-                <img
-                  src={schoolLogo}
-                  alt="School Logo"
-                  height={"60px"}
-                  width={'60px'}
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                  }}
-                />
+        <Toolbar disableGutters sx={{ py: 1, minHeight: '70px' }}>
+
+          {/* Logo and Brand - Always visible */}
+          <Link to="/" style={{ textDecoration: 'none', flexGrow: { xs: 1, md: 0 } }}>
+            <LogoContainer>
+              {schoolLogo ? (
+                <Logo src={schoolLogo} alt={schoolName} />
               ) : (
-                <SchoolIcon sx={{ fontSize: 40, color: headerSettings.textColor || '#333', mr: 1 }} />
+                <SchoolIcon sx={{ fontSize: 50, color: headerSettings.textColor || '#667eea' }} />
               )}
-              <BrandText variant="h5" textColor={headerSettings.textColor}>
+              <BrandText textColor={headerSettings.textColor}>
                 {schoolName}
               </BrandText>
             </LogoContainer>
           </Link>
 
+          {/* Spacer */}
+          <Box sx={{ flexGrow: 1 }} />
 
-          {/* Mobile - Login Button on LEFT */}
-          <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1 }}>
-            {!authenticated && headerSettings.showLoginButton && (
-              <Link to="/login" style={{ textDecoration: 'none' }}>
-                <StyledButton size="small" sx={{
-                  minWidth: 'auto',
-                  px: 2,
-                  py: 1,
-                  fontSize: '0.875rem'
-                }}>
-                  <LoginIcon sx={{ fontSize: '1rem' }} />
-                  Login
-                </StyledButton>
-              </Link>
+          {/* Right Side Buttons */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+
+            {/* Download App Button */}
+            {showInstallButton && headerSettings.showDownloadButton && (
+              <StyledButton onClick={handleInstallClick} sx={{ display: { xs: 'none', sm: 'flex' } }}>
+                <DownloadIcon />
+                Download App
+              </StyledButton>
             )}
-          </Box>
 
-          {/* Mobile - Logo and Name on RIGHT */}
-          <Link className="nav-list" to={'/'} style={{textDecoration:"none"}}>
-            <LogoContainer sx={{ display: { xs: 'flex', md: 'none' }, flexGrow: 1, justifyContent: 'flex-end' }}>
-              {headerSettings.showLogo && schoolLogo ? (
-                <img
-                  src={schoolLogo}
-                  alt="School Logo"
-                  height={"40px"}
-                  width={'40px'}
-                  style={{ marginRight: '8px' }}
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                  }}
-                />
-              ) : (
-                <SchoolIcon sx={{ fontSize: 30, color: headerSettings.textColor || '#333', mr: 1 }} />
-              )}
-              <BrandText variant="h6" textColor={headerSettings.textColor}>
-                {schoolName.length > 20 ? 'SMS' : schoolName}
-              </BrandText>
-            </LogoContainer>
-          </Link>
-
-
-      
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: "flex-end", gap: 1 }}>
+            {/* Not Authenticated */}
             {!authenticated && (
               <>
                 {headerSettings.showLoginButton && (
                   <Link to="/login" style={{ textDecoration: 'none' }}>
                     <StyledButton>
                       <LoginIcon />
-                      Login
+                      <span style={{ display: { xs: 'none', sm: 'inline' } }}>Login</span>
                     </StyledButton>
                   </Link>
                 )}
 
                 {headerSettings.showRegisterButton && (
-                  <Link to="/register" style={{ textDecoration: 'none' }}>
+                  <Link to="/register" style={{ textDecoration: 'none', display: { xs: 'none', md: 'block' } }}>
                     <StyledButton>
                       <PersonAddIcon />
                       Register
@@ -366,91 +246,69 @@ function Navbar() {
               </>
             )}
 
+            {/* Authenticated */}
             {authenticated && (
               <>
                 {headerSettings.showDashboardButton && (
                   <Link to={`/${user?.role?.toLowerCase()}`} style={{ textDecoration: 'none' }}>
                     <DashboardButton>
                       <DashboardIcon />
-                      Dashboard
+                      <span style={{ display: { xs: 'none', sm: 'inline' } }}>Dashboard</span>
                     </DashboardButton>
                   </Link>
                 )}
 
-                <Link to="/logout" style={{ textDecoration: 'none' }}>
-                  <LogoutButton>
-                    <LogoutIcon />
+                {/* User Avatar Menu */}
+                <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
+                  <Avatar
+                    src={user?.profilePicture}
+                    alt={user?.name}
+                    sx={{
+                      width: 45,
+                      height: 45,
+                      border: '2px solid #667eea',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </Avatar>
+                </IconButton>
+
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleMenuClose}
+                  PaperProps={{
+                    sx: {
+                      mt: 1.5,
+                      minWidth: 200,
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                    }
+                  }}
+                >
+                  <MenuItem disabled>
+                    <Typography variant="body2" fontWeight="bold">
+                      {user?.name}
+                    </Typography>
+                  </MenuItem>
+                  <MenuItem disabled>
+                    <Typography variant="caption" color="text.secondary">
+                      {user?.email}
+                    </Typography>
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout} sx={{ color: '#f44336', mt: 1 }}>
+                    <LogoutIcon sx={{ mr: 1, fontSize: 20 }} />
                     Logout
-                  </LogoutButton>
-                </Link>
+                  </MenuItem>
+                </Menu>
               </>
             )}
           </Box>
         </Toolbar>
       </Container>
-
-      {/* Mobile Floating Action Buttons - Below Header */}
-      {!authenticated && (
-        <Box sx={{
-          display: { xs: 'flex', md: 'none' },
-          gap: 1,
-          px: 2,
-          py: 1,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
-          {headerSettings.showLoginButton && (
-            <Link to="/login" style={{ textDecoration: 'none', flex: 1 }}>
-              <Button
-                variant="contained"
-                fullWidth
-                size="small"
-                sx={{
-                  background: '#fff',
-                  color: '#667eea',
-                  fontWeight: 600,
-                  py: 1,
-                  '&:hover': {
-                    background: '#f0f0f0',
-                    transform: 'translateY(-1px)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                  },
-                  transition: 'all 0.2s ease'
-                }}
-                startIcon={<LoginIcon />}
-              >
-                Login
-              </Button>
-            </Link>
-          )}
-          {showInstallButton && (
-            <Button
-              variant="contained"
-              size="small"
-              onClick={handleInstallClick}
-              sx={{
-                background: '#FFD700',
-                color: '#333',
-                fontWeight: 600,
-                py: 1,
-                flex: 1,
-                '&:hover': {
-                  background: '#FFC700',
-                  transform: 'translateY(-1px)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                },
-                transition: 'all 0.2s ease'
-              }}
-              startIcon={<DownloadIcon />}
-            >
-              Download App
-            </Button>
-          )}
-        </Box>
-      )}
     </StyledAppBar>
   );
-}
+};
+
 export default Navbar;
