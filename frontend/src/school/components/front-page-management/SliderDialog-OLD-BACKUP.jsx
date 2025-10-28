@@ -14,10 +14,9 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Divider,
-  CircularProgress,
-  Alert
+  CircularProgress
 } from '@mui/material';
-import { CloudUpload as UploadIcon, VideoLibrary, CheckCircle } from '@mui/icons-material';
+import { CloudUpload as UploadIcon, VideoLibrary } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 
 const UploadBox = styled(Box)(({ theme }) => ({
@@ -38,12 +37,10 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
     title: '',
     description: '',
     url: '',
-    type: 'image',
+    type: 'image', // 'image' or 'video'
     active: true
   });
   const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState('');
-  const [error, setError] = useState('');
 
   useEffect(() => {
     if (editingSlider) {
@@ -63,8 +60,6 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
         active: true
       });
     }
-    setError('');
-    setUploadProgress('');
   }, [editingSlider, open]);
 
   const handleChange = (field, value) => {
@@ -72,182 +67,135 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
       ...prev,
       [field]: value
     }));
-    setError('');
   };
 
-  // Simple image compression
-  const compressImage = async (file, maxWidth = 1920, quality = 0.7) => {
+  // Compress image before upload
+  const compressImage = (file, maxWidth = 1920, quality = 0.8) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-
-      reader.onerror = () => {
-        reject(new Error('Failed to read file'));
-      };
-
       reader.onload = (e) => {
         const img = new Image();
-
-        img.onerror = () => {
-          reject(new Error('Failed to load image'));
-        };
-
         img.onload = () => {
-          try {
-            const canvas = document.createElement('canvas');
-            let width = img.width;
-            let height = img.height;
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
 
-            // Scale down if too large
-            if (width > maxWidth) {
-              height = (height * maxWidth) / width;
-              width = maxWidth;
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-
-            // Convert to base64
-            canvas.toBlob(
-              (blob) => {
-                if (!blob) {
-                  reject(new Error('Failed to compress image'));
-                  return;
-                }
-
-                const compressedReader = new FileReader();
-                compressedReader.onerror = () => reject(new Error('Failed to read compressed image'));
-                compressedReader.onload = (event) => resolve(event.target.result);
-                compressedReader.readAsDataURL(blob);
-              },
-              'image/jpeg',
-              quality
-            );
-          } catch (err) {
-            reject(new Error('Compression failed: ' + err.message));
+          // Scale down if image is too large
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
           }
-        };
 
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Convert to base64 with compression
+          canvas.toBlob(
+            (blob) => {
+              const compressedReader = new FileReader();
+              compressedReader.onload = (event) => {
+                resolve(event.target.result);
+              };
+              compressedReader.onerror = reject;
+              compressedReader.readAsDataURL(blob);
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+        img.onerror = reject;
         img.src = e.target.result;
       };
-
+      reader.onerror = reject;
       reader.readAsDataURL(file);
     });
   };
 
   const handleImageUpload = async (file) => {
-    if (!file) {
-      setError('No file selected');
-      return;
-    }
+    if (!file) return;
 
     setUploading(true);
-    setError('');
-    setUploadProgress('Starting upload...');
 
     try {
-      console.log('📁 File selected:', file.name, 'Size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
+      console.log(`📁 Original file size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
 
       let fileData;
 
-      // Handle images
+      // For images, compress them
       if (file.type.startsWith('image/')) {
-        const maxImageSize = 10 * 1024 * 1024; // 10MB
-
+        // Check if image is too large before compression
+        const maxImageSize = 10 * 1024 * 1024; // 10MB before compression
         if (file.size > maxImageSize) {
-          setError(`Image too large: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum: 10MB`);
+          alert(`Image is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Please use an image smaller than 10MB.`);
           setUploading(false);
           return;
         }
 
-        setUploadProgress('Compressing image...');
         console.log('🔄 Compressing image...');
-
         try {
-          // Try compression
-          fileData = await compressImage(file, 1920, 0.7);
-          console.log('✅ Image compressed successfully');
-          setUploadProgress('Image compressed!');
+          fileData = await compressImage(file);
+          console.log(`✅ Compressed image successfully`);
 
           // Check compressed size
-          const compressedSizeMB = (fileData.length * 0.75) / (1024 * 1024);
-          console.log('📊 Compressed size:', compressedSizeMB.toFixed(2), 'MB');
-
-          if (compressedSizeMB > 3) {
-            console.log('⚠️ Still large, compressing more...');
-            setUploadProgress('Applying additional compression...');
-            fileData = await compressImage(file, 1920, 0.5);
+          const compressedSizeMB = (fileData.length * 0.75) / (1024 * 1024); // Approximate size in MB
+          if (compressedSizeMB > 5) {
+            console.warn('⚠️ Compressed image is still large, applying additional compression...');
+            fileData = await compressImage(file, 1920, 0.6); // More aggressive compression
           }
         } catch (compressionError) {
           console.error('❌ Compression failed:', compressionError);
-          setError('Compression failed: ' + compressionError.message);
+          alert('Failed to compress image. Please try a different image or reduce its size before uploading.');
           setUploading(false);
           return;
         }
       }
-      // Handle videos
+      // For videos, check size and convert directly
       else if (file.type.startsWith('video/')) {
-        const maxVideoSize = 50 * 1024 * 1024; // 50MB
-
-        if (file.size > maxVideoSize) {
-          setError(`Video too large: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum: 50MB. Use YouTube/Vimeo URL instead.`);
+        const maxSize = 50 * 1024 * 1024; // Reduced to 50MB
+        if (file.size > maxSize) {
+          alert(`Video is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Maximum size is 50MB.\n\nTips:\n• Compress the video using online tools\n• Use YouTube/Vimeo and enter the URL instead\n• Reduce video resolution or duration`);
           setUploading(false);
           return;
         }
 
-        setUploadProgress('Converting video...');
         console.log('🔄 Converting video to base64...');
-
-        try {
-          fileData = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onerror = () => reject(new Error('Failed to read video file'));
-            reader.onload = (e) => resolve(e.target.result);
-            reader.readAsDataURL(file);
-          });
-          console.log('✅ Video converted successfully');
-          setUploadProgress('Video ready!');
-        } catch (videoError) {
-          console.error('❌ Video conversion failed:', videoError);
-          setError('Video conversion failed: ' + videoError.message);
-          setUploading(false);
-          return;
-        }
+        fileData = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        console.log(`✅ Video converted successfully`);
       }
       else {
-        setError('Unsupported file type. Use JPG, PNG for images or MP4, WebM for videos.');
+        alert('Unsupported file type. Please upload an image (JPG, PNG) or video (MP4, WebM, MOV).');
         setUploading(false);
         return;
       }
 
-      // Set the file data
       setFormData(prev => ({
         ...prev,
         url: fileData
       }));
 
-      setUploadProgress('✅ Upload complete!');
-      console.log('✅ File processed successfully!');
-
-      // Clear success message after 2 seconds
-      setTimeout(() => {
-        setUploadProgress('');
-      }, 2000);
-
+      // Show success message
+      console.log('✅ File uploaded successfully!');
     } catch (error) {
-      console.error('❌ Upload error:', error);
-      setError('Upload failed: ' + error.message);
+      console.error('❌ Error processing file:', error);
+      const errorMessage = error.message || 'Unknown error occurred';
+      alert(`Error uploading media: ${errorMessage}\n\nPlease try:\n• Using a smaller file\n• A different file format\n• Compressing the file before upload`);
     } finally {
       setUploading(false);
     }
   };
 
   const handleSubmit = () => {
-    // Validate
+    // Only URL is required, title and description are optional
     if (!formData.url || formData.url.trim() === '') {
-      setError('Please upload an image/video or provide a URL');
+      alert('Please upload an image/video or provide a URL');
       return;
     }
 
@@ -255,12 +203,12 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
       id: editingSlider?.id || Date.now().toString(),
       type: formData.type || 'image',
       url: formData.url,
-      title: (formData.title || '').trim(),
-      description: (formData.description || '').trim(),
+      title: (formData.title || '').trim() || '',
+      description: (formData.description || '').trim() || '',
       active: formData.active !== undefined ? formData.active : true
     };
 
-    console.log('💾 Submitting slide:', slideData);
+    console.log('SliderDialog - Submitting slide data:', slideData);
     onSave(slideData);
     onClose();
   };
@@ -272,20 +220,6 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
       </DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
-          {/* Error Display */}
-          {error && (
-            <Alert severity="error" onClose={() => setError('')}>
-              {error}
-            </Alert>
-          )}
-
-          {/* Success Display */}
-          {uploadProgress && !error && (
-            <Alert severity="success" icon={<CheckCircle />}>
-              {uploadProgress}
-            </Alert>
-          )}
-
           {/* Type Selector */}
           <Box>
             <Typography variant="h6" gutterBottom>
@@ -307,91 +241,86 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
           {/* Image/Video Upload */}
           <Box>
             <Typography variant="h6" gutterBottom>
-              {formData.type === 'image' ? 'Upload Image' : 'Upload Video or Enter URL'}
+              {formData.type === 'image' ? 'Slide Image' : 'Video URL'}
             </Typography>
-
             {formData.type === 'image' ? (
               <UploadBox>
                 <input
                   type="file"
-                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  accept="image/*"
                   style={{ display: 'none' }}
                   id="slider-image-upload"
                   onChange={(e) => handleImageUpload(e.target.files[0])}
-                  disabled={uploading}
                 />
-                <label htmlFor="slider-image-upload" style={{ cursor: uploading ? 'not-allowed' : 'pointer' }}>
+                <label htmlFor="slider-image-upload">
                   {uploading ? (
                     <>
                       <CircularProgress size={48} sx={{ mb: 1 }} />
-                      <Typography>Processing...</Typography>
+                      <Typography>Processing image...</Typography>
                     </>
                   ) : (
                     <>
                       <UploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
                       <Typography variant="h6" fontWeight="600" gutterBottom>
-                        Click to Upload Image
+                        Upload Slide Image
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        JPG, PNG, or WebP • Max 10MB
+                        Recommended: 1920x1080px
                       </Typography>
                       <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
-                        Recommended: 1920x1080px for best quality
+                        JPG or PNG • Max 10MB • Auto-compressed
                       </Typography>
                     </>
                   )}
                 </label>
-                {formData.url && !uploading && formData.type === 'image' && (
-                  <Box sx={{ mt: 2 }}>
-                    <Avatar
-                      src={formData.url}
-                      sx={{ width: 120, height: 80, mx: 'auto' }}
-                      variant="rounded"
-                    />
-                    <Typography variant="caption" color="success.main" sx={{ mt: 1, display: 'block' }}>
-                      ✓ Image uploaded successfully
-                    </Typography>
-                  </Box>
+                {formData.url && !uploading && (
+                  <Avatar
+                    src={formData.url}
+                    sx={{ width: 120, height: 80, mx: 'auto', mt: 2 }}
+                    variant="rounded"
+                  />
                 )}
               </UploadBox>
             ) : (
               <Box>
                 <TextField
                   fullWidth
-                  label="Video URL (YouTube, Vimeo, or direct link)"
+                  label="Video URL"
                   value={formData.url}
                   onChange={(e) => handleChange('url', e.target.value)}
-                  placeholder="https://youtube.com/watch?v=..."
-                  helperText="Paste YouTube/Vimeo URL or upload video file below"
+                  placeholder="Enter YouTube URL or video file URL"
+                  helperText="YouTube, Vimeo, or direct video file URL"
                   sx={{ mb: 2 }}
                 />
-                <Divider sx={{ my: 2 }}>OR Upload Video File</Divider>
+                <Divider sx={{ my: 2 }}>OR</Divider>
                 <UploadBox>
                   <input
                     type="file"
-                    accept="video/mp4,video/webm,video/mov"
+                    accept="video/*"
                     style={{ display: 'none' }}
                     id="slider-video-upload"
                     onChange={(e) => handleImageUpload(e.target.files[0])}
-                    disabled={uploading}
                   />
-                  <label htmlFor="slider-video-upload" style={{ cursor: uploading ? 'not-allowed' : 'pointer' }}>
+                  <label htmlFor="slider-video-upload">
                     {uploading ? (
                       <>
                         <CircularProgress size={48} sx={{ mb: 1 }} />
                         <Typography>Processing video...</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          This may take a moment for large files
+                        </Typography>
                       </>
                     ) : (
                       <>
                         <VideoLibrary sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
                         <Typography variant="h6" fontWeight="600" gutterBottom>
-                          Click to Upload Video
+                          Upload Video File
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          MP4, WebM, or MOV • Max 50MB
+                          MP4, WebM, or MOV
                         </Typography>
                         <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
-                          For larger videos, use YouTube/Vimeo URL above
+                          Max 50MB • For larger videos, use YouTube/Vimeo
                         </Typography>
                       </>
                     )}
@@ -412,8 +341,8 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
             label="Slide Title (Optional)"
             value={formData.title}
             onChange={(e) => handleChange('title', e.target.value)}
-            placeholder="e.g., Welcome to Our School"
-            helperText="Leave blank if you don't want text on the slide"
+            placeholder="e.g., Our Beautiful Campus"
+            helperText="Optional - Leave blank if not needed"
           />
 
           {/* Description - Optional */}
@@ -424,8 +353,8 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
             label="Slide Description (Optional)"
             value={formData.description}
             onChange={(e) => handleChange('description', e.target.value)}
-            placeholder="e.g., Excellence in Education Since 1995"
-            helperText="Leave blank if you don't want a description"
+            placeholder="e.g., State-of-the-art facilities designed for modern learning"
+            helperText="Optional - Leave blank if not needed"
           />
 
           {/* Active Toggle */}
@@ -479,43 +408,36 @@ const SliderDialog = ({ open, onClose, onSave, editingSlider }) => {
                     <Typography variant="h5">🎥 Video Slide</Typography>
                   </Box>
                 )}
-                {(formData.title || formData.description) && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
-                      color: 'white',
-                      p: 2
-                    }}
-                  >
-                    {formData.title && (
-                      <Typography variant="h6" fontWeight="bold">
-                        {formData.title}
-                      </Typography>
-                    )}
-                    {formData.description && (
-                      <Typography variant="body2">
-                        {formData.description}
-                      </Typography>
-                    )}
-                  </Box>
-                )}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+                    color: 'white',
+                    p: 2
+                  }}
+                >
+                  <Typography variant="h6" fontWeight="bold">
+                    {formData.title || 'Slide Title'}
+                  </Typography>
+                  <Typography variant="body2">
+                    {formData.description || 'Slide description'}
+                  </Typography>
+                </Box>
               </Box>
             </Box>
           )}
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={uploading}>
-          Cancel
-        </Button>
+        <Button onClick={onClose} disabled={uploading}>Cancel</Button>
         <Button
           onClick={handleSubmit}
           variant="contained"
           disabled={!formData.url || uploading}
+          startIcon={uploading ? <CircularProgress size={20} /> : null}
         >
           {uploading ? 'Processing...' : (editingSlider ? 'Update Slide' : 'Add Slide')}
         </Button>
