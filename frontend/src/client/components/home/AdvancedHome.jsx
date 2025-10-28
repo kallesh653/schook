@@ -53,30 +53,71 @@ const pulse = keyframes`
   50% { transform: scale(1.05); }
 `;
 
-// Slider Components - Properly centered and fits in single page
+const slideInFromLeft = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+`;
+
+const slideInFromRight = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+`;
+
+const zoomIn = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+`;
+
+const shimmer = keyframes`
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+`;
+
+// Slider Components - Beautiful large slider with animations
 const SliderContainer = styled(Box)({
   position: 'relative',
   width: '100%',
-  height: '450px', // Optimized for single page view
-  maxHeight: '450px',
-  minHeight: '350px',
+  height: '650px', // Much bigger for impressive display
+  maxHeight: '650px',
+  minHeight: '500px',
   overflow: 'hidden',
-  marginBottom: '40px',
-  borderRadius: '0',
-  boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+  marginBottom: '50px',
+  borderRadius: '20px',
+  boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
   '@media (max-width: 1200px)': {
-    height: '400px',
-    maxHeight: '400px'
+    height: '550px',
+    maxHeight: '550px'
   },
   '@media (max-width: 768px)': {
-    height: '350px',
-    maxHeight: '350px',
-    minHeight: '300px'
+    height: '450px',
+    maxHeight: '450px',
+    minHeight: '400px',
+    borderRadius: '15px'
   },
   '@media (max-width: 600px)': {
-    height: '300px',
-    maxHeight: '300px',
-    minHeight: '250px'
+    height: '400px',
+    maxHeight: '400px',
+    minHeight: '350px',
+    borderRadius: '10px'
   }
 });
 
@@ -87,9 +128,12 @@ const SlideWrapper = styled(Box)({
   width: '100%',
   height: '100%',
   opacity: 0,
-  transition: 'opacity 1.2s ease-in-out',
+  transform: 'scale(1.1)',
+  transition: 'opacity 1.5s ease-in-out, transform 1.5s ease-in-out',
   '&.active': {
-    opacity: 1
+    opacity: 1,
+    transform: 'scale(1)',
+    animation: `${zoomIn} 1.5s ease-out`
   }
 });
 
@@ -807,6 +851,120 @@ const AdvancedHome = () => {
                 </Typography>
               </Card>
             </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Achievements & Awards Section */}
+      <Box sx={{ py: 12, background: 'white' }}>
+        <Container maxWidth="lg">
+          <SectionTitle variant="h2">
+            Our Achievements
+          </SectionTitle>
+          <Typography variant="h6" textAlign="center" color="text.secondary" sx={{ mb: 8, fontSize: '1.3rem' }}>
+            Recognitions that make us proud
+          </Typography>
+          <Grid container spacing={4}>
+            {[
+              { icon: <TrophyIcon sx={{ fontSize: 70 }} />, title: 'National Excellence Award', year: '2024', desc: 'Best Educational Institution' },
+              { icon: <StarIcon sx={{ fontSize: 70 }} />, title: 'Top Rated School', year: '2023-2024', desc: '5-Star Rating by Education Board' },
+              { icon: <TrendingUpIcon sx={{ fontSize: 70 }} />, title: '100% Results', year: '10 Years', desc: 'Consistent Academic Excellence' },
+              { icon: <SportsIcon sx={{ fontSize: 70 }} />, title: 'Sports Champions', year: '2024', desc: 'State Level Championship Winners' }
+            ].map((achievement, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index}>
+                <Card sx={{
+                  p: 4,
+                  textAlign: 'center',
+                  height: '100%',
+                  background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+                  transition: 'all 0.4s ease',
+                  animation: `${fadeIn} 0.8s ease ${index * 0.2}s both`,
+                  '&:hover': {
+                    transform: 'translateY(-15px) scale(1.05)',
+                    boxShadow: '0 20px 50px rgba(102, 126, 234, 0.3)'
+                  }
+                }}>
+                  <Box sx={{ color: '#667eea', mb: 2, animation: `${float} 3s ease-in-out infinite` }}>
+                    {achievement.icon}
+                  </Box>
+                  <Typography variant="h5" fontWeight="bold" sx={{ mb: 1 }}>
+                    {achievement.title}
+                  </Typography>
+                  <Typography variant="h6" sx={{ color: '#667eea', mb: 2, fontWeight: 'bold' }}>
+                    {achievement.year}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {achievement.desc}
+                  </Typography>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* News & Events Section */}
+      <Box sx={{ py: 12, background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
+        <Container maxWidth="lg">
+          <SectionTitle variant="h2">
+            Latest News & Events
+          </SectionTitle>
+          <Typography variant="h6" textAlign="center" color="text.secondary" sx={{ mb: 8, fontSize: '1.3rem' }}>
+            Stay updated with our school community
+          </Typography>
+          <Grid container spacing={4}>
+            {[
+              {
+                icon: <NewsIcon sx={{ fontSize: 50 }} />,
+                title: 'Annual Science Exhibition',
+                date: 'December 15, 2024',
+                desc: 'Students showcase innovative projects and experiments. Open to all parents and visitors.'
+              },
+              {
+                icon: <CalendarIcon sx={{ fontSize: 50 }} />,
+                title: 'Sports Day Celebration',
+                date: 'January 10, 2025',
+                desc: 'Inter-house sports competition with various athletic events and games.'
+              },
+              {
+                icon: <BookIcon sx={{ fontSize: 50 }} />,
+                title: 'Parent-Teacher Meeting',
+                date: 'December 20, 2024',
+                desc: 'Discuss student progress and academic performance with teachers.'
+              }
+            ].map((event, index) => (
+              <Grid item xs={12} md={4} key={index}>
+                <Card sx={{
+                  p: 4,
+                  height: '100%',
+                  background: 'white',
+                  transition: 'all 0.3s ease',
+                  animation: `${slideInFromLeft} 0.8s ease ${index * 0.2}s both`,
+                  '&:hover': {
+                    transform: 'translateY(-10px)',
+                    boxShadow: '0 15px 40px rgba(0,0,0,0.15)'
+                  }
+                }}>
+                  <Box sx={{
+                    color: '#667eea',
+                    mb: 3,
+                    display: 'flex',
+                    justifyContent: 'center'
+                  }}>
+                    {event.icon}
+                  </Box>
+                  <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>
+                    {event.title}
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ color: '#667eea', mb: 2, fontWeight: 'bold' }}>
+                    {event.date}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
+                    {event.desc}
+                  </Typography>
+                </Card>
+              </Grid>
+            ))}
           </Grid>
         </Container>
       </Box>
