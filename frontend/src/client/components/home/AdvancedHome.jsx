@@ -23,7 +23,8 @@ import {
   CalendarToday as CalendarIcon,
   Phone as PhoneIcon,
   Email as EmailIcon,
-  LocationOn as LocationIcon
+  LocationOn as LocationIcon,
+  WhatsApp as WhatsAppIcon
 } from '@mui/icons-material';
 
 // Animations
@@ -265,6 +266,30 @@ const StudentLoginButton = styled(Fab)({
     right: '20px',
     padding: '20px 35px',
     fontSize: '1rem'
+  }
+});
+
+const WhatsAppButton = styled(Fab)({
+  position: 'fixed',
+  bottom: '130px',
+  right: '40px',
+  background: '#25D366',
+  color: 'white',
+  width: '70px',
+  height: '70px',
+  boxShadow: '0 10px 40px rgba(37, 211, 102, 0.5)',
+  zIndex: 9998,
+  animation: `${pulse} 2s ease-in-out infinite`,
+  '&:hover': {
+    background: '#128C7E',
+    transform: 'scale(1.15)',
+    boxShadow: '0 15px 50px rgba(37, 211, 102, 0.7)'
+  },
+  '@media (max-width: 600px)': {
+    bottom: '100px',
+    right: '20px',
+    width: '60px',
+    height: '60px'
   }
 });
 
@@ -1010,6 +1035,16 @@ const AdvancedHome = () => {
           </Button>
         </Container>
       </Box>
+
+      {/* Floating WhatsApp Button */}
+      {homeData?.socialMedia?.whatsapp && (
+        <WhatsAppButton
+          onClick={() => window.open(`https://wa.me/${homeData.socialMedia.whatsapp.replace(/[^0-9]/g, '')}`, '_blank')}
+          aria-label="Contact us on WhatsApp"
+        >
+          <WhatsAppIcon sx={{ fontSize: 40 }} />
+        </WhatsAppButton>
+      )}
 
       {/* Floating Student Login Button */}
       <StudentLoginButton

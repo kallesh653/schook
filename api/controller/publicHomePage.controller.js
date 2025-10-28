@@ -469,6 +469,69 @@ exports.updateSocialMedia = async (req, res) => {
   }
 };
 
+// Update Achievements section
+exports.updateAchievements = async (req, res) => {
+  try {
+    const { showSection, sectionTitle, items } = req.body;
+
+    let publicPage = await PublicHomePage.findOne({ isSingleton: true });
+
+    if (!publicPage) {
+      publicPage = await PublicHomePage.create({ isSingleton: true });
+    }
+
+    if (showSection !== undefined) publicPage.achievements.showSection = showSection;
+    if (sectionTitle) publicPage.achievements.sectionTitle = sectionTitle;
+    if (items) publicPage.achievements.items = items;
+
+    await publicPage.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Achievements section updated successfully',
+      data: publicPage
+    });
+  } catch (error) {
+    console.error('Error updating achievements:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating achievements section'
+    });
+  }
+};
+
+// Update Contact Information
+exports.updateContact = async (req, res) => {
+  try {
+    const { showSection, phone, email, address } = req.body;
+
+    let publicPage = await PublicHomePage.findOne({ isSingleton: true });
+
+    if (!publicPage) {
+      publicPage = await PublicHomePage.create({ isSingleton: true });
+    }
+
+    if (showSection !== undefined) publicPage.contact.showSection = showSection;
+    if (phone !== undefined) publicPage.contact.phone = phone;
+    if (email !== undefined) publicPage.contact.email = email;
+    if (address !== undefined) publicPage.contact.address = address;
+
+    await publicPage.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Contact information updated successfully',
+      data: publicPage
+    });
+  } catch (error) {
+    console.error('Error updating contact info:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating contact information'
+    });
+  }
+};
+
 // File upload handler for public home page
 exports.uploadFile = async (req, res) => {
   const form = formidableLib.formidable({

@@ -19,6 +19,8 @@ router.patch('/campus', auth(['SCHOOL']), publicHomePageController.updateCampus)
 router.patch('/testimonials', auth(['SCHOOL']), publicHomePageController.updateTestimonials);
 router.patch('/about', auth(['SCHOOL']), publicHomePageController.updateAbout);
 router.patch('/social-media', auth(['SCHOOL']), publicHomePageController.updateSocialMedia);
+router.patch('/achievements', auth(['SCHOOL']), publicHomePageController.updateAchievements);
+router.patch('/contact', auth(['SCHOOL']), publicHomePageController.updateContact);
 
 // File upload (requires SCHOOL authentication)
 router.post('/upload', auth(['SCHOOL']), publicHomePageController.uploadFile);

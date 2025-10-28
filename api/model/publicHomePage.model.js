@@ -177,6 +177,44 @@ const publicHomePageSchema = new mongoose.Schema({
     }]
   },
 
+  // Achievements & Awards Section
+  achievements: {
+    showSection: {
+      type: Boolean,
+      default: true
+    },
+    sectionTitle: {
+      type: String,
+      default: 'Our Achievements'
+    },
+    items: [{
+      title: String,
+      year: String,
+      description: String,
+      icon: String
+    }]
+  },
+
+  // Contact Information Section
+  contact: {
+    showSection: {
+      type: Boolean,
+      default: true
+    },
+    phone: {
+      type: String,
+      default: '+1 (555) 123-4567'
+    },
+    email: {
+      type: String,
+      default: 'info@school.com'
+    },
+    address: {
+      type: String,
+      default: '123 School St, City, State'
+    }
+  },
+
   // Theme Settings
   theme: {
     primaryColor: {

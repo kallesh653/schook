@@ -48,7 +48,9 @@ import {
   TrendingUp,
   Newspaper,
   CalendarToday,
-  Photo as PhotoIcon
+  Photo as PhotoIcon,
+  Phone,
+  WhatsApp
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import axios from 'axios';
@@ -132,6 +134,12 @@ const CompleteWebsiteBuilder = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [campusImages, setCampusImages] = useState([]);
+  const [achievements, setAchievements] = useState([]);
+  const [newsEvents, setNewsEvents] = useState([]);
+  const [contactPhone, setContactPhone] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactAddress, setContactAddress] = useState('');
+  const [whatsappNumber, setWhatsappNumber] = useState('');
 
   // Dialogs
   const [openSliderDialog, setOpenSliderDialog] = useState(false);
@@ -164,6 +172,12 @@ const CompleteWebsiteBuilder = () => {
         setTestimonials(data.testimonials?.items || []);
         setPrograms(data.programs?.items || []);
         setCampusImages(data.campus?.images || []);
+        setAchievements(data.achievements?.items || []);
+        setNewsEvents(data.announcements?.items || []);
+        setContactPhone(data.contact?.phone || '');
+        setContactEmail(data.contact?.email || '');
+        setContactAddress(data.contact?.address || '');
+        setWhatsappNumber(data.socialMedia?.whatsapp || '');
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -451,6 +465,109 @@ const CompleteWebsiteBuilder = () => {
     }
   };
 
+  // ===== ACHIEVEMENTS =====
+  const handleSaveAchievements = async () => {
+    const token = getToken();
+    if (!token) return;
+
+    setSaving(true);
+    try {
+      await axios.patch(`${baseUrl}/public-home/achievements`, {
+        showSection: true,
+        items: achievements
+      }, { headers: { Authorization: `Bearer ${token}` } });
+
+      setSnackbar({ open: true, message: 'Achievements saved successfully!', severity: 'success' });
+      fetchWebsiteData();
+    } catch (error) {
+      console.error('Save achievements error:', error);
+      const errorMsg = error.response?.data?.message || error.message || 'Error saving achievements';
+      setSnackbar({ open: true, message: errorMsg, severity: 'error' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleAddAchievement = () => {
+    setAchievements([...achievements, { title: '', year: '', description: '', icon: 'trophy' }]);
+  };
+
+  const handleUpdateAchievement = (index, field, value) => {
+    const updated = [...achievements];
+    updated[index] = { ...updated[index], [field]: value };
+    setAchievements(updated);
+  };
+
+  const handleDeleteAchievement = (index) => {
+    setAchievements(achievements.filter((_, i) => i !== index));
+  };
+
+  // ===== NEWS & EVENTS =====
+  const handleSaveNewsEvents = async () => {
+    const token = getToken();
+    if (!token) return;
+
+    setSaving(true);
+    try {
+      await axios.patch(`${baseUrl}/public-home/announcements`, {
+        showSection: true,
+        items: newsEvents
+      }, { headers: { Authorization: `Bearer ${token}` } });
+
+      setSnackbar({ open: true, message: 'News & Events saved successfully!', severity: 'success' });
+      fetchWebsiteData();
+    } catch (error) {
+      console.error('Save news error:', error);
+      const errorMsg = error.response?.data?.message || error.message || 'Error saving news';
+      setSnackbar({ open: true, message: errorMsg, severity: 'error' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleAddNewsEvent = () => {
+    setNewsEvents([...newsEvents, { title: '', date: new Date().toISOString().split('T')[0], description: '' }]);
+  };
+
+  const handleUpdateNewsEvent = (index, field, value) => {
+    const updated = [...newsEvents];
+    updated[index] = { ...updated[index], [field]: value };
+    setNewsEvents(updated);
+  };
+
+  const handleDeleteNewsEvent = (index) => {
+    setNewsEvents(newsEvents.filter((_, i) => i !== index));
+  };
+
+  // ===== CONTACT & WHATSAPP =====
+  const handleSaveContact = async () => {
+    const token = getToken();
+    if (!token) return;
+
+    setSaving(true);
+    try {
+      await axios.patch(`${baseUrl}/public-home/contact`, {
+        showSection: true,
+        phone: contactPhone,
+        email: contactEmail,
+        address: contactAddress
+      }, { headers: { Authorization: `Bearer ${token}` } });
+
+      await axios.patch(`${baseUrl}/public-home/social-media`, {
+        whatsapp: whatsappNumber
+      }, { headers: { Authorization: `Bearer ${token}` } });
+
+      setSnackbar({ open: true, message: 'Contact info & WhatsApp saved successfully!', severity: 'success' });
+      fetchWebsiteData();
+    } catch (error) {
+      console.error('Save contact error:', error);
+      const errorMsg = error.response?.data?.message || error.message || 'Error saving contact';
+      setSnackbar({ open: true, message: errorMsg, severity: 'error' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
@@ -485,6 +602,9 @@ const CompleteWebsiteBuilder = () => {
             <Tab icon={<FormatQuote />} label="Testimonials" />
             <Tab icon={<MenuBook />} label="Programs" />
             <Tab icon={<PhotoIcon />} label="Campus Gallery" />
+            <Tab icon={<EmojiEvents />} label="Achievements" />
+            <Tab icon={<Newspaper />} label="News & Events" />
+            <Tab icon={<Phone />} label="Contact & WhatsApp" />
             <Tab icon={<Preview />} label="Preview" />
           </StyledTabs>
 
@@ -1063,8 +1183,263 @@ const CompleteWebsiteBuilder = () => {
             </Button>
           </TabPanel>
 
-          {/* TAB 7: Preview */}
+          {/* TAB 7: Achievements */}
           <TabPanel value={tabValue} index={7}>
+            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="h4" fontWeight="bold">
+                Achievements & Awards
+              </Typography>
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={handleAddAchievement}
+                sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+              >
+                Add Achievement
+              </Button>
+            </Box>
+
+            <Alert severity="info" sx={{ mb: 3 }}>
+              <Typography variant="body2">
+                Showcase your schools awards and achievements. Recommended: 4 achievements.
+              </Typography>
+            </Alert>
+
+            <Grid container spacing={3}>
+              {achievements.map((achievement, index) => (
+                <Grid item xs={12} md={6} key={index}>
+                  <Card sx={{ p: 3, position: 'relative' }}>
+                    <IconButton
+                      size="small"
+                      sx={{ position: 'absolute', top: 8, right: 8 }}
+                      onClick={() => handleDeleteAchievement(index)}
+                    >
+                      <Delete color="error" />
+                    </IconButton>
+                    <TextField
+                      fullWidth
+                      label="Achievement Title"
+                      value={achievement.title}
+                      onChange={(e) => handleUpdateAchievement(index, 'title', e.target.value)}
+                      sx={{ mb: 2 }}
+                    />
+                    <TextField
+                      fullWidth
+                      label="Year"
+                      value={achievement.year}
+                      onChange={(e) => handleUpdateAchievement(index, 'year', e.target.value)}
+                      sx={{ mb: 2 }}
+                      placeholder="e.g., 2024"
+                    />
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={2}
+                      label="Description"
+                      value={achievement.description}
+                      onChange={(e) => handleUpdateAchievement(index, 'description', e.target.value)}
+                    />
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+
+            <Button
+              variant="contained"
+              size="large"
+              fullWidth
+              startIcon={<Save />}
+              onClick={handleSaveAchievements}
+              disabled={saving}
+              sx={{
+                mt: 4,
+                py: 2,
+                fontSize: '1.2rem',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+              }}
+            >
+              {saving ? 'Saving...' : 'Save Achievements'}
+            </Button>
+          </TabPanel>
+
+          {/* TAB 8: News & Events */}
+          <TabPanel value={tabValue} index={8}>
+            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="h4" fontWeight="bold">
+                Latest News & Events
+              </Typography>
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={handleAddNewsEvent}
+                sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+              >
+                Add News/Event
+              </Button>
+            </Box>
+
+            <Alert severity="info" sx={{ mb: 3 }}>
+              <Typography variant="body2">
+                Keep your community updated with news and upcoming events. Recommended: 3 events.
+              </Typography>
+            </Alert>
+
+            <Grid container spacing={3}>
+              {newsEvents.map((event, index) => (
+                <Grid item xs={12} key={index}>
+                  <Card sx={{ p: 3, position: 'relative' }}>
+                    <IconButton
+                      size="small"
+                      sx={{ position: 'absolute', top: 8, right: 8 }}
+                      onClick={() => handleDeleteNewsEvent(index)}
+                    >
+                      <Delete color="error" />
+                    </IconButton>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={8}>
+                        <TextField
+                          fullWidth
+                          label="Event Title"
+                          value={event.title}
+                          onChange={(e) => handleUpdateNewsEvent(index, 'title', e.target.value)}
+                          sx={{ mb: 2 }}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <TextField
+                          fullWidth
+                          label="Date"
+                          type="date"
+                          value={event.date}
+                          onChange={(e) => handleUpdateNewsEvent(index, 'date', e.target.value)}
+                          InputLabelProps={{ shrink: true }}
+                          sx={{ mb: 2 }}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          multiline
+                          rows={3}
+                          label="Description"
+                          value={event.description}
+                          onChange={(e) => handleUpdateNewsEvent(index, 'description', e.target.value)}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+
+            <Button
+              variant="contained"
+              size="large"
+              fullWidth
+              startIcon={<Save />}
+              onClick={handleSaveNewsEvents}
+              disabled={saving}
+              sx={{
+                mt: 4,
+                py: 2,
+                fontSize: '1.2rem',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+              }}
+            >
+              {saving ? 'Saving...' : 'Save News & Events'}
+            </Button>
+          </TabPanel>
+
+          {/* TAB 9: Contact & WhatsApp */}
+          <TabPanel value={tabValue} index={9}>
+            <Typography variant="h4" gutterBottom fontWeight="bold">
+              Contact Information & WhatsApp
+            </Typography>
+            <Alert severity="info" sx={{ mb: 3 }}>
+              <Typography variant="body2">
+                Set your contact details and WhatsApp number for easy communication.
+              </Typography>
+            </Alert>
+
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <Card sx={{ p: 3 }}>
+                  <Typography variant="h6" gutterBottom fontWeight="bold">
+                    Contact Details
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    label="Phone Number"
+                    value={contactPhone}
+                    onChange={(e) => setContactPhone(e.target.value)}
+                    sx={{ mb: 3 }}
+                    placeholder="+1 (555) 123-4567"
+                  />
+                  <TextField
+                    fullWidth
+                    label="Email Address"
+                    value={contactEmail}
+                    onChange={(e) => setContactEmail(e.target.value)}
+                    sx={{ mb: 3 }}
+                    placeholder="info@school.com"
+                  />
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={3}
+                    label="Physical Address"
+                    value={contactAddress}
+                    onChange={(e) => setContactAddress(e.target.value)}
+                    placeholder="123 School St, City, State"
+                  />
+                </Card>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <Card sx={{ p: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <WhatsApp sx={{ fontSize: 40, color: '#25D366', mr: 2 }} />
+                    <Typography variant="h6" fontWeight="bold">
+                      WhatsApp Integration
+                    </Typography>
+                  </Box>
+                  <TextField
+                    fullWidth
+                    label="WhatsApp Number"
+                    value={whatsappNumber}
+                    onChange={(e) => setWhatsappNumber(e.target.value)}
+                    helperText="Include country code (e.g., +919876543210)"
+                    placeholder="+919876543210"
+                  />
+                  <Alert severity="success" sx={{ mt: 3 }}>
+                    <Typography variant="body2">
+                      A floating WhatsApp button will appear on your homepage for easy contact!
+                    </Typography>
+                  </Alert>
+                </Card>
+              </Grid>
+            </Grid>
+
+            <Button
+              variant="contained"
+              size="large"
+              fullWidth
+              startIcon={<Save />}
+              onClick={handleSaveContact}
+              disabled={saving}
+              sx={{
+                mt: 4,
+                py: 2,
+                fontSize: '1.2rem',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+              }}
+            >
+              {saving ? 'Saving...' : 'Save Contact & WhatsApp'}
+            </Button>
+          </TabPanel>
+
+          {/* TAB 10: Preview */}
+          <TabPanel value={tabValue} index={10}>
             <Box sx={{ textAlign: 'center', py: 6 }}>
               <Preview sx={{ fontSize: 100, color: '#667eea', mb: 3 }} />
               <Typography variant="h3" gutterBottom fontWeight="bold">
