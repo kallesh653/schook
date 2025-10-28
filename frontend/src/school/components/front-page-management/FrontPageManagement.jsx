@@ -228,24 +228,41 @@ const FrontPageManagement = () => {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      console.log('Fetching front page data with headers:', headers);
-      const response = await axios.get(`${baseUrl}/front-page/data`, { headers });
-      
+      console.log('Fetching public home page data with headers:', headers);
+      const response = await axios.get(`${baseUrl}/public-home/data`, { headers });
+
       if (response.data.success) {
         const data = response.data.data;
-        setSchoolInfo(data.schoolInfo || {});
-        setMedia(data.media || {});
-        setNews(data.news || []);
-        setPrograms(data.programs || []);
+
+        // Map data from public-home API structure
+        setSchoolInfo({
+          name: data.heroSection?.title || '',
+          tagline: data.heroSection?.subtitle || '',
+          description: data.heroSection?.description || '',
+          established: '1995',
+          students: data.statistics?.stats?.find(s => s.label === 'Students')?.value || '',
+          teachers: data.statistics?.stats?.find(s => s.label === 'Teachers')?.value || '',
+          achievements: data.statistics?.stats?.find(s => s.label === 'Success Rate')?.value || ''
+        });
+
+        setMedia({
+          ...media,
+          sliderImages: data.slider?.slides || []
+        });
+
+        setNews([]);
+        setPrograms([]);
         setTheme(data.theme || {});
         setHeaderSettings(data.headerSettings || {});
+
+        console.log('Loaded slider data:', data.slider?.slides);
       }
     } catch (error) {
       console.error('Error fetching front page data:', error);
-      setSnackbar({ 
-        open: true, 
-        message: 'Error loading front page data', 
-        severity: 'error' 
+      setSnackbar({
+        open: true,
+        message: 'Error loading front page data',
+        severity: 'error'
       });
     } finally {
       setLoading(false);
@@ -453,13 +470,17 @@ const FrontPageManagement = () => {
     try {
       const updatedSlides = media.sliderImages.filter(slide => slide.id !== slideId);
       setMedia(prev => ({ ...prev, sliderImages: updatedSlides }));
-      
+
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      await axios.patch(`${baseUrl}/front-page/media`, { sliderImages: updatedSlides }, {
+      await axios.patch(`${baseUrl}/public-home/slider`, {
+        showSlider: true,
+        slides: updatedSlides
+      }, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
-      
+
       setSnackbar({ open: true, message: 'Slide deleted successfully!', severity: 'success' });
+      triggerFrontPageRefresh();
     } catch (error) {
       console.error('Error deleting slide:', error);
       setSnackbar({ open: true, message: 'Error deleting slide', severity: 'error' });
@@ -468,26 +489,40 @@ const FrontPageManagement = () => {
 
   const handleSaveSlide = async (slideData) => {
     try {
+      console.log('FrontPageManagement - Saving slide data:', slideData);
+
       let updatedSlides;
       if (editingSlider) {
-        updatedSlides = media.sliderImages.map(slide => 
+        updatedSlides = (media.sliderImages || []).map(slide =>
           slide.id === editingSlider.id ? slideData : slide
         );
       } else {
         updatedSlides = [...(media.sliderImages || []), slideData];
       }
-      
+
+      console.log('FrontPageManagement - Updated slides array:', updatedSlides);
       setMedia(prev => ({ ...prev, sliderImages: updatedSlides }));
-      
+
+      // Save to the PUBLIC-HOME API endpoint
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      await axios.patch(`${baseUrl}/front-page/media`, { sliderImages: updatedSlides }, {
+      const response = await axios.patch(`${baseUrl}/public-home/slider`, {
+        showSlider: true,
+        slides: updatedSlides
+      }, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
-      
+
+      console.log('FrontPageManagement - API response:', response.data);
       setSnackbar({ open: true, message: 'Slide saved successfully!', severity: 'success' });
+      setOpenSliderDialog(false);
+      triggerFrontPageRefresh();
+
+      // Refresh data to get latest from API
+      fetchFrontPageData();
     } catch (error) {
       console.error('Error saving slide:', error);
-      setSnackbar({ open: true, message: 'Error saving slide', severity: 'error' });
+      console.error('Error details:', error.response?.data);
+      setSnackbar({ open: true, message: error.response?.data?.message || 'Error saving slide', severity: 'error' });
     }
   };
 

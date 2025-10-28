@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Box, Button, Card, CardContent, Grid, Fab } from '@mui/material';
+import { Container, Typography, Box, Button, Card, CardContent, Grid, Fab, IconButton } from '@mui/material';
 import { styled, keyframes } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -8,7 +8,9 @@ import {
   School as SchoolIcon,
   Person as PersonIcon,
   Star as StarIcon,
-  TrendingUp as TrendingUpIcon
+  TrendingUp as TrendingUpIcon,
+  ArrowBackIos,
+  ArrowForwardIos
 } from '@mui/icons-material';
 
 // Animations
@@ -20,6 +22,17 @@ const fadeIn = keyframes`
 const float = keyframes`
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
+`;
+
+const kenBurns = keyframes`
+  0% { transform: scale(1) translateX(0) translateY(0); }
+  50% { transform: scale(1.1) translateX(-2%) translateY(-2%); }
+  100% { transform: scale(1.2) translateX(-4%) translateY(-4%); }
+`;
+
+const slideIn = keyframes`
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
 `;
 
 // Styled Components
@@ -97,10 +110,114 @@ const FeatureCard = styled(Card)({
   }
 });
 
+// Slider Components
+const SliderContainer = styled(Box)({
+  position: 'relative',
+  width: '100%',
+  height: '80vh',
+  minHeight: '600px',
+  maxHeight: '900px',
+  overflow: 'hidden',
+  '@media (max-width: 600px)': {
+    height: '60vh',
+    minHeight: '400px'
+  }
+});
+
+const SlideWrapper = styled(Box)({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  opacity: 0,
+  transition: 'opacity 1s ease-in-out',
+  '&.active': {
+    opacity: 1
+  }
+});
+
+const SlideImage = styled('div')(({ imageUrl }) => ({
+  width: '100%',
+  height: '100%',
+  backgroundImage: `url(${imageUrl})`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  animation: `${kenBurns} 15s ease-out infinite alternate`,
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%)'
+  }
+}));
+
+const SlideContent = styled(Box)({
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  textAlign: 'center',
+  color: 'white',
+  zIndex: 2,
+  width: '90%',
+  maxWidth: '1000px',
+  padding: '20px'
+});
+
+const SliderNav = styled(IconButton)(({ direction }) => ({
+  position: 'absolute',
+  top: '50%',
+  [direction]: '20px',
+  transform: 'translateY(-50%)',
+  zIndex: 10,
+  background: 'rgba(255, 255, 255, 0.2)',
+  backdropFilter: 'blur(10px)',
+  color: 'white',
+  width: '60px',
+  height: '60px',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    background: 'rgba(255, 255, 255, 0.3)',
+    transform: 'translateY(-50%) scale(1.1)'
+  },
+  '@media (max-width: 600px)': {
+    width: '45px',
+    height: '45px',
+    [direction]: '10px'
+  }
+}));
+
+const SliderDots = styled(Box)({
+  position: 'absolute',
+  bottom: '30px',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  display: 'flex',
+  gap: '12px',
+  zIndex: 10
+});
+
+const Dot = styled('div')(({ active }) => ({
+  width: active ? '40px' : '12px',
+  height: '12px',
+  borderRadius: '6px',
+  background: active ? 'white' : 'rgba(255, 255, 255, 0.5)',
+  cursor: 'pointer',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    background: 'rgba(255, 255, 255, 0.8)'
+  }
+}));
+
 const SimpleHome = () => {
   const navigate = useNavigate();
   const [homeData, setHomeData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     fetchHomeData();
@@ -126,88 +243,183 @@ const SimpleHome = () => {
     { label: 'Success Rate', value: '95%', icon: 'success' }
   ];
 
+  // Slider data - get active slides from API or use defaults
+  const slides = homeData?.slider?.slides?.filter(slide => slide.active) || [
+    {
+      id: '1',
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1920&h=1080&fit=crop',
+      title: 'Welcome to GenTime',
+      description: 'Modern School Management System'
+    },
+    {
+      id: '2',
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1920&h=1080&fit=crop',
+      title: 'Excellence in Education',
+      description: 'Empowering Students for Tomorrow'
+    },
+    {
+      id: '3',
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=1920&h=1080&fit=crop',
+      title: 'State-of-the-Art Facilities',
+      description: 'Learning Environments That Inspire'
+    }
+  ];
+
+  // Auto-advance slider every 5 seconds
+  useEffect(() => {
+    if (slides.length > 1) {
+      const timer = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % slides.length);
+      }, 5000);
+      return () => clearInterval(timer);
+    }
+  }, [slides.length]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const goToSlide = (index) => {
+    setCurrentSlide(index);
+  };
+
   return (
     <Box>
-      {/* Hero Section */}
-      <HeroSection>
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-          <Box sx={{ textAlign: 'center', color: 'white' }}>
-            <Typography
-              variant="h1"
-              sx={{
-                fontSize: { xs: '2.5rem', md: '4rem' },
-                fontWeight: 900,
-                mb: 3,
-                textShadow: '0 4px 20px rgba(0,0,0,0.2)',
-                animation: `${fadeIn} 1s ease`
-              }}
-            >
-              Welcome to GenTime
-            </Typography>
-            <Typography
-              variant="h4"
-              sx={{
-                fontSize: { xs: '1.2rem', md: '1.8rem' },
-                mb: 5,
-                opacity: 0.95,
-                fontWeight: 400,
-                animation: `${fadeIn} 1.2s ease`
-              }}
-            >
-              Modern School Management System
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Button
-                variant="contained"
-                size="large"
-                onClick={() => navigate('/register')}
+      {/* Full-Width Hero Slider */}
+      <SliderContainer>
+        {slides.map((slide, index) => (
+          <SlideWrapper key={slide.id} className={index === currentSlide ? 'active' : ''}>
+            <SlideImage imageUrl={slide.url} />
+            <SlideContent>
+              {slide.title && (
+                <Typography
+                  variant="h1"
+                  sx={{
+                    fontSize: { xs: '2.5rem', md: '5rem' },
+                    fontWeight: 900,
+                    mb: 3,
+                    textShadow: '0 4px 30px rgba(0,0,0,0.5)',
+                    animation: `${slideIn} 0.8s ease`,
+                    letterSpacing: '2px'
+                  }}
+                >
+                  {slide.title}
+                </Typography>
+              )}
+              {slide.description && (
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontSize: { xs: '1.2rem', md: '2rem' },
+                    mb: 5,
+                    fontWeight: 300,
+                    textShadow: '0 2px 20px rgba(0,0,0,0.5)',
+                    animation: `${slideIn} 1s ease`,
+                    animationDelay: '0.2s',
+                    opacity: 0,
+                    animationFillMode: 'forwards'
+                  }}
+                >
+                  {slide.description}
+                </Typography>
+              )}
+              <Box
                 sx={{
-                  background: 'white',
-                  color: '#667eea',
-                  px: 5,
-                  py: 2,
-                  fontSize: '1.1rem',
-                  fontWeight: 'bold',
-                  borderRadius: '30px',
-                  textTransform: 'none',
-                  animation: `${fadeIn} 1.4s ease`,
-                  '&:hover': {
-                    background: 'rgba(255,255,255,0.9)',
-                    transform: 'translateY(-3px)',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
-                  }
+                  display: 'flex',
+                  gap: 2,
+                  justifyContent: 'center',
+                  flexWrap: 'wrap',
+                  animation: `${slideIn} 1.2s ease`,
+                  animationDelay: '0.4s',
+                  opacity: 0,
+                  animationFillMode: 'forwards'
                 }}
               >
-                Get Started
-              </Button>
-              <Button
-                variant="outlined"
-                size="large"
-                onClick={() => navigate('/login')}
-                sx={{
-                  color: 'white',
-                  borderColor: 'white',
-                  px: 5,
-                  py: 2,
-                  fontSize: '1.1rem',
-                  fontWeight: 'bold',
-                  borderRadius: '30px',
-                  textTransform: 'none',
-                  borderWidth: '2px',
-                  animation: `${fadeIn} 1.6s ease`,
-                  '&:hover': {
-                    borderWidth: '2px',
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={() => navigate('/register')}
+                  sx={{
+                    background: 'white',
+                    color: '#667eea',
+                    px: 6,
+                    py: 2.5,
+                    fontSize: '1.2rem',
+                    fontWeight: 'bold',
+                    borderRadius: '50px',
+                    textTransform: 'none',
+                    boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+                    '&:hover': {
+                      background: 'rgba(255,255,255,0.9)',
+                      transform: 'translateY(-3px) scale(1.05)',
+                      boxShadow: '0 15px 50px rgba(0,0,0,0.4)'
+                    }
+                  }}
+                >
+                  Get Started
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  onClick={() => navigate('/login')}
+                  sx={{
+                    color: 'white',
+                    borderColor: 'white',
+                    px: 6,
+                    py: 2.5,
+                    fontSize: '1.2rem',
+                    fontWeight: 'bold',
+                    borderRadius: '50px',
+                    textTransform: 'none',
+                    borderWidth: '3px',
+                    backdropFilter: 'blur(10px)',
                     background: 'rgba(255,255,255,0.1)',
-                    transform: 'translateY(-3px)'
-                  }
-                }}
-              >
-                School Login
-              </Button>
-            </Box>
-          </Box>
-        </Container>
-      </HeroSection>
+                    '&:hover': {
+                      borderWidth: '3px',
+                      background: 'rgba(255,255,255,0.2)',
+                      transform: 'translateY(-3px)'
+                    }
+                  }}
+                >
+                  School Login
+                </Button>
+              </Box>
+            </SlideContent>
+          </SlideWrapper>
+        ))}
+
+        {/* Navigation Arrows */}
+        {slides.length > 1 && (
+          <>
+            <SliderNav direction="left" onClick={prevSlide}>
+              <ArrowBackIos sx={{ fontSize: 28, ml: '8px' }} />
+            </SliderNav>
+            <SliderNav direction="right" onClick={nextSlide}>
+              <ArrowForwardIos sx={{ fontSize: 28 }} />
+            </SliderNav>
+          </>
+        )}
+
+        {/* Dots Navigation */}
+        {slides.length > 1 && (
+          <SliderDots>
+            {slides.map((_, index) => (
+              <Dot
+                key={index}
+                active={index === currentSlide}
+                onClick={() => goToSlide(index)}
+              />
+            ))}
+          </SliderDots>
+        )}
+      </SliderContainer>
 
       {/* Stats Section */}
       <Box sx={{ py: 8, background: '#f8f9fa' }}>
