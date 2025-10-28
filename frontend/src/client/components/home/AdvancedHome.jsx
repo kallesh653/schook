@@ -17,7 +17,13 @@ import {
   Science as ScienceIcon,
   Sports as SportsIcon,
   Computer as ComputerIcon,
-  FormatQuote as QuoteIcon
+  FormatQuote as QuoteIcon,
+  Image as ImageIcon,
+  Newspaper as NewsIcon,
+  CalendarToday as CalendarIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+  LocationOn as LocationIcon
 } from '@mui/icons-material';
 
 // Animations
@@ -47,17 +53,21 @@ const pulse = keyframes`
   50% { transform: scale(1.05); }
 `;
 
-// Slider Components
+// Slider Components - FULL WIDTH EDGE TO EDGE
 const SliderContainer = styled(Box)({
   position: 'relative',
-  width: '100%',
-  height: '90vh',
-  minHeight: '700px',
-  maxHeight: '1000px',
+  width: '100vw',
+  height: '100vh',
+  minHeight: '800px',
   overflow: 'hidden',
+  marginLeft: 'calc(-50vw + 50%)',
+  marginRight: 'calc(-50vw + 50%)',
+  left: '50%',
+  right: '50%',
+  marginTop: '-20px', // Remove any top margin
   '@media (max-width: 600px)': {
-    height: '70vh',
-    minHeight: '500px'
+    height: '80vh',
+    minHeight: '600px'
   }
 });
 
@@ -617,6 +627,175 @@ const AdvancedHome = () => {
                 </TestimonialCard>
               </Grid>
             ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Programs Section */}
+      <Box sx={{ py: 12, background: 'white' }}>
+        <Container maxWidth="lg">
+          <SectionTitle variant="h2">
+            Our Programs
+          </SectionTitle>
+          <Typography variant="h6" textAlign="center" color="text.secondary" sx={{ mb: 8, fontSize: '1.3rem' }}>
+            Comprehensive education from foundation to excellence
+          </Typography>
+          <Grid container spacing={4}>
+            {[
+              { title: 'Pre-Primary', desc: 'Ages 3-5 • Play-based learning foundation', icon: '🌱', color: '#ff6b6b' },
+              { title: 'Primary School', desc: 'Grades 1-5 • Building core competencies', icon: '📚', color: '#4ecdc4' },
+              { title: 'Middle School', desc: 'Grades 6-8 • Developing critical thinking', icon: '🎯', color: '#45b7d1' },
+              { title: 'High School', desc: 'Grades 9-10 • Board exam preparation', icon: '🎓', color: '#f7b731' },
+              { title: 'Senior Secondary', desc: 'Grades 11-12 • Career-focused learning', icon: '🚀', color: '#5f27cd' },
+              { title: 'Special Programs', desc: 'Sports, Arts, STEM Excellence', icon: '⭐', color: '#fd79a8' }
+            ].map((program, index) => (
+              <Grid item xs={12} md={4} key={index}>
+                <Card sx={{
+                  p: 4,
+                  height: '100%',
+                  textAlign: 'center',
+                  border: `3px solid ${program.color}`,
+                  borderRadius: '25px',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-10px)',
+                    boxShadow: `0 20px 50px ${program.color}40`
+                  }
+                }}>
+                  <Typography variant="h1" sx={{ mb: 2 }}>
+                    {program.icon}
+                  </Typography>
+                  <Typography variant="h4" fontWeight="bold" sx={{ mb: 2, color: program.color }}>
+                    {program.title}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ fontSize: '1.1rem' }}>
+                    {program.desc}
+                  </Typography>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Gallery Section */}
+      <Box sx={{ py: 12, background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
+        <Container maxWidth="lg">
+          <SectionTitle variant="h2">
+            Campus Life
+          </SectionTitle>
+          <Typography variant="h6" textAlign="center" color="text.secondary" sx={{ mb: 8, fontSize: '1.3rem' }}>
+            A glimpse into our vibrant community
+          </Typography>
+          <Grid container spacing={3}>
+            {[
+              'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800',
+              'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800',
+              'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800',
+              'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800',
+              'https://images.unsplash.com/photo-1503676382389-4809596d5290?w=800',
+              'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800'
+            ].map((img, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <Box sx={{
+                  height: 300,
+                  borderRadius: '20px',
+                  overflow: 'hidden',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'scale(1.05)',
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.25)'
+                  }
+                }}>
+                  <img
+                    src={img}
+                    alt={`Gallery ${index + 1}`}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Contact Section */}
+      <Box sx={{ py: 12, background: 'white' }}>
+        <Container maxWidth="lg">
+          <SectionTitle variant="h2">
+            Get In Touch
+          </SectionTitle>
+          <Typography variant="h6" textAlign="center" color="text.secondary" sx={{ mb: 8, fontSize: '1.3rem' }}>
+            We're here to answer your questions
+          </Typography>
+          <Grid container spacing={6}>
+            <Grid item xs={12} md={4}>
+              <Card sx={{ p: 4, textAlign: 'center', height: '100%' }}>
+                <Box sx={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 20px'
+                }}>
+                  <PhoneIcon sx={{ fontSize: 40, color: 'white' }} />
+                </Box>
+                <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>
+                  Call Us
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  +1 (555) 123-4567
+                </Typography>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Card sx={{ p: 4, textAlign: 'center', height: '100%' }}>
+                <Box sx={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 20px'
+                }}>
+                  <EmailIcon sx={{ fontSize: 40, color: 'white' }} />
+                </Box>
+                <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>
+                  Email Us
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  info@school.com
+                </Typography>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Card sx={{ p: 4, textAlign: 'center', height: '100%' }}>
+                <Box sx={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 20px'
+                }}>
+                  <LocationIcon sx={{ fontSize: 40, color: 'white' }} />
+                </Box>
+                <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>
+                  Visit Us
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  123 School St, City, State
+                </Typography>
+              </Card>
+            </Grid>
           </Grid>
         </Container>
       </Box>
