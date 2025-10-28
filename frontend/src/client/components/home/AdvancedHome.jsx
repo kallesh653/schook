@@ -53,32 +53,30 @@ const pulse = keyframes`
   50% { transform: scale(1.05); }
 `;
 
-// Slider Components - FULL WIDTH but fits in one screen
+// Slider Components - Properly centered and fits in single page
 const SliderContainer = styled(Box)({
   position: 'relative',
-  width: '100vw',
-  height: '500px', // Fixed height for single page view
-  maxHeight: '500px',
-  minHeight: '400px',
+  width: '100%',
+  height: '450px', // Optimized for single page view
+  maxHeight: '450px',
+  minHeight: '350px',
   overflow: 'hidden',
-  marginLeft: 'calc(-50vw + 50%)',
-  marginRight: 'calc(-50vw + 50%)',
-  left: '50%',
-  right: '50%',
-  marginTop: '-20px',
+  marginBottom: '40px',
+  borderRadius: '0',
+  boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
   '@media (max-width: 1200px)': {
-    height: '450px',
-    maxHeight: '450px'
+    height: '400px',
+    maxHeight: '400px'
   },
   '@media (max-width: 768px)': {
-    height: '400px',
-    maxHeight: '400px',
-    minHeight: '350px'
-  },
-  '@media (max-width: 600px)': {
     height: '350px',
     maxHeight: '350px',
     minHeight: '300px'
+  },
+  '@media (max-width: 600px)': {
+    height: '300px',
+    maxHeight: '300px',
+    minHeight: '250px'
   }
 });
 
@@ -404,7 +402,8 @@ const AdvancedHome = () => {
   return (
     <Box>
       {/* Hero Slider */}
-      <SliderContainer>
+      <Container maxWidth="xl" sx={{ px: { xs: 0, md: 3 }, mt: 3 }}>
+        <SliderContainer>
         {slides.map((slide, index) => (
           <SlideWrapper key={slide.id} className={index === currentSlide ? 'active' : ''}>
             <SlideImage imageUrl={slide.url} />
@@ -522,6 +521,7 @@ const AdvancedHome = () => {
           </>
         )}
       </SliderContainer>
+      </Container>
 
       {/* Stats Section */}
       <Box sx={{ py: 10, background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
