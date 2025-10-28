@@ -343,7 +343,7 @@ const AdvancedHome = () => {
     {
       name: 'Sarah Johnson',
       role: 'Parent of Class 10 Student',
-      text: 'The dedication of teachers and the nurturing environment have transformed my child's learning journey. Highly recommended!',
+      text: 'The dedication of teachers and the nurturing environment have transformed my child learning journey. Highly recommended!',
       rating: 5
     },
     {
