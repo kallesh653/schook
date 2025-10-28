@@ -45,6 +45,8 @@ import StudentRecords from "./school/components/student-records/StudentRecords";
 import HomePageManagement from "./school/components/home-page-management/HomePageManagement";
 import PublicHomePage from "./client/components/public-home/PublicHomePage";
 import SimpleHome from "./client/components/home/SimpleHome";
+import AdvancedHome from "./client/components/home/AdvancedHome";
+import WebsiteBuilder from "./website-builder/WebsiteBuilder";
 import FeesManagement from "./school/components/fees/FeesManagement";
 import MarkSheetGenerator from "./school/components/marksheet/MarkSheetGenerator";
 import SmsManagement from "./school/components/sms/SmsManagement";
@@ -105,9 +107,12 @@ function App() {
               <Route path="notice" element={<NoticeTeacher/>} />
             </Route>
   
+            {/* Standalone Website Builder - Separate route */}
+            <Route path="/website-builder" element={<WebsiteBuilder />} />
+
             <Route path="/" element={<Client />}>
               <Route index element={<Navigate to="/home" replace />} />
-              <Route path="home" element={<SimpleHome />} />
+              <Route path="home" element={<AdvancedHome />} />
               <Route path="contact" element={<Contact />} />
               <Route path="login" element={<Login />} />
               <Route path="student-login" element={<StudentLogin />} />
