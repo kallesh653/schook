@@ -12,7 +12,7 @@ import { Lock, Login as LoginIcon } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import axios from 'axios';
 import { baseUrl } from '../environment';
-import WebsiteBuilder from './WebsiteBuilder';
+import CompleteWebsiteBuilder from './CompleteWebsiteBuilder';
 
 const LoginContainer = styled(Box)({
   minHeight: '100vh',
@@ -205,8 +205,8 @@ const ProtectedWebsiteBuilder = () => {
     );
   }
 
-  // Authenticated - show website builder
-  return <WebsiteBuilder />;
+  // Authenticated - show complete website builder
+  return <CompleteWebsiteBuilder />;
 };
 
 export default ProtectedWebsiteBuilder;
