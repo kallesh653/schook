@@ -85,12 +85,15 @@ module.exports = {
                         }, jwtSecret );
 
                    res.header("Authorization", token);
-                   res.status(200).json({ success: true, message: "Success Login", 
+                   res.status(200).json({
+                    success: true,
+                    message: "Success Login",
+                    token: token,
                     user: {
-                         id: resp[0]._id, 
-                         owner_name:resp[0].owner_name, 
+                         id: resp[0]._id,
+                         owner_name:resp[0].owner_name,
                          school_name: resp[0].school_name,
-                          image_url: resp[0].school_image, 
+                          image_url: resp[0].school_image,
                           role: "SCHOOL" } })
                 }else {
                     res.status(401).json({ success: false, message: "Password doesn't match." })

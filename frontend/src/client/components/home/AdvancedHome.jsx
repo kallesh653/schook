@@ -57,19 +57,28 @@ const pulse = keyframes`
 const SliderContainer = styled(Box)({
   position: 'relative',
   width: '100vw',
-  height: '70vh', // Optimized for single page view
-  maxHeight: '600px', // Maximum height to fit nicely
-  minHeight: '450px',
+  height: '500px', // Fixed height for single page view
+  maxHeight: '500px',
+  minHeight: '400px',
   overflow: 'hidden',
   marginLeft: 'calc(-50vw + 50%)',
   marginRight: 'calc(-50vw + 50%)',
   left: '50%',
   right: '50%',
   marginTop: '-20px',
-  '@media (max-width: 600px)': {
-    height: '60vh',
-    maxHeight: '450px',
+  '@media (max-width: 1200px)': {
+    height: '450px',
+    maxHeight: '450px'
+  },
+  '@media (max-width: 768px)': {
+    height: '400px',
+    maxHeight: '400px',
     minHeight: '350px'
+  },
+  '@media (max-width: 600px)': {
+    height: '350px',
+    maxHeight: '350px',
+    minHeight: '300px'
   }
 });
 
