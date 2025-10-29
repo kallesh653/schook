@@ -36,6 +36,7 @@ import ExplicitIcon from '@mui/icons-material/Explicit';
 import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SchoolIcon from '@mui/icons-material/School';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 
 const drawerWidth = 280;
 
@@ -265,6 +266,7 @@ export default function Teacher() {
         { link: "/teacher/periods", component: "My Schedule", icon: CalendarMonthIcon, category: "academic" },
         { link: "/teacher/attendance", component: "Attendance", icon: RecentActorsIcon, category: "academic" },
         { link: "/teacher/examinations", component: "Examinations", icon: ExplicitIcon, category: "academic" },
+        { link: "/teacher/question-paper", component: "Question Paper Generator", icon: AssignmentIcon, category: "academic" },
         { link: "/teacher/notice", component: "Notices", icon: CircleNotificationsIcon, category: "communication" },
         { link: "/logout", component: "Log Out", icon: LogoutIcon, category: "system" }
     ];
