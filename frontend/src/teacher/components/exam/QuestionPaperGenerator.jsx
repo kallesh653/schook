@@ -70,7 +70,7 @@ const QuestionPaperGenerator = () => {
   });
 
   const [questions, setQuestions] = useState([
-    { id: 1, question: '', marks: '', type: 'short' }
+    { id: 1, question: '', marks: '', type: 'short', optionA: '', optionB: '', optionC: '', optionD: '' }
   ]);
 
   const [showPreview, setShowPreview] = useState(false);
@@ -94,7 +94,7 @@ const QuestionPaperGenerator = () => {
 
   const addQuestion = () => {
     const newId = questions.length > 0 ? Math.max(...questions.map(q => q.id)) + 1 : 1;
-    setQuestions([...questions, { id: newId, question: '', marks: '', type: 'short' }]);
+    setQuestions([...questions, { id: newId, question: '', marks: '', type: 'short', optionA: '', optionB: '', optionC: '', optionD: '' }]);
   };
 
   const deleteQuestion = (id) => {
@@ -114,19 +114,19 @@ const QuestionPaperGenerator = () => {
     let yPosition = 20;
 
     // Header - School Name
-    doc.setFontSize(22);
+    doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(102, 126, 234);
     doc.text(paperInfo.schoolName || 'School Name', pageWidth / 2, yPosition, { align: 'center' });
 
-    yPosition += 10;
+    yPosition += 12;
 
     // Horizontal line under school name
     doc.setDrawColor(102, 126, 234);
-    doc.setLineWidth(0.5);
+    doc.setLineWidth(0.8);
     doc.line(margin, yPosition, pageWidth - margin, yPosition);
 
-    yPosition += 10;
+    yPosition += 12;
 
     // Exam Title
     doc.setFontSize(18);
@@ -137,63 +137,63 @@ const QuestionPaperGenerator = () => {
 
     // Exam Details Box
     doc.setFillColor(245, 247, 250);
-    doc.rect(margin, yPosition, pageWidth - 2 * margin, 35, 'F');
+    doc.rect(margin, yPosition, pageWidth - 2 * margin, 38, 'F');
 
-    yPosition += 8;
+    yPosition += 10;
 
     // Details in two columns
-    doc.setFontSize(11);
+    doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
 
     // Left column
     doc.text('Subject:', margin + 5, yPosition);
     doc.setFont('helvetica', 'normal');
-    doc.text(paperInfo.subject || '_______________', margin + 25, yPosition);
+    doc.text(paperInfo.subject || '_______________', margin + 28, yPosition);
 
     doc.setFont('helvetica', 'bold');
-    doc.text('Class:', margin + 5, yPosition + 7);
+    doc.text('Class:', margin + 5, yPosition + 8);
     doc.setFont('helvetica', 'normal');
-    doc.text(paperInfo.className || '_______________', margin + 25, yPosition + 7);
+    doc.text(paperInfo.className || '_______________', margin + 28, yPosition + 8);
 
     // Right column
     doc.setFont('helvetica', 'bold');
     doc.text('Date:', pageWidth / 2 + 10, yPosition);
     doc.setFont('helvetica', 'normal');
-    doc.text(paperInfo.examDate || '_______________', pageWidth / 2 + 30, yPosition);
+    doc.text(paperInfo.examDate || '_______________', pageWidth / 2 + 32, yPosition);
 
     doc.setFont('helvetica', 'bold');
-    doc.text('Duration:', pageWidth / 2 + 10, yPosition + 7);
+    doc.text('Duration:', pageWidth / 2 + 10, yPosition + 8);
     doc.setFont('helvetica', 'normal');
-    doc.text(paperInfo.duration || '_______________', pageWidth / 2 + 30, yPosition + 7);
+    doc.text(paperInfo.duration || '_______________', pageWidth / 2 + 32, yPosition + 8);
 
     doc.setFont('helvetica', 'bold');
-    doc.text('Total Marks:', pageWidth / 2 + 10, yPosition + 14);
+    doc.text('Total Marks:', pageWidth / 2 + 10, yPosition + 16);
     doc.setFont('helvetica', 'normal');
-    doc.text(paperInfo.totalMarks || '_______________', pageWidth / 2 + 35, yPosition + 14);
+    doc.text(paperInfo.totalMarks || '_______________', pageWidth / 2 + 37, yPosition + 16);
 
-    yPosition += 30;
+    yPosition += 32;
 
     // Instructions Box
-    yPosition += 5;
-    doc.setFontSize(10);
+    yPosition += 8;
+    doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
     doc.text('INSTRUCTIONS:', margin, yPosition);
-    yPosition += 6;
+    yPosition += 7;
     doc.setFont('helvetica', 'normal');
     doc.text('• All questions are compulsory.', margin + 5, yPosition);
-    yPosition += 5;
+    yPosition += 6;
     doc.text('• Write your answers in the answer sheet provided.', margin + 5, yPosition);
-    yPosition += 5;
+    yPosition += 6;
     doc.text('• Read the questions carefully before answering.', margin + 5, yPosition);
 
-    yPosition += 10;
+    yPosition += 12;
 
     // Horizontal line before questions
     doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.3);
+    doc.setLineWidth(0.5);
     doc.line(margin, yPosition, pageWidth - margin, yPosition);
 
-    yPosition += 10;
+    yPosition += 12;
 
     // Questions Section
     doc.setFontSize(14);
@@ -201,7 +201,7 @@ const QuestionPaperGenerator = () => {
     doc.setTextColor(102, 126, 234);
     doc.text('QUESTIONS', margin, yPosition);
 
-    yPosition += 10;
+    yPosition += 12;
 
     // Group questions by type
     const groupedQuestions = {};
@@ -222,58 +222,68 @@ const QuestionPaperGenerator = () => {
 
     Object.keys(groupedQuestions).forEach((type, sectionIndex) => {
       if (sectionIndex > 0) {
-        yPosition += 5;
+        yPosition += 8;
       }
 
       // Section heading
-      doc.setFontSize(12);
+      doc.setFontSize(13);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(102, 126, 234);
       doc.text(`Section ${String.fromCharCode(65 + sectionIndex)}: ${typeLabels[type]}`, margin, yPosition);
-      yPosition += 8;
+      yPosition += 10;
 
       groupedQuestions[type].forEach((q, index) => {
         // Check if we need a new page
-        if (yPosition > 270) {
+        if (yPosition > 250) {
           doc.addPage();
           yPosition = 20;
         }
 
         // Question number and text
-        doc.setFontSize(11);
+        doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text(`Q${questionNumber}.`, margin, yPosition);
+        doc.text(`${questionNumber}.`, margin, yPosition);
 
         doc.setFont('helvetica', 'normal');
         const questionText = q.question || 'Question text here';
         const splitQuestion = doc.splitTextToSize(questionText, pageWidth - margin - 50);
-        doc.text(splitQuestion, margin + 10, yPosition);
+        doc.text(splitQuestion, margin + 8, yPosition);
 
         // Marks in box on the right
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(10);
+        doc.setFontSize(11);
         doc.text(`[${q.marks || '0'} marks]`, pageWidth - margin - 25, yPosition, { align: 'right' });
 
-        yPosition += splitQuestion.length * 5 + 3;
+        yPosition += splitQuestion.length * 6 + 5;
 
-        // Answer space
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'italic');
-        doc.setTextColor(150, 150, 150);
-        doc.text('Answer:', margin + 10, yPosition);
-        yPosition += 5;
+        // MCQ Options
+        if (type === 'mcq' && (q.optionA || q.optionB || q.optionC || q.optionD)) {
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(0, 0, 0);
 
-        // Lines for answer
-        const answerLines = type === 'essay' ? 8 : type === 'long' ? 5 : 3;
-        doc.setDrawColor(200, 200, 200);
-        doc.setLineWidth(0.2);
-        for (let i = 0; i < answerLines; i++) {
-          doc.line(margin + 10, yPosition, pageWidth - margin, yPosition);
-          yPosition += 7;
+          if (q.optionA) {
+            doc.text(`(A) ${q.optionA}`, margin + 15, yPosition);
+            yPosition += 6;
+          }
+          if (q.optionB) {
+            doc.text(`(B) ${q.optionB}`, margin + 15, yPosition);
+            yPosition += 6;
+          }
+          if (q.optionC) {
+            doc.text(`(C) ${q.optionC}`, margin + 15, yPosition);
+            yPosition += 6;
+          }
+          if (q.optionD) {
+            doc.text(`(D) ${q.optionD}`, margin + 15, yPosition);
+            yPosition += 6;
+          }
+
+          yPosition += 4;
         }
 
-        yPosition += 5;
+        yPosition += 8;
         questionNumber++;
       });
     });
@@ -282,7 +292,7 @@ const QuestionPaperGenerator = () => {
     const totalPages = doc.internal.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
-      doc.setFontSize(8);
+      doc.setFontSize(9);
       doc.setFont('helvetica', 'italic');
       doc.setTextColor(100, 100, 100);
       doc.text(`Page ${i} of ${totalPages}`, pageWidth / 2, 285, { align: 'center' });
@@ -464,6 +474,53 @@ const QuestionPaperGenerator = () => {
                       required
                     />
                   </Grid>
+
+                  {/* MCQ Options - Only show for MCQ type */}
+                  {q.type === 'mcq' && (
+                    <>
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle2" sx={{ color: '#667eea', fontWeight: 'bold', mb: 1 }}>
+                          Multiple Choice Options
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Option A"
+                          value={q.optionA || ''}
+                          onChange={(e) => handleQuestionChange(q.id, 'optionA', e.target.value)}
+                          placeholder="Enter option A"
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Option B"
+                          value={q.optionB || ''}
+                          onChange={(e) => handleQuestionChange(q.id, 'optionB', e.target.value)}
+                          placeholder="Enter option B"
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Option C"
+                          value={q.optionC || ''}
+                          onChange={(e) => handleQuestionChange(q.id, 'optionC', e.target.value)}
+                          placeholder="Enter option C"
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Option D"
+                          value={q.optionD || ''}
+                          onChange={(e) => handleQuestionChange(q.id, 'optionD', e.target.value)}
+                          placeholder="Enter option D"
+                        />
+                      </Grid>
+                    </>
+                  )}
                 </Grid>
               </QuestionCard>
             ))}
