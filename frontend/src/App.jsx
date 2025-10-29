@@ -31,7 +31,7 @@ import TeacherExaminations from "./teacher/components/teacher examinations/Teach
 import TeacherSchedule from "./teacher/components/periods/TeacherSchedule";
 import AssignPeriod2 from "./school/components/assign period/AssignPeriod2";
 import QuestionPaperGenerator from "./teacher/components/exam/QuestionPaperGenerator";
-import MarksEntry from "./teacher/components/marks/MarksEntry";
+import TeacherMarksEntry from "./teacher/components/marks/TeacherMarksEntry";
 import StudentResults from "./student/components/results/StudentResults";
 import AttendanceDetails from "./school/components/attendance/attendance details/AttendanceDetails";
 import StudentAttendanceList from "./school/components/attendance/StudentAttendanceList";
@@ -105,7 +105,7 @@ function App() {
               <Route index element={<TeacherDetails />}/>
               <Route path="details" element={<TeacherDetails />} />
               <Route path="examinations" element={<TeacherExaminations />} />
-              <Route path="marks-entry" element={<MarksEntry />} />
+              <Route path="marks-entry" element={<TeacherMarksEntry />} />
               <Route path="question-paper" element={<QuestionPaperGenerator />} />
               <Route path="periods" element={<TeacherSchedule />} />
               {/* <Route path='sub-teach' element={<StudentSubjectTeacher/>} /> */}
