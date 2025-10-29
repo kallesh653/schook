@@ -33,6 +33,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ExplicitIcon from '@mui/icons-material/Explicit';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SchoolIcon from '@mui/icons-material/School';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 const drawerWidth = 280;
 
 // Animation keyframes
@@ -261,6 +262,7 @@ export default function Student() {
         { link: "/student/periods", component: "My Schedule", icon: CalendarMonthIcon, category: "academic" },
         { link: "/student/attendance", component: "My Attendance", icon: GradingIcon, category: "academic" },
         { link: "/student/examinations", component: "My Examinations", icon: ExplicitIcon, category: "academic" },
+        { link: "/student/results", component: "My Results", icon: AssessmentIcon, category: "academic" },
         { link: "/student/notice", component: "Notices", icon: CircleNotificationsIcon, category: "communication" },
         { link: "/logout", component: "Log Out", icon: LogoutIcon, category: "system" }
     ]

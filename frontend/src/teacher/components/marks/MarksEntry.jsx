@@ -96,16 +96,18 @@ const MarksEntry = () => {
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState('');
   const [students, setStudents] = useState([]);
-  const [examinations, setExaminations] = useState([]);
-  const [selectedExam, setSelectedExam] = useState('');
   const [subjects, setSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState('');
+  const [examType, setExamType] = useState('');
+  const [examDate, setExamDate] = useState(new Date().toISOString().split('T')[0]);
   const [academicYear, setAcademicYear] = useState('2024-2025');
   const [marksData, setMarksData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [viewDialog, setViewDialog] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+
+  const examTypes = ['Midterm', 'Final', 'Unit Test', 'Quiz', 'Assignment', 'Mock Test'];
 
   // Fetch Classes
   useEffect(() => {
@@ -129,7 +131,6 @@ const MarksEntry = () => {
   useEffect(() => {
     if (selectedClass) {
       fetchStudents();
-      fetchExaminations();
     }
   }, [selectedClass]);
 
@@ -152,15 +153,6 @@ const MarksEntry = () => {
     } catch (error) {
       console.error('Error fetching students:', error);
       showSnackbar('Error fetching students', 'error');
-    }
-  };
-
-  const fetchExaminations = async () => {
-    try {
-      const response = await axios.get(`${baseUrl}/examination/fetch-class/${selectedClass}`);
-      setExaminations(response.data.data || []);
-    } catch (error) {
-      console.error('Error fetching examinations:', error);
     }
   };
 
@@ -206,8 +198,8 @@ const MarksEntry = () => {
       setLoading(true);
 
       // Validate inputs
-      if (!selectedClass || !selectedExam || !selectedSubject) {
-        showSnackbar('Please select class, examination, and subject', 'error');
+      if (!selectedClass || !selectedSubject || !examType) {
+        showSnackbar('Please select class, subject, and examination type', 'error');
         return;
       }
 
@@ -219,10 +211,14 @@ const MarksEntry = () => {
         return;
       }
 
-      // Get class info
+      // Get class and subject info
       const classInfo = classes.find(c => c._id === selectedClass);
       const subjectInfo = subjects.find(s => s._id === selectedSubject);
-      const examInfo = examinations.find(e => e._id === selectedExam);
+
+      // Get school info from localStorage
+      const schoolId = localStorage.getItem('schoolId') || sessionStorage.getItem('schoolId');
+      const schoolName = localStorage.getItem('schoolName') || sessionStorage.getItem('schoolName') || 'School';
+      const teacherName = localStorage.getItem('userName') || sessionStorage.getItem('userName') || 'Teacher';
 
       // Prepare marksheet data for each student
       const marksheetPromises = validMarks.map(async (item) => {
@@ -237,7 +233,7 @@ const MarksEntry = () => {
           class: classInfo?.class_text || 'N/A',
           section: classInfo?.section || 'A',
           roll_number: item.roll_number,
-          examination: examInfo?.examType || 'Regular Exam',
+          examination: examType,
           academic_year: academicYear,
           subjects: [{
             name: subjectInfo?.subject_name || 'Subject',
@@ -252,8 +248,11 @@ const MarksEntry = () => {
           percentage: Math.round(percentage * 100) / 100,
           overall_grade: grade,
           result: percentage >= 33 ? 'Pass' : 'Fail',
-          teacher_name: localStorage.getItem('teacherName') || 'Teacher',
-          status: 'Draft'
+          teacher_name: teacherName,
+          school_name: schoolName,
+          issue_date: new Date(examDate),
+          status: 'Issued',
+          created_by: teacherName
         };
 
         return axios.post(`${baseUrl}/marksheet/create`, marksheetData, {
@@ -265,10 +264,16 @@ const MarksEntry = () => {
 
       await Promise.all(marksheetPromises);
 
-      showSnackbar(`Marks saved successfully for ${validMarks.length} student(s)!`, 'success');
+      showSnackbar(`✅ Marks saved successfully for ${validMarks.length} student(s)!`, 'success');
 
-      // Reset marks data
-      fetchStudents();
+      // Reset marks data after successful save
+      const resetMarks = marksData.map(item => ({
+        ...item,
+        marks: '',
+        remarks: ''
+      }));
+      setMarksData(resetMarks);
+
     } catch (error) {
       console.error('Error saving marks:', error);
       const errorMsg = error.response?.data?.message || error.message || 'Error saving marks';
@@ -313,12 +318,12 @@ const MarksEntry = () => {
               </Typography>
 
               <Grid container spacing={3}>
-                <Grid item xs={12} md={3}>
-                  <FormControl fullWidth>
-                    <InputLabel>Class</InputLabel>
+                <Grid item xs={12} md={4}>
+                  <FormControl fullWidth required>
+                    <InputLabel>Select Class *</InputLabel>
                     <Select
                       value={selectedClass}
-                      label="Class"
+                      label="Select Class *"
                       onChange={(e) => setSelectedClass(e.target.value)}
                     >
                       {classes.map((cls) => (
@@ -330,30 +335,12 @@ const MarksEntry = () => {
                   </FormControl>
                 </Grid>
 
-                <Grid item xs={12} md={3}>
-                  <FormControl fullWidth>
-                    <InputLabel>Examination</InputLabel>
-                    <Select
-                      value={selectedExam}
-                      label="Examination"
-                      onChange={(e) => setSelectedExam(e.target.value)}
-                      disabled={!examinations.length}
-                    >
-                      {examinations.map((exam) => (
-                        <MenuItem key={exam._id} value={exam._id}>
-                          {exam.examType} - {exam.subject?.subject_name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                <Grid item xs={12} md={3}>
-                  <FormControl fullWidth>
-                    <InputLabel>Subject</InputLabel>
+                <Grid item xs={12} md={4}>
+                  <FormControl fullWidth required>
+                    <InputLabel>Select Subject *</InputLabel>
                     <Select
                       value={selectedSubject}
-                      label="Subject"
+                      label="Select Subject *"
                       onChange={(e) => setSelectedSubject(e.target.value)}
                       disabled={!subjects.length}
                     >
@@ -366,7 +353,35 @@ const MarksEntry = () => {
                   </FormControl>
                 </Grid>
 
-                <Grid item xs={12} md={3}>
+                <Grid item xs={12} md={4}>
+                  <FormControl fullWidth required>
+                    <InputLabel>Examination Type *</InputLabel>
+                    <Select
+                      value={examType}
+                      label="Examination Type *"
+                      onChange={(e) => setExamType(e.target.value)}
+                    >
+                      {examTypes.map((type) => (
+                        <MenuItem key={type} value={type}>
+                          {type}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    label="Exam Date"
+                    type="date"
+                    value={examDate}
+                    onChange={(e) => setExamDate(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
                     label="Academic Year"
@@ -374,6 +389,14 @@ const MarksEntry = () => {
                     onChange={(e) => setAcademicYear(e.target.value)}
                     placeholder="e.g., 2024-2025"
                   />
+                </Grid>
+
+                <Grid item xs={12} md={4}>
+                  <Box sx={{ pt: 1 }}>
+                    <Alert severity="info" sx={{ fontSize: '0.85rem' }}>
+                      All students in selected class will be shown below
+                    </Alert>
+                  </Box>
                 </Grid>
               </Grid>
             </Card>
