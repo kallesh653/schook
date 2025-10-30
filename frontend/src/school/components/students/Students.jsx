@@ -306,8 +306,30 @@ export default function Students() {
               setType("error");
             });
         } else {
-          setMessage("Please provide an image.");
-          setType("error");
+          // Submit without image - image is now optional
+          const fd = new FormData();
+          Object.keys(values).forEach((key) => {
+            if (key !== 'total_fees' && key !== 'paid_fees') {
+              fd.append(key, values[key]);
+            }
+          });
+
+          if (values.total_fees || values.paid_fees) {
+            fd.append("fees[total_fees]", values.total_fees || 0);
+            fd.append("fees[paid_fees]", values.paid_fees || 0);
+          }
+
+          axios
+            .post(`${baseUrl}/student/register`, fd)
+            .then(async (resp) => {
+              setMessage(resp.data.message);
+              setType("success");
+              Formik.resetForm();
+            })
+            .catch((e) => {
+              setMessage(e.response?.data?.message || 'Registration failed');
+              setType("error");
+            });
         }
       }
     },

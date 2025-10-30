@@ -7,7 +7,7 @@ const teacherSchema = new mongoose.Schema({
     qualification:{type:String, required:false},
     age:{type:String, required:false},
     gender:{type:String, required:true},
-    teacher_image:{type:String,  required:true},
+    teacher_image:{type:String,  required:false, default: 'default-teacher.png'},
     createdAt:{type:Date, default: new Date()},
 
     password:{type:String, required:true}

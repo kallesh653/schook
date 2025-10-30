@@ -56,9 +56,6 @@ module.exports = {
             if (!fields.password || !fields.password[0]) {
                 return res.status(400).json({ success: false, message: "Password is required." });
             }
-            if (!files.image || !files.image[0]) {
-                return res.status(400).json({ success: false, message: "Student image is required." });
-            }
             if (!req.user || !req.user.id) {
                 return res.status(401).json({ success: false, message: "Authentication required. Please login again." });
             }
@@ -68,19 +65,8 @@ module.exports = {
                     res.status(500).json({ success: false, message: "Email Already Exist!" })
                 } else {
 
-                    const photo = files.image[0];
-                    let oldPath = photo.filepath;
-                    let originalFileName = photo.originalFilename.replace(" ", "_")
-
-                    let newPath = path.join(__dirname, '../../frontend/public/images/uploaded/student', '/', originalFileName)
-
-                    let photoData = fs.readFileSync(oldPath);
-                    fs.writeFile(newPath, photoData, function (err) {
-                        if (err) {
-                            console.log("File write error:", err);
-                            return res.status(500).json({ success: false, message: "Error saving image file." });
-                        }
-
+                    // Function to save student data
+                    const saveStudentData = (imageName) => {
                         var salt = bcrypt.genSaltSync(10);
                         var hashPassword = bcrypt.hashSync(fields.password[0], salt);
 
@@ -114,7 +100,7 @@ module.exports = {
                             gender: fields.gender[0],
                             date_of_birth: dateOfBirth,
                             date_of_admission: fields.date_of_admission && fields.date_of_admission[0] ? new Date(fields.date_of_admission[0]) : new Date(),
-                            student_image: originalFileName,
+                            student_image: imageName,
                             password: hashPassword,
                             school: req.user.id
                         };
@@ -142,8 +128,28 @@ module.exports = {
                             console.log("Error details:", e.message)
                             res.status(500).json({ success: false, message: e.message || "Failed Registration." })
                         })
+                    };
 
-                    })
+                    // Check if image is provided
+                    if (files.image && files.image[0]) {
+                        const photo = files.image[0];
+                        let oldPath = photo.filepath;
+                        let originalFileName = photo.originalFilename.replace(/\s+/g, "_")
+
+                        let newPath = path.join(__dirname, '../../frontend/public/images/uploaded/student', '/', originalFileName)
+
+                        let photoData = fs.readFileSync(oldPath);
+                        fs.writeFile(newPath, photoData, function (err) {
+                            if (err) {
+                                console.log("File write error:", err);
+                                return res.status(500).json({ success: false, message: "Error saving image file." });
+                            }
+                            saveStudentData(originalFileName);
+                        })
+                    } else {
+                        // No image provided, use default
+                        saveStudentData('default-student.png');
+                    }
 
 
                 }

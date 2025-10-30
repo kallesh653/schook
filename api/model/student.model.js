@@ -25,7 +25,7 @@ const studentSchema = new mongoose.Schema({
         unique: false,
         sparse: true
     },
-    student_image:{type:String,  required:true},
+    student_image:{type:String,  required:false, default: 'default-student.png'},
     createdAt:{type:Date, default: new Date()},
 
     // Fees Information

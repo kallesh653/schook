@@ -442,7 +442,7 @@ const ActionButton = styled(IconButton)(({ theme, color }) => ({
             if (file) {
               fd.append("image", file, file.name);
             }
-    
+
             axios
               .patch(`${baseUrl}/teacher/update/${editId}`, fd)
               .then((resp) => {
@@ -452,42 +452,32 @@ const ActionButton = styled(IconButton)(({ theme, color }) => ({
                 cancelEdit();
               })
               .catch((e) => {
-                setMessage(e.response.data.message);
+                setMessage(e.response?.data?.message || 'Update failed');
                 setType("error");
               });
           } else {
+          // Image is now optional - submit with or without image
+          const fd = new FormData();
           if (file) {
-            // const fd = new FormData();
-            // fd.append("image", file, file.name);
-            // fd.append('email', values.email);
-            // fd.append("name", values.name);
-            // fd.append("qualification", values.qualification);
-            // fd.append("age", values.age);
-            // fd.append("gender", values.gender);
-            // fd.append("password", values.password)
-            const fd = new FormData();
             fd.append("image", file, file.name);
-            Object.keys(values).forEach((key) => fd.append(key, values[key]));
-  
-            axios
-              .post(`${baseUrl}/teacher/register`, fd)
-              .then((resp) => {
-                console.log("Response after submitting admin teacher", resp);
-                setMessage(resp.data.message);
-                setType("success");
-                handleClearFile()
-              })
-              .catch((e) => {
-                setMessage(e.response.data.message);
-                setType("error");
-                console.log("Error, response admin teacher calls", e);
-              });
-            Formik.resetForm();
-            setFile(null);
-          } else {
-            setMessage("Please provide image.");
-            setType("error");
           }
+          Object.keys(values).forEach((key) => fd.append(key, values[key]));
+
+          axios
+            .post(`${baseUrl}/teacher/register`, fd)
+            .then((resp) => {
+              console.log("Response after submitting admin teacher", resp);
+              setMessage(resp.data.message);
+              setType("success");
+              handleClearFile();
+              Formik.resetForm();
+              setFile(null);
+            })
+            .catch((e) => {
+              setMessage(e.response?.data?.message || 'Registration failed');
+              setType("error");
+              console.log("Error, response admin teacher calls", e);
+            });
         }
       },
     });

@@ -35,55 +35,80 @@ module.exports = {
         const form = new formidable.IncomingForm();
         const schoolId = req.user.schoolId;
         form.parse(req, (err, fields, files) => {
+            if (err) {
+                console.log("Error parsing form:", err);
+                return res.status(400).json({ success: false, message: "Error parsing form data." });
+            }
+
+            // Check for required fields
+            if (!fields.email || !fields.email[0]) {
+                return res.status(400).json({ success: false, message: "Email is required." });
+            }
+            if (!fields.name || !fields.name[0]) {
+                return res.status(400).json({ success: false, message: "Name is required." });
+            }
+            if (!fields.password || !fields.password[0]) {
+                return res.status(400).json({ success: false, message: "Password is required." });
+            }
+            if (!fields.gender || !fields.gender[0]) {
+                return res.status(400).json({ success: false, message: "Gender is required." });
+            }
+
             Teacher.find({ email: fields.email[0] }).then(resp => {
                 if (resp.length > 0) {
                     res.status(500).json({ success: false, message: "Email Already Exist!" })
                 } else {
-
-                    const photo = files.image[0];
-                    let oldPath = photo.filepath;
-                    let originalFileName = photo.originalFilename.replace(" ", "_")
-
-                    let newPath = path.join(__dirname, '../../frontend/public/images/uploaded/teacher', '/', originalFileName)
-
-                    let photoData = fs.readFileSync(oldPath);
-                    fs.writeFile(newPath, photoData, function (err) {
-                        if (err) console.log(err);
-
+                    // Function to save teacher data with image name
+                    const saveTeacherData = (imageName) => {
                         var salt = bcrypt.genSaltSync(10);
                         var hashPassword = bcrypt.hashSync(fields.password[0], salt);
 
                         const newTeacher = new Teacher({
                             email: fields.email[0],
                             name: fields.name[0],
-                            qualification:fields.qualification[0],
-                            age: fields.age[0],
+                            qualification: fields.qualification && fields.qualification[0] ? fields.qualification[0] : '',
+                            age: fields.age && fields.age[0] ? fields.age[0] : '',
                             gender: fields.gender[0],
-
-                            teacher_image: originalFileName,
+                            teacher_image: imageName,
                             password: hashPassword,
-                            school:schoolId
-                         
-                        })
+                            school: schoolId
+                        });
 
                         newTeacher.save().then(savedData => {
-                            console.log("Date saved", savedData);
-                            res.status(200).json({ success: true, data: savedData, message:"Teacher is Registered Successfully." })
+                            console.log("Teacher saved", savedData);
+                            res.status(200).json({ success: true, data: savedData, message: "Teacher is Registered Successfully." })
                         }).catch(e => {
-                            console.log("ERRORO in Register", e)
-                            res.status(500).json({ success: false, message: "Failed Registration." })
-                        })
+                            console.log("Error in Register Teacher:", e.message);
+                            res.status(500).json({ success: false, message: `Failed Registration: ${e.message}` })
+                        });
+                    };
 
-                    })
+                    // Check if image is provided
+                    if (files.image && files.image[0]) {
+                        const photo = files.image[0];
+                        let oldPath = photo.filepath;
+                        let originalFileName = photo.originalFilename.replace(/\s+/g, "_");
 
+                        let newPath = path.join(__dirname, '../../frontend/public/images/uploaded/teacher', '/', originalFileName);
 
+                        let photoData = fs.readFileSync(oldPath);
+                        fs.writeFile(newPath, photoData, function (err) {
+                            if (err) {
+                                console.log("Error saving image:", err);
+                                return res.status(500).json({ success: false, message: "Error saving teacher image." });
+                            }
+                            saveTeacherData(originalFileName);
+                        });
+                    } else {
+                        // No image provided, use default
+                        saveTeacherData('default-teacher.png');
+                    }
                 }
-            })
-
-        })
-
-
-
+            }).catch(e => {
+                console.log("Error checking teacher email:", e);
+                res.status(500).json({ success: false, message: "Database error while checking email." });
+            });
+        });
     },
     loginTeacher: async (req, res) => {
         Teacher.find({ email: req.body.email }).then(resp => {
