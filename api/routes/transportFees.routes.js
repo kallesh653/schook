@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const transportFeesController = require('../controller/transportFees.controller');
-const { authMiddleware } = require('../middleware/auth.middleware');
 
-// All routes require authentication
-router.use(authMiddleware);
+// TODO: Add authentication middleware when available
+// const { authMiddleware } = require('../middleware/auth.middleware');
+// router.use(authMiddleware);
 
 // Create new transport fees location
 router.post('/create', transportFeesController.createTransportFees);
