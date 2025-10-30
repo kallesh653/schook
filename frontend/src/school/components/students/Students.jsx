@@ -34,6 +34,9 @@ import CustomizedSnackbars from "../../../basic utility components/CustomizedSna
 import { studentSchema } from "../../../yupSchema/studentSchema";
 import StudentCardAdmin from "../../utility components/student card/StudentCard";
 import { styled } from '@mui/material/styles';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 // Icons
 import PersonIcon from '@mui/icons-material/Person';
@@ -51,6 +54,9 @@ import PeopleIcon from '@mui/icons-material/People';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import DownloadIcon from '@mui/icons-material/Download';
+import DescriptionIcon from '@mui/icons-material/Description';
 
 // Styled components
 const StyledHeaderCard = styled(Card)(({ theme }) => ({
@@ -435,6 +441,263 @@ export default function Students() {
     setImageUrl(null);
   };
 
+  // Export all students to Excel
+  const exportToExcel = () => {
+    if (!students || students.length === 0) {
+      setMessage("No students data to export");
+      setType("warning");
+      return;
+    }
+
+    const exportData = students.map((student, index) => ({
+      'S.No': index + 1,
+      'Roll Number': student.roll_number || 'N/A',
+      'Name': student.name,
+      'Email': student.email,
+      'Class': student.student_class?.class_name || 'N/A',
+      'Course': student.course?.course_name || 'N/A',
+      'Age': student.age,
+      'Gender': student.gender,
+      'Guardian': student.guardian,
+      'Guardian Phone': student.guardian_phone,
+      'Aadhaar': student.aadhaar_number || 'N/A',
+      'School Name': student.school_name || 'N/A',
+      'School ID': student.school_id || 'N/A',
+      'Established Year': student.established_year || 'N/A',
+      'Total Fees': student.fees?.total_fees || 0,
+      'Advance Fees': student.fees?.advance_fees || 0,
+      'Balance Fees': student.fees?.balance_fees || 0,
+      'Admission Date': new Date(student.date_of_admission).toLocaleDateString()
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Students');
+
+    // Auto-size columns
+    const maxWidth = exportData.reduce((w, r) => Math.max(w, ...Object.values(r).map(v => String(v).length)), 10);
+    worksheet['!cols'] = Object.keys(exportData[0] || {}).map(() => ({ wch: maxWidth }));
+
+    XLSX.writeFile(workbook, `Students_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+    setMessage("Excel file downloaded successfully");
+    setType("success");
+  };
+
+  // Generate PDF for individual student
+  const downloadStudentPDF = (student) => {
+    const doc = new jsPDF();
+
+    // Add border
+    doc.setDrawColor(67, 126, 234);
+    doc.setLineWidth(1);
+    doc.rect(10, 10, 190, 277);
+
+    // Title
+    doc.setFillColor(67, 126, 234);
+    doc.rect(15, 15, 180, 20, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.setFont(undefined, 'bold');
+    doc.text('STUDENT DETAILS SLIP', 105, 28, { align: 'center' });
+
+    // School Details (if available)
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    let yPos = 45;
+
+    if (student.school_name) {
+      doc.setFont(undefined, 'bold');
+      doc.text(student.school_name, 105, yPos, { align: 'center' });
+      yPos += 5;
+    }
+    if (student.school_id) {
+      doc.setFont(undefined, 'normal');
+      doc.text(`School ID: ${student.school_id}`, 105, yPos, { align: 'center' });
+      yPos += 5;
+    }
+    if (student.established_year) {
+      doc.text(`Established: ${student.established_year}`, 105, yPos, { align: 'center' });
+      yPos += 5;
+    }
+
+    yPos += 5;
+
+    // Personal Details
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, yPos, 180, 8, 'F');
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(12);
+    doc.text('PERSONAL INFORMATION', 20, yPos + 5);
+    yPos += 15;
+
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(10);
+
+    const personalData = [
+      ['Roll Number:', student.roll_number || 'N/A'],
+      ['Name:', student.name],
+      ['Email:', student.email],
+      ['Age:', student.age + ' years'],
+      ['Gender:', student.gender],
+      ['Date of Birth:', new Date(student.date_of_birth).toLocaleDateString()],
+      ['Date of Admission:', new Date(student.date_of_admission).toLocaleDateString()],
+      ['Aadhaar Number:', student.aadhaar_number || 'N/A']
+    ];
+
+    personalData.forEach(([label, value]) => {
+      doc.setFont(undefined, 'bold');
+      doc.text(label, 20, yPos);
+      doc.setFont(undefined, 'normal');
+      doc.text(value, 70, yPos);
+      yPos += 7;
+    });
+
+    // Academic Details
+    yPos += 5;
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, yPos, 180, 8, 'F');
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(12);
+    doc.text('ACADEMIC INFORMATION', 20, yPos + 5);
+    yPos += 15;
+
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('Class:', 20, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.text(student.student_class?.class_name || 'N/A', 70, yPos);
+    yPos += 7;
+
+    doc.setFont(undefined, 'bold');
+    doc.text('Course:', 20, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.text(student.course?.course_name || 'N/A', 70, yPos);
+    yPos += 10;
+
+    // Guardian Details
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, yPos, 180, 8, 'F');
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(12);
+    doc.text('GUARDIAN INFORMATION', 20, yPos + 5);
+    yPos += 15;
+
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('Guardian Name:', 20, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.text(student.guardian, 70, yPos);
+    yPos += 7;
+
+    doc.setFont(undefined, 'bold');
+    doc.text('Guardian Phone:', 20, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.text(student.guardian_phone, 70, yPos);
+    yPos += 10;
+
+    // Fees Details
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, yPos, 180, 8, 'F');
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(12);
+    doc.text('FEES INFORMATION', 20, yPos + 5);
+    yPos += 15;
+
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(10);
+
+    const feesData = [
+      ['Total Fees:', `₹${student.fees?.total_fees || 0}`],
+      ['Advance Paid:', `₹${student.fees?.advance_fees || 0}`],
+      ['Balance Due:', `₹${student.fees?.balance_fees || 0}`]
+    ];
+
+    feesData.forEach(([label, value]) => {
+      doc.setFont(undefined, 'bold');
+      doc.text(label, 20, yPos);
+      doc.setFont(undefined, 'normal');
+      doc.text(value, 70, yPos);
+      yPos += 7;
+    });
+
+    // Footer
+    doc.setFontSize(8);
+    doc.setTextColor(128, 128, 128);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 105, 280, { align: 'center' });
+
+    doc.save(`${student.name}_Student_Details.pdf`);
+    setMessage("PDF downloaded successfully");
+    setType("success");
+  };
+
+  // Generate comprehensive PDF report for all students
+  const downloadAllStudentsPDF = () => {
+    if (!students || students.length === 0) {
+      setMessage("No students data to export");
+      setType("warning");
+      return;
+    }
+
+    const doc = new jsPDF();
+
+    // Title Page
+    doc.setFillColor(67, 126, 234);
+    doc.rect(0, 0, 210, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont(undefined, 'bold');
+    doc.text('STUDENT REPORT', 105, 20, { align: 'center' });
+
+    // School info if available
+    if (students[0]?.school_name) {
+      doc.setFontSize(14);
+      doc.text(students[0].school_name, 105, 30, { align: 'center' });
+    }
+
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 105, 50, { align: 'center' });
+    doc.text(`Total Students: ${students.length}`, 105, 58, { align: 'center' });
+
+    // Summary Statistics
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('Summary Statistics:', 20, 70);
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(10);
+    doc.text(`Total Fees: ₹${feesStats.totalFees.toLocaleString()}`, 20, 78);
+    doc.text(`Fees Collected: ₹${feesStats.feesCollected.toLocaleString()}`, 20, 85);
+    doc.text(`Balance Fees: ₹${feesStats.balanceFees.toLocaleString()}`, 20, 92);
+
+    // Student Table
+    const tableData = students.map((student, index) => [
+      index + 1,
+      student.roll_number || 'N/A',
+      student.name,
+      student.student_class?.class_name || 'N/A',
+      student.age,
+      student.gender,
+      `₹${student.fees?.total_fees || 0}`,
+      `₹${student.fees?.balance_fees || 0}`
+    ]);
+
+    doc.autoTable({
+      startY: 100,
+      head: [['#', 'Roll No', 'Name', 'Class', 'Age', 'Gender', 'Total Fees', 'Balance']],
+      body: tableData,
+      theme: 'striped',
+      headStyles: { fillColor: [67, 126, 234], textColor: 255, fontStyle: 'bold' },
+      styles: { fontSize: 8, cellPadding: 2 },
+      alternateRowStyles: { fillColor: [245, 245, 245] }
+    });
+
+    doc.save(`Students_Complete_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+    setMessage("Comprehensive PDF report downloaded successfully");
+    setType("success");
+  };
+
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       {message && (
@@ -559,6 +822,57 @@ export default function Students() {
           </Card>
         </Grid>
       </Grid>
+
+      {/* Export Buttons */}
+      <Box sx={{ mb: 3, display: 'flex', gap: 2, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+        <Button
+          variant="contained"
+          startIcon={<PictureAsPdfIcon />}
+          onClick={downloadAllStudentsPDF}
+          sx={{
+            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            color: 'white',
+            fontWeight: 'bold',
+            px: 3,
+            py: 1.5,
+            borderRadius: '10px',
+            textTransform: 'none',
+            boxShadow: '0 4px 15px rgba(245, 87, 108, 0.4)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)',
+              boxShadow: '0 6px 20px rgba(245, 87, 108, 0.6)',
+              transform: 'translateY(-2px)',
+            },
+            transition: 'all 0.3s ease'
+          }}
+        >
+          Download All Students PDF Report
+        </Button>
+
+        <Button
+          variant="contained"
+          startIcon={<DescriptionIcon />}
+          onClick={exportToExcel}
+          sx={{
+            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            color: 'white',
+            fontWeight: 'bold',
+            px: 3,
+            py: 1.5,
+            borderRadius: '10px',
+            textTransform: 'none',
+            boxShadow: '0 4px 15px rgba(79, 172, 254, 0.4)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)',
+              boxShadow: '0 6px 20px rgba(79, 172, 254, 0.6)',
+              transform: 'translateY(-2px)',
+            },
+            transition: 'all 0.3s ease'
+          }}
+        >
+          Export to Excel
+        </Button>
+      </Box>
 
       {/* Add Student Form */}
       <StyledFilterCard>
@@ -1158,7 +1472,15 @@ export default function Students() {
                     </TableCell>
 
                     <TableCell align="center">
-                      <Box>
+                      <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+                        <Tooltip title="Download PDF Slip">
+                          <ActionButton
+                            sx={{ color: '#f093fb' }}
+                            onClick={() => downloadStudentPDF(student)}
+                          >
+                            <PictureAsPdfIcon />
+                          </ActionButton>
+                        </Tooltip>
                         <Tooltip title="Edit Student">
                           <ActionButton
                             color="primary"
