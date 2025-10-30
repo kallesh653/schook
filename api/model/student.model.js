@@ -25,6 +25,12 @@ const studentSchema = new mongoose.Schema({
         unique: false,
         sparse: true
     },
+    // Optional school details
+    roll_number:{type:String, required:false},
+    school_name:{type:String, required:false},
+    school_id:{type:String, required:false},
+    established_year:{type:String, required:false},
+
     student_image:{type:String,  required:false, default: 'default-student.png'},
     createdAt:{type:Date, default: new Date()},
 

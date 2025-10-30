@@ -121,6 +121,19 @@ module.exports = {
                         if (fields.transport_fees && fields.transport_fees[0] && fields.transport_fees[0] !== '') {
                             studentData.transport_fees = fields.transport_fees[0];
                         }
+                        // Optional school details
+                        if (fields.roll_number && fields.roll_number[0]) {
+                            studentData.roll_number = fields.roll_number[0];
+                        }
+                        if (fields.school_name && fields.school_name[0]) {
+                            studentData.school_name = fields.school_name[0];
+                        }
+                        if (fields.school_id && fields.school_id[0]) {
+                            studentData.school_id = fields.school_id[0];
+                        }
+                        if (fields.established_year && fields.established_year[0]) {
+                            studentData.established_year = fields.established_year[0];
+                        }
 
                         // Handle fees data
                         const total_fees = Number(fields.total_fees?.[0]) || 0;

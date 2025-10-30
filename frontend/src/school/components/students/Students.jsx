@@ -223,6 +223,10 @@ export default function Students() {
     guardian: "",
     guardian_phone: "",
     aadhaar_number: "",
+    roll_number: "",
+    school_name: "",
+    school_id: "",
+    established_year: "",
     password: "",
     transport_fees: "",
     total_fees: "",
@@ -799,7 +803,7 @@ export default function Students() {
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Aadhaar Number"
+                  label="Aadhaar Number (Optional)"
                   variant="outlined"
                   name="aadhaar_number"
                   value={Formik.values.aadhaar_number}
@@ -813,6 +817,58 @@ export default function Students() {
                     {Formik.errors.aadhaar_number}
                   </Typography>
                 )}
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Roll Number (Optional)"
+                  variant="outlined"
+                  name="roll_number"
+                  value={Formik.values.roll_number}
+                  onChange={Formik.handleChange}
+                  onBlur={Formik.handleBlur}
+                  placeholder="Enter roll number"
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="School Name (Optional)"
+                  variant="outlined"
+                  name="school_name"
+                  value={Formik.values.school_name}
+                  onChange={Formik.handleChange}
+                  onBlur={Formik.handleBlur}
+                  placeholder="Enter school name"
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="School ID (Optional)"
+                  variant="outlined"
+                  name="school_id"
+                  value={Formik.values.school_id}
+                  onChange={Formik.handleChange}
+                  onBlur={Formik.handleBlur}
+                  placeholder="Enter school ID"
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Established Year (Optional)"
+                  variant="outlined"
+                  name="established_year"
+                  value={Formik.values.established_year}
+                  onChange={Formik.handleChange}
+                  onBlur={Formik.handleBlur}
+                  placeholder="e.g., 1990"
+                />
               </Grid>
 
               <Grid item xs={12} md={6}>
