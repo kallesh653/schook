@@ -485,7 +485,8 @@ export default function Students() {
 
   // Generate PDF for individual student
   const downloadStudentPDF = (student) => {
-    const doc = new jsPDF();
+    try {
+      const doc = new jsPDF();
 
     // Add border
     doc.setDrawColor(67, 126, 234);
@@ -622,25 +623,31 @@ export default function Students() {
       yPos += 7;
     });
 
-    // Footer
-    doc.setFontSize(8);
-    doc.setTextColor(128, 128, 128);
-    doc.text(`Generated on: ${new Date().toLocaleString()}`, 105, 280, { align: 'center' });
+      // Footer
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text(`Generated on: ${new Date().toLocaleString()}`, 105, 280, { align: 'center' });
 
-    doc.save(`${student.name}_Student_Details.pdf`);
-    setMessage("PDF downloaded successfully");
-    setType("success");
+      doc.save(`${student.name.replace(/\s+/g, '_')}_Student_Details.pdf`);
+      setMessage("PDF downloaded successfully");
+      setType("success");
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      setMessage("Error generating PDF: " + error.message);
+      setType("error");
+    }
   };
 
   // Generate comprehensive PDF report for all students
   const downloadAllStudentsPDF = () => {
-    if (!students || students.length === 0) {
-      setMessage("No students data to export");
-      setType("warning");
-      return;
-    }
+    try {
+      if (!students || students.length === 0) {
+        setMessage("No students data to export");
+        setType("warning");
+        return;
+      }
 
-    const doc = new jsPDF();
+      const doc = new jsPDF();
 
     // Title Page
     doc.setFillColor(67, 126, 234);
@@ -693,9 +700,14 @@ export default function Students() {
       alternateRowStyles: { fillColor: [245, 245, 245] }
     });
 
-    doc.save(`Students_Complete_Report_${new Date().toISOString().split('T')[0]}.pdf`);
-    setMessage("Comprehensive PDF report downloaded successfully");
-    setType("success");
+      doc.save(`Students_Complete_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+      setMessage("Comprehensive PDF report downloaded successfully");
+      setType("success");
+    } catch (error) {
+      console.error('Error generating comprehensive PDF:', error);
+      setMessage("Error generating PDF report: " + error.message);
+      setType("error");
+    }
   };
 
   return (
