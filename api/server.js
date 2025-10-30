@@ -17,6 +17,7 @@ const attendanceRoutes = require('./router/attendance.router');
 const periodRoutes = require("./router/period.router");
 const noticeRoutes = require("./router/notice.router");
 const feesRoutes = require("./router/fees.router");
+const transportFeesRouter = require('./routes/transportFees.routes');
 const studentRecordRouter = require('./router/studentRecord.router');
 const frontPageRouter = require('./router/frontPage.router');
 const publicHomePageRouter = require('./router/publicHomePage.router');
@@ -73,6 +74,7 @@ app.use('/api/attendance', attendanceRoutes)
 app.use('/api/period',  periodRoutes)
 app.use('/api/notices', noticeRoutes)
 app.use('/api/fees', feesRoutes)
+app.use('/api/transport-fees', transportFeesRouter)
 app.use("/api/student-records", studentRecordRouter);
 app.use("/api/front-page", frontPageRouter);
 app.use("/api/public-home", publicHomePageRouter);

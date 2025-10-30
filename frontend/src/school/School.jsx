@@ -43,6 +43,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import SchoolIcon from '@mui/icons-material/School';
 import SmsIcon from '@mui/icons-material/Sms';
 import SettingsIcon from '@mui/icons-material/Settings';
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 
 const drawerWidth = 280;
 
@@ -284,6 +285,7 @@ export default function School() {
         { link: "/school/teachers", component: "Teachers", icon: GroupIcon, category: "people" },
         { link: "/school/student-records", component: "Student Records", icon: AssignmentIndIcon, category: "records" },
         { link: "/school/fees", component: "Fees Management", icon: PaymentIcon, category: "financial" },
+        { link: "/school/transport-fees", component: "Transport Fees", icon: DirectionsBusIcon, category: "financial" },
         { link: "/school/periods", component: "Schedule", icon: CalendarMonthIcon, category: "academic" },
         { link: "/school/attendance", component: "Attendance", icon: RecentActorsIcon, category: "records" },
         { link: "/school/attendance-report", component: "Attendance Reports", icon: AssessmentIcon, category: "records" },

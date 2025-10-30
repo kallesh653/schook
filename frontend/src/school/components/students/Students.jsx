@@ -121,6 +121,7 @@ export default function Students() {
   const [studentClass, setStudentClass] = useState([]);
   const [courses, setCourses] = useState([]);
   const [students, setStudents] = useState([]);
+  const [transportFees, setTransportFees] = useState([]);
   const [isEdit, setEdit] = useState(false);
   const [editId, setEditId] = useState(null);
   const [viewMode, setViewMode] = useState('table');
@@ -216,6 +217,7 @@ export default function Students() {
     password: "",
     total_fees: "",
     paid_fees: "",
+    transport_fees: "",
   };
 
   // Function to calculate age from date of birth
@@ -283,7 +285,7 @@ export default function Students() {
           const fd = new FormData();
           fd.append("image", file, file.name);
           Object.keys(values).forEach((key) => {
-            if (key !== 'total_fees' && key !== 'paid_fees') {
+            if (key !== 'total_fees' && key !== 'paid_fees' && key !== 'transport_fees') {
               fd.append(key, values[key]);
             }
           });
@@ -291,6 +293,10 @@ export default function Students() {
           if (values.total_fees || values.paid_fees) {
             fd.append("fees[total_fees]", values.total_fees || 0);
             fd.append("fees[paid_fees]", values.paid_fees || 0);
+          }
+
+          if (values.transport_fees) {
+            fd.append("transport_fees", values.transport_fees);
           }
 
           axios
@@ -309,7 +315,7 @@ export default function Students() {
           // Submit without image - image is now optional
           const fd = new FormData();
           Object.keys(values).forEach((key) => {
-            if (key !== 'total_fees' && key !== 'paid_fees') {
+            if (key !== 'total_fees' && key !== 'paid_fees' && key !== 'transport_fees') {
               fd.append(key, values[key]);
             }
           });
@@ -317,6 +323,10 @@ export default function Students() {
           if (values.total_fees || values.paid_fees) {
             fd.append("fees[total_fees]", values.total_fees || 0);
             fd.append("fees[paid_fees]", values.paid_fees || 0);
+          }
+
+          if (values.transport_fees) {
+            fd.append("transport_fees", values.transport_fees);
           }
 
           axios
@@ -373,6 +383,18 @@ export default function Students() {
     }
   };
 
+  const fetchTransportFees = () => {
+    const token = localStorage.getItem('token');
+    axios
+      .get(`${baseUrl}/transport-fees/fetch-active`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then((resp) => {
+        setTransportFees(resp.data.data);
+      })
+      .catch(() => console.log("Error in fetching transport fees"));
+  };
+
   const fetchStudents = () => {
     axios
       .get(`${baseUrl}/student/fetch-with-query`, { params })
@@ -386,6 +408,7 @@ export default function Students() {
     fetchStudents();
     fetchStudentClass();
     fetchCourses();
+    fetchTransportFees();
   }, [message, params]);
 
   const fileInputRef = useRef(null);
@@ -703,6 +726,30 @@ export default function Students() {
                   onChange={Formik.handleChange}
                   onBlur={Formik.handleBlur}
                 />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel id="transport-fees-label">Transport Fees (Optional)</InputLabel>
+                  <Select
+                    labelId="transport-fees-label"
+                    label="Transport Fees (Optional)"
+                    name="transport_fees"
+                    value={Formik.values.transport_fees}
+                    onChange={Formik.handleChange}
+                    onBlur={Formik.handleBlur}
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {transportFees && transportFees.map((location) => (
+                      <MenuItem key={location._id} value={location._id}>
+                        {location.location_name} - ₹{location.monthly_fee}/month
+                        {location.distance && ` (${location.distance})`}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
 
               {!isEdit && (

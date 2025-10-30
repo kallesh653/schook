@@ -115,6 +115,9 @@ module.exports = {
                         if (Object.keys(feesData).length > 0) {
                             studentData.fees = feesData;
                         }
+                        if (fields.transport_fees && fields.transport_fees[0] && fields.transport_fees[0] !== '') {
+                            studentData.transport_fees = fields.transport_fees[0];
+                        }
 
                         console.log("Student Data to save:", studentData);
 

@@ -35,6 +35,14 @@ const studentSchema = new mongoose.Schema({
         balance_fees: { type: Number, default: 0 }
     },
 
+    // Transport Fees Selection
+    transport_fees: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'TransportFees',
+        required: false,
+        default: null
+    },
+
     password:{type:String, required:true}
 
 })
