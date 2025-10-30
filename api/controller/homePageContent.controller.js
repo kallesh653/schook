@@ -996,7 +996,7 @@ const updateSEO = async (req, res) => {
 
 // File upload handler
 const uploadFile = async (req, res) => {
-  const form = formidableLib.formidable({
+  const form = new formidableLib.IncomingForm({
     multiples: true,
     uploadDir: path.join(__dirname, "../uploads/home-page"),
     keepExtensions: true,
