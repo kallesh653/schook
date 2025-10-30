@@ -46,12 +46,27 @@ module.exports = {
                 return res.status(500).json({ success: false, message: "Error parsing form data." });
             }
 
-            // Validate required fields
+            // Validate required fields with specific messages
             if (!fields.email || !fields.email[0]) {
                 return res.status(400).json({ success: false, message: "Email is required." });
             }
             if (!fields.name || !fields.name[0]) {
                 return res.status(400).json({ success: false, message: "Name is required." });
+            }
+            if (!fields.student_class || !fields.student_class[0]) {
+                return res.status(400).json({ success: false, message: "Class is required. Please select a class." });
+            }
+            if (!fields.gender || !fields.gender[0]) {
+                return res.status(400).json({ success: false, message: "Gender is required." });
+            }
+            if (!fields.guardian || !fields.guardian[0]) {
+                return res.status(400).json({ success: false, message: "Guardian name is required." });
+            }
+            if (!fields.guardian_phone || !fields.guardian_phone[0]) {
+                return res.status(400).json({ success: false, message: "Guardian phone is required." });
+            }
+            if (!fields.age || !fields.age[0]) {
+                return res.status(400).json({ success: false, message: "Age is required." });
             }
             if (!fields.password || !fields.password[0]) {
                 return res.status(400).json({ success: false, message: "Password is required." });
