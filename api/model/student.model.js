@@ -28,13 +28,6 @@ const studentSchema = new mongoose.Schema({
     student_image:{type:String,  required:false, default: 'default-student.png'},
     createdAt:{type:Date, default: new Date()},
 
-    // Fees Information
-    fees: {
-        total_fees: { type: Number, default: 0 },
-        paid_fees: { type: Number, default: 0 },
-        balance_fees: { type: Number, default: 0 }
-    },
-
     // Transport Fees Selection
     transport_fees: {
         type: mongoose.Schema.ObjectId,
@@ -47,13 +40,8 @@ const studentSchema = new mongoose.Schema({
 
 })
 
-// Pre-save middleware to calculate balance fees and validate age
+// Pre-save middleware to validate age
 studentSchema.pre('save', function(next) {
-    if (this.fees) {
-        // Calculate balance fees (Total - Paid)
-        this.fees.balance_fees = (this.fees.total_fees || 0) - (this.fees.paid_fees || 0);
-    }
-
     // Validate minimum age of 4 years
     if (this.date_of_birth) {
         const today = new Date();

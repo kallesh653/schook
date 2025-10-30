@@ -284,7 +284,6 @@ export default function School() {
         { link: "/school/students", component: "Students", icon: GroupIcon, category: "people" },
         { link: "/school/teachers", component: "Teachers", icon: GroupIcon, category: "people" },
         { link: "/school/student-records", component: "Student Records", icon: AssignmentIndIcon, category: "records" },
-        { link: "/school/fees", component: "Fees Management", icon: PaymentIcon, category: "financial" },
         { link: "/school/transport-fees", component: "Transport Fees", icon: DirectionsBusIcon, category: "financial" },
         { link: "/school/periods", component: "Schedule", icon: CalendarMonthIcon, category: "academic" },
         { link: "/school/attendance", component: "Attendance", icon: RecentActorsIcon, category: "records" },

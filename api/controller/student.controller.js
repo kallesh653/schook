@@ -72,15 +72,6 @@ module.exports = {
 
                         console.log(fields,"Fields")
 
-                        // Handle fees data
-                        const feesData = {};
-                        if (fields['fees[total_fees]']) {
-                            feesData.total_fees = Number(fields['fees[total_fees]'][0]) || 0;
-                        }
-                        if (fields['fees[paid_fees]']) {
-                            feesData.paid_fees = Number(fields['fees[paid_fees]'][0]) || 0;
-                        }
-
                         // Calculate date of birth from age if not provided
                         let dateOfBirth = new Date();
                         if (fields.date_of_birth && fields.date_of_birth[0]) {
@@ -111,9 +102,6 @@ module.exports = {
                         }
                         if (fields.aadhaar_number && fields.aadhaar_number[0]) {
                             studentData.aadhaar_number = fields.aadhaar_number[0];
-                        }
-                        if (Object.keys(feesData).length > 0) {
-                            studentData.fees = feesData;
                         }
                         if (fields.transport_fees && fields.transport_fees[0] && fields.transport_fees[0] !== '') {
                             studentData.transport_fees = fields.transport_fees[0];

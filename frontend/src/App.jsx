@@ -50,7 +50,6 @@ import PublicHomePage from "./client/components/public-home/PublicHomePage";
 import SimpleHome from "./client/components/home/SimpleHome";
 import AdvancedHome from "./client/components/home/AdvancedHome";
 import ProtectedWebsiteBuilder from "./website-builder/ProtectedWebsiteBuilder";
-import FeesManagement from "./school/components/fees/FeesManagement";
 import TransportFees from "./school/components/transport/TransportFees";
 import MarkSheetGenerator from "./school/components/marksheet/MarkSheetGenerator";
 import SmsManagement from "./school/components/sms/SmsManagement";
@@ -85,7 +84,6 @@ function App() {
               <Route path="attendance-report" element={<AttendanceReport />} />
               <Route path="attendance-student/:studentId" element={<AttendanceDetails />} />
               <Route path="examinations" element={<Examinations />} />
-              <Route path="fees" element={<FeesManagement />} />
               <Route path="transport-fees" element={<TransportFees />} />
               <Route path="marksheets" element={<MarkSheetGenerator />} />
               <Route path="sms" element={<SmsManagement />} />

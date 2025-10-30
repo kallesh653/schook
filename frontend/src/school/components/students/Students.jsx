@@ -184,8 +184,7 @@ export default function Students() {
           guardian_phone: data.guardian_phone,
           aadhaar_number: data.aadhaar_number || "",
           password: data.password,
-          total_fees: data.fees?.total_fees || "",
-          paid_fees: data.fees?.paid_fees || "",
+          transport_fees: data.transport_fees?._id || "",
         });
         setImageUrl(data.image);
         setEditId(data._id);
@@ -215,8 +214,6 @@ export default function Students() {
     guardian_phone: "",
     aadhaar_number: "",
     password: "",
-    total_fees: "",
-    paid_fees: "",
     transport_fees: "",
   };
 
@@ -263,11 +260,6 @@ export default function Students() {
           fd.append("image", file, file.name);
         }
 
-        if (values.total_fees || values.paid_fees) {
-          fd.append("fees[total_fees]", values.total_fees || 0);
-          fd.append("fees[paid_fees]", values.paid_fees || 0);
-        }
-
         axios
           .patch(`${baseUrl}/student/update/${editId}`, fd)
           .then((resp) => {
@@ -285,15 +277,10 @@ export default function Students() {
           const fd = new FormData();
           fd.append("image", file, file.name);
           Object.keys(values).forEach((key) => {
-            if (key !== 'total_fees' && key !== 'paid_fees' && key !== 'transport_fees') {
+            if (key !== 'transport_fees') {
               fd.append(key, values[key]);
             }
           });
-
-          if (values.total_fees || values.paid_fees) {
-            fd.append("fees[total_fees]", values.total_fees || 0);
-            fd.append("fees[paid_fees]", values.paid_fees || 0);
-          }
 
           if (values.transport_fees) {
             fd.append("transport_fees", values.transport_fees);
@@ -315,15 +302,10 @@ export default function Students() {
           // Submit without image - image is now optional
           const fd = new FormData();
           Object.keys(values).forEach((key) => {
-            if (key !== 'total_fees' && key !== 'paid_fees' && key !== 'transport_fees') {
+            if (key !== 'transport_fees') {
               fd.append(key, values[key]);
             }
           });
-
-          if (values.total_fees || values.paid_fees) {
-            fd.append("fees[total_fees]", values.total_fees || 0);
-            fd.append("fees[paid_fees]", values.paid_fees || 0);
-          }
 
           if (values.transport_fees) {
             fd.append("transport_fees", values.transport_fees);
@@ -700,32 +682,6 @@ export default function Students() {
                     {Formik.errors.aadhaar_number}
                   </Typography>
                 )}
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Total Fees"
-                  variant="outlined"
-                  name="total_fees"
-                  type="number"
-                  value={Formik.values.total_fees}
-                  onChange={Formik.handleChange}
-                  onBlur={Formik.handleBlur}
-                />
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Paid Fees"
-                  variant="outlined"
-                  name="paid_fees"
-                  type="number"
-                  value={Formik.values.paid_fees}
-                  onChange={Formik.handleChange}
-                  onBlur={Formik.handleBlur}
-                />
               </Grid>
 
               <Grid item xs={12} md={6}>
