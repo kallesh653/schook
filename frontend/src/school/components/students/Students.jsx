@@ -851,7 +851,6 @@ export default function Students() {
                     Guardian Info
                   </Box>
                 </TableCell>
-                <TableCell align="center">Fees Status</TableCell>
                 <TableCell align="center">Actions</TableCell>
               </TableRow>
             </StyledTableHead>
@@ -939,28 +938,6 @@ export default function Students() {
                           </Typography>
                         )}
                       </Box>
-                    </TableCell>
-
-                    <TableCell align="center">
-                      {student.fees ? (
-                        <Box>
-                          <Typography variant="body2" sx={{ mb: 0.5 }}>
-                            <strong>Total:</strong> ₹{student.fees.total_fees || 0}
-                          </Typography>
-                          <Typography variant="body2" sx={{ mb: 0.5 }}>
-                            <strong>Paid:</strong> ₹{student.fees.paid_fees || 0}
-                          </Typography>
-                          <Chip
-                            label={`Balance: ₹${(student.fees.total_fees || 0) - (student.fees.paid_fees || 0)}`}
-                            color={(student.fees.total_fees || 0) - (student.fees.paid_fees || 0) === 0 ? 'success' : 'warning'}
-                            size="small"
-                          />
-                        </Box>
-                      ) : (
-                        <Typography variant="body2" color="text.secondary">
-                          No fees data
-                        </Typography>
-                      )}
                     </TableCell>
 
                     <TableCell align="center">

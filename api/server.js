@@ -16,7 +16,7 @@ const examRouter =  require('./router/examination.router')
 const attendanceRoutes = require('./router/attendance.router');
 const periodRoutes = require("./router/period.router");
 const noticeRoutes = require("./router/notice.router");
-const feesRoutes = require("./router/fees.router");
+// const feesRoutes = require("./router/fees.router"); // REMOVED - Fees management completely removed
 const transportFeesRouter = require('./routes/transportFees.routes');
 const studentRecordRouter = require('./router/studentRecord.router');
 const frontPageRouter = require('./router/frontPage.router');
@@ -73,7 +73,7 @@ app.use('/api/examination', examRouter)
 app.use('/api/attendance', attendanceRoutes)
 app.use('/api/period',  periodRoutes)
 app.use('/api/notices', noticeRoutes)
-app.use('/api/fees', feesRoutes)
+// app.use('/api/fees', feesRoutes) // REMOVED - Fees management completely removed
 app.use('/api/transport-fees', transportFeesRouter)
 app.use("/api/student-records", studentRecordRouter);
 app.use("/api/front-page", frontPageRouter);
