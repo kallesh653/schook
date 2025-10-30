@@ -41,6 +41,28 @@ module.exports = {
         const form = new formidable.IncomingForm();
 
         form.parse(req, (err, fields, files) => {
+            if (err) {
+                console.log("Form parse error:", err);
+                return res.status(500).json({ success: false, message: "Error parsing form data." });
+            }
+
+            // Validate required fields
+            if (!fields.email || !fields.email[0]) {
+                return res.status(400).json({ success: false, message: "Email is required." });
+            }
+            if (!fields.name || !fields.name[0]) {
+                return res.status(400).json({ success: false, message: "Name is required." });
+            }
+            if (!fields.password || !fields.password[0]) {
+                return res.status(400).json({ success: false, message: "Password is required." });
+            }
+            if (!files.image || !files.image[0]) {
+                return res.status(400).json({ success: false, message: "Student image is required." });
+            }
+            if (!req.user || !req.user.id) {
+                return res.status(401).json({ success: false, message: "Authentication required. Please login again." });
+            }
+
             Student.find({ email: fields.email[0] }).then(resp => {
                 if (resp.length > 0) {
                     res.status(500).json({ success: false, message: "Email Already Exist!" })
@@ -54,7 +76,10 @@ module.exports = {
 
                     let photoData = fs.readFileSync(oldPath);
                     fs.writeFile(newPath, photoData, function (err) {
-                        if (err) console.log(err);
+                        if (err) {
+                            console.log("File write error:", err);
+                            return res.status(500).json({ success: false, message: "Error saving image file." });
+                        }
 
                         var salt = bcrypt.genSaltSync(10);
                         var hashPassword = bcrypt.hashSync(fields.password[0], salt);
@@ -70,17 +95,28 @@ module.exports = {
                             feesData.paid_fees = Number(fields['fees[paid_fees]'][0]) || 0;
                         }
 
+                        // Calculate date of birth from age if not provided
+                        let dateOfBirth = new Date();
+                        if (fields.date_of_birth && fields.date_of_birth[0]) {
+                            dateOfBirth = new Date(fields.date_of_birth[0]);
+                        } else if (fields.age && fields.age[0]) {
+                            const age = Number(fields.age[0]);
+                            dateOfBirth.setFullYear(dateOfBirth.getFullYear() - age);
+                        }
+
                         const studentData = {
                             email: fields.email[0],
                             name: fields.name[0],
-                            student_class:fields.student_class[0],
-                            guardian:fields.guardian[0],
-                            guardian_phone:fields.guardian_phone[0],
-                            age: fields.age[0],
+                            student_class: fields.student_class[0],
+                            guardian: fields.guardian[0],
+                            guardian_phone: fields.guardian_phone[0],
+                            age: Number(fields.age[0]) || 5,
                             gender: fields.gender[0],
+                            date_of_birth: dateOfBirth,
+                            date_of_admission: fields.date_of_admission && fields.date_of_admission[0] ? new Date(fields.date_of_admission[0]) : new Date(),
                             student_image: originalFileName,
                             password: hashPassword,
-                            school:req.user.id
+                            school: req.user.id
                         };
 
                         // Only add optional fields if they exist
@@ -94,6 +130,8 @@ module.exports = {
                             studentData.fees = feesData;
                         }
 
+                        console.log("Student Data to save:", studentData);
+
                         const newStudent = new Student(studentData)
 
                         newStudent.save().then(savedData => {
@@ -101,13 +139,17 @@ module.exports = {
                             res.status(200).json({ success: true, data: savedData, message:"Student is Registered Successfully." })
                         }).catch(e => {
                             console.log("ERRORO in Register", e)
-                            res.status(500).json({ success: false, message: "Failed Registration." })
+                            console.log("Error details:", e.message)
+                            res.status(500).json({ success: false, message: e.message || "Failed Registration." })
                         })
 
                     })
 
 
                 }
+            }).catch(err => {
+                console.log("Database error:", err);
+                res.status(500).json({ success: false, message: "Database error checking email." });
             })
 
         })
