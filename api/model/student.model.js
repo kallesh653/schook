@@ -28,6 +28,13 @@ const studentSchema = new mongoose.Schema({
     student_image:{type:String,  required:false, default: 'default-student.png'},
     createdAt:{type:Date, default: new Date()},
 
+    // Fees Management
+    fees: {
+        total_fees: {type: Number, required: false, default: 0},
+        advance_fees: {type: Number, required: false, default: 0},
+        balance_fees: {type: Number, required: false, default: 0}
+    },
+
     // Transport Fees Selection
     transport_fees: {
         type: mongoose.Schema.ObjectId,

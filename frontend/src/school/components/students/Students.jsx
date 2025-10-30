@@ -47,6 +47,10 @@ import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import PeopleIcon from '@mui/icons-material/People';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 
 // Styled components
 const StyledHeaderCard = styled(Card)(({ theme }) => ({
@@ -125,6 +129,12 @@ export default function Students() {
   const [isEdit, setEdit] = useState(false);
   const [editId, setEditId] = useState(null);
   const [viewMode, setViewMode] = useState('table');
+  const [feesStats, setFeesStats] = useState({
+    totalStudents: 0,
+    totalFees: 0,
+    feesCollected: 0,
+    balanceFees: 0
+  });
 
   const [file, setFile] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
@@ -215,6 +225,8 @@ export default function Students() {
     aadhaar_number: "",
     password: "",
     transport_fees: "",
+    total_fees: "",
+    advance_fees: "",
   };
 
   // Function to calculate age from date of birth
@@ -381,7 +393,24 @@ export default function Students() {
     axios
       .get(`${baseUrl}/student/fetch-with-query`, { params })
       .then((resp) => {
-        setStudents(resp.data.data);
+        const studentsData = resp.data.data;
+        setStudents(studentsData);
+
+        // Calculate fees statistics
+        const stats = studentsData.reduce((acc, student) => {
+          const totalFees = student.fees?.total_fees || 0;
+          const advanceFees = student.fees?.advance_fees || 0;
+          const balanceFees = student.fees?.balance_fees || 0;
+
+          return {
+            totalStudents: acc.totalStudents + 1,
+            totalFees: acc.totalFees + totalFees,
+            feesCollected: acc.feesCollected + advanceFees,
+            balanceFees: acc.balanceFees + balanceFees
+          };
+        }, { totalStudents: 0, totalFees: 0, feesCollected: 0, balanceFees: 0 });
+
+        setFeesStats(stats);
       })
       .catch(() => console.log("Error in fetching students data"));
   };
@@ -412,18 +441,120 @@ export default function Students() {
         />
       )}
 
-      {/* Header Card */}
-      <StyledHeaderCard>
-        <CardContent sx={{ textAlign: 'center', py: 4 }}>
-          <SchoolIcon sx={{ fontSize: 60, mb: 2 }} />
-          <Typography variant="h3" component="h1" gutterBottom>
-            Student Management
-          </Typography>
-          <Typography variant="h6" sx={{ opacity: 0.9 }}>
-            Manage and view all student information
-          </Typography>
-        </CardContent>
-      </StyledHeaderCard>
+      {/* Dashboard Stats Cards */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {/* Total Students Card */}
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            height: '100%',
+            transition: 'transform 0.3s ease-in-out',
+            '&:hover': { transform: 'translateY(-8px)', boxShadow: '0 12px 20px rgba(102, 126, 234, 0.4)' }
+          }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                <Box>
+                  <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>
+                    Total Students
+                  </Typography>
+                  <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
+                    {feesStats.totalStudents}
+                  </Typography>
+                </Box>
+                <PeopleIcon sx={{ fontSize: 48, opacity: 0.8 }} />
+              </Box>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                Enrolled in school
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Total Fees Card */}
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{
+            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            color: 'white',
+            height: '100%',
+            transition: 'transform 0.3s ease-in-out',
+            '&:hover': { transform: 'translateY(-8px)', boxShadow: '0 12px 20px rgba(240, 147, 251, 0.4)' }
+          }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                <Box>
+                  <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>
+                    Total Fees
+                  </Typography>
+                  <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
+                    ₹{feesStats.totalFees.toLocaleString()}
+                  </Typography>
+                </Box>
+                <AttachMoneyIcon sx={{ fontSize: 48, opacity: 0.8 }} />
+              </Box>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                Overall fees amount
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Fees Collected Card */}
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{
+            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            color: 'white',
+            height: '100%',
+            transition: 'transform 0.3s ease-in-out',
+            '&:hover': { transform: 'translateY(-8px)', boxShadow: '0 12px 20px rgba(79, 172, 254, 0.4)' }
+          }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                <Box>
+                  <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>
+                    Fees Collected
+                  </Typography>
+                  <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
+                    ₹{feesStats.feesCollected.toLocaleString()}
+                  </Typography>
+                </Box>
+                <AccountBalanceWalletIcon sx={{ fontSize: 48, opacity: 0.8 }} />
+              </Box>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                {feesStats.totalFees > 0 ? `${((feesStats.feesCollected / feesStats.totalFees) * 100).toFixed(1)}%` : '0%'} collected
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Balance Fees Card */}
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{
+            background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+            color: 'white',
+            height: '100%',
+            transition: 'transform 0.3s ease-in-out',
+            '&:hover': { transform: 'translateY(-8px)', boxShadow: '0 12px 20px rgba(250, 112, 154, 0.4)' }
+          }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                <Box>
+                  <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>
+                    Balance Fees
+                  </Typography>
+                  <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
+                    ₹{feesStats.balanceFees.toLocaleString()}
+                  </Typography>
+                </Box>
+                <TrendingUpIcon sx={{ fontSize: 48, opacity: 0.8 }} />
+              </Box>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                Pending collection
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
       {/* Add Student Form */}
       <StyledFilterCard>
@@ -706,6 +837,36 @@ export default function Students() {
                     ))}
                   </Select>
                 </FormControl>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Total Fees"
+                  variant="outlined"
+                  name="total_fees"
+                  type="number"
+                  value={Formik.values.total_fees}
+                  onChange={Formik.handleChange}
+                  onBlur={Formik.handleBlur}
+                  error={Formik.touched.total_fees && Boolean(Formik.errors.total_fees)}
+                  helperText={Formik.touched.total_fees && Formik.errors.total_fees}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Advance Fees Paid"
+                  variant="outlined"
+                  name="advance_fees"
+                  type="number"
+                  value={Formik.values.advance_fees}
+                  onChange={Formik.handleChange}
+                  onBlur={Formik.handleBlur}
+                  error={Formik.touched.advance_fees && Boolean(Formik.errors.advance_fees)}
+                  helperText={Formik.touched.advance_fees && Formik.errors.advance_fees}
+                />
               </Grid>
 
               {!isEdit && (

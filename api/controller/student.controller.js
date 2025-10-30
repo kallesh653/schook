@@ -122,6 +122,17 @@ module.exports = {
                             studentData.transport_fees = fields.transport_fees[0];
                         }
 
+                        // Handle fees data
+                        const total_fees = Number(fields.total_fees?.[0]) || 0;
+                        const advance_fees = Number(fields.advance_fees?.[0]) || 0;
+                        const balance_fees = total_fees - advance_fees;
+
+                        studentData.fees = {
+                            total_fees: total_fees,
+                            advance_fees: advance_fees,
+                            balance_fees: balance_fees
+                        };
+
                         console.log("Student Data to save:", studentData);
 
                         const newStudent = new Student(studentData)

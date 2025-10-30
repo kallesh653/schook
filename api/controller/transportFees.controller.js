@@ -5,7 +5,7 @@ module.exports = {
     // Create a new transport fee location
     createTransportFees: async (req, res) => {
         try {
-            const schoolId = req.user.schoolId;
+            const schoolId = req.user.id; // User ID is the school ID for SCHOOL role
             const { location_name, distance, fee_structure, monthly_fee, annual_fee, description } = req.body;
 
             // Validation
@@ -95,7 +95,7 @@ module.exports = {
     // Get all transport fee locations for a school
     getAllTransportFees: async (req, res) => {
         try {
-            const schoolId = req.user.schoolId;
+            const schoolId = req.user.id;
 
             const transportFees = await TransportFees.find({ school: schoolId })
                 .sort({ location_name: 1 });
@@ -118,7 +118,7 @@ module.exports = {
     // Get active transport fee locations only
     getActiveTransportFees: async (req, res) => {
         try {
-            const schoolId = req.user.schoolId;
+            const schoolId = req.user.id;
 
             const transportFees = await TransportFees.find({
                 school: schoolId,
@@ -144,7 +144,7 @@ module.exports = {
     getTransportFeesById: async (req, res) => {
         try {
             const { id } = req.params;
-            const schoolId = req.user.schoolId;
+            const schoolId = req.user.id;
 
             const transportFees = await TransportFees.findOne({
                 _id: id,
@@ -176,7 +176,7 @@ module.exports = {
     updateTransportFees: async (req, res) => {
         try {
             const { id } = req.params;
-            const schoolId = req.user.schoolId;
+            const schoolId = req.user.id;
             const { location_name, distance, fee_structure, monthly_fee, annual_fee, description, is_active } = req.body;
 
             const transportFees = await TransportFees.findOne({
@@ -230,7 +230,7 @@ module.exports = {
     deleteTransportFees: async (req, res) => {
         try {
             const { id } = req.params;
-            const schoolId = req.user.schoolId;
+            const schoolId = req.user.id;
 
             const deletedData = await TransportFees.findOneAndDelete({
                 _id: id,
@@ -263,7 +263,7 @@ module.exports = {
     toggleActiveStatus: async (req, res) => {
         try {
             const { id } = req.params;
-            const schoolId = req.user.schoolId;
+            const schoolId = req.user.id;
 
             const transportFees = await TransportFees.findOne({
                 _id: id,
