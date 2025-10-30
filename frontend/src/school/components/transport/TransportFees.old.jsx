@@ -9,9 +9,11 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  FormControlLabel,
   Grid,
   IconButton,
   Paper,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -21,8 +23,6 @@ import {
   TextField,
   Tooltip,
   Typography,
-  Chip,
-  Divider,
 } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { useFormik } from "formik";
@@ -41,8 +41,6 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
 // Styled Components
 const StyledHeaderCard = styled(Card)(({ theme }) => ({
@@ -89,19 +87,12 @@ const ActionButton = styled(IconButton)(({ theme, color }) => ({
   transition: 'all 0.2s ease-in-out',
 }));
 
-const FeeCard = styled(Card)(({ theme }) => ({
-  marginBottom: theme.spacing(2),
-  borderRadius: '10px',
-  border: '1px solid #e0e0e0',
-  '&:hover': {
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-  },
-}));
-
 // Validation Schema
 const transportFeesSchema = yup.object({
   location_name: yup.string().required('Location name is required'),
+  monthly_fee: yup.number().required('Monthly fee is required').min(0, 'Fee must be positive'),
   distance: yup.string(),
+  annual_fee: yup.number().min(0, 'Annual fee must be positive'),
   description: yup.string(),
 });
 
@@ -110,7 +101,6 @@ export default function TransportFees() {
   const [isEdit, setEdit] = useState(false);
   const [editId, setEditId] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [feeStructure, setFeeStructure] = useState([{ period_name: 'Monthly', amount: '' }]);
 
   // MESSAGE
   const [message, setMessage] = useState("");
@@ -123,27 +113,9 @@ export default function TransportFees() {
   const initialValues = {
     location_name: "",
     distance: "",
+    monthly_fee: "",
+    annual_fee: "",
     description: "",
-  };
-
-  // Add new fee row
-  const addFeeRow = () => {
-    setFeeStructure([...feeStructure, { period_name: '', amount: '' }]);
-  };
-
-  // Remove fee row
-  const removeFeeRow = (index) => {
-    if (feeStructure.length > 1) {
-      const newStructure = feeStructure.filter((_, i) => i !== index);
-      setFeeStructure(newStructure);
-    }
-  };
-
-  // Update fee row
-  const updateFeeRow = (index, field, value) => {
-    const newStructure = [...feeStructure];
-    newStructure[index][field] = value;
-    setFeeStructure(newStructure);
   };
 
   const Formik = useFormik({
@@ -151,27 +123,12 @@ export default function TransportFees() {
     validationSchema: transportFeesSchema,
     onSubmit: async (values) => {
       try {
-        // Validate fee structure
-        const validFees = feeStructure.filter(f => f.period_name && f.amount);
-        if (validFees.length === 0) {
-          setMessage("Please add at least one fee period with period name and amount");
-          setType("error");
-          return;
-        }
-
         const token = localStorage.getItem("token");
-        const dataToSend = {
-          ...values,
-          fee_structure: validFees.map(f => ({
-            period_name: f.period_name,
-            amount: Number(f.amount)
-          }))
-        };
 
         if (isEdit) {
           const response = await axios.patch(
             `${baseUrl}/transport-fees/update/${editId}`,
-            dataToSend,
+            values,
             {
               headers: { Authorization: `Bearer ${token}` }
             }
@@ -182,7 +139,7 @@ export default function TransportFees() {
         } else {
           const response = await axios.post(
             `${baseUrl}/transport-fees/create`,
-            dataToSend,
+            values,
             {
               headers: { Authorization: `Bearer ${token}` }
             }
@@ -190,7 +147,6 @@ export default function TransportFees() {
           setMessage(response.data.message);
           setType("success");
           Formik.resetForm();
-          setFeeStructure([{ period_name: 'Monthly', amount: '' }]);
         }
         setOpenDialog(false);
         fetchTransportFees();
@@ -236,22 +192,9 @@ export default function TransportFees() {
       const data = response.data.data;
       Formik.setFieldValue("location_name", data.location_name);
       Formik.setFieldValue("distance", data.distance || '');
+      Formik.setFieldValue("monthly_fee", data.monthly_fee);
+      Formik.setFieldValue("annual_fee", data.annual_fee || '');
       Formik.setFieldValue("description", data.description || '');
-
-      // Set fee structure
-      if (data.fee_structure && data.fee_structure.length > 0) {
-        setFeeStructure(data.fee_structure.map(f => ({
-          period_name: f.period_name,
-          amount: f.amount
-        })));
-      } else {
-        // Backward compatibility
-        const fees = [];
-        if (data.monthly_fee) fees.push({ period_name: 'Monthly', amount: data.monthly_fee });
-        if (data.annual_fee) fees.push({ period_name: 'Annual', amount: data.annual_fee });
-        setFeeStructure(fees.length > 0 ? fees : [{ period_name: 'Monthly', amount: '' }]);
-      }
-
       setEditId(data._id);
       setOpenDialog(true);
     } catch (e) {
@@ -284,7 +227,6 @@ export default function TransportFees() {
     setEdit(false);
     setEditId(null);
     Formik.resetForm();
-    setFeeStructure([{ period_name: 'Monthly', amount: '' }]);
     setOpenDialog(false);
   };
 
@@ -327,7 +269,7 @@ export default function TransportFees() {
             Transport Fees Management
           </Typography>
           <Typography variant="h6" sx={{ opacity: 0.9, mb: 3 }}>
-            Create locations with custom fee periods (Monthly, Quarterly, Annual, etc.)
+            Manage transport fees for different locations
           </Typography>
           <Button
             variant="contained"
@@ -360,9 +302,10 @@ export default function TransportFees() {
               <TableCell align="center">
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
                   <AttachMoneyIcon />
-                  Fee Options
+                  Monthly Fee
                 </Box>
               </TableCell>
+              <TableCell align="center">Annual Fee</TableCell>
               <TableCell align="center">Description</TableCell>
               <TableCell align="center">Status</TableCell>
               <TableCell align="center">Actions</TableCell>
@@ -383,36 +326,14 @@ export default function TransportFees() {
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
-                      {location.fee_structure && location.fee_structure.length > 0 ? (
-                        location.fee_structure.map((fee, idx) => (
-                          <Chip
-                            key={idx}
-                            label={`${fee.period_name}: ₹${fee.amount}`}
-                            color="primary"
-                            variant="outlined"
-                            sx={{ fontWeight: 'bold' }}
-                          />
-                        ))
-                      ) : (
-                        <>
-                          {location.monthly_fee && (
-                            <Chip
-                              label={`Monthly: ₹${location.monthly_fee}`}
-                              color="primary"
-                              variant="outlined"
-                            />
-                          )}
-                          {location.annual_fee && (
-                            <Chip
-                              label={`Annual: ₹${location.annual_fee}`}
-                              color="success"
-                              variant="outlined"
-                            />
-                          )}
-                        </>
-                      )}
-                    </Box>
+                    <Typography variant="h6" sx={{ color: '#2196F3', fontWeight: 'bold' }}>
+                      ₹{location.monthly_fee}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Typography variant="body1" sx={{ color: '#4caf50' }}>
+                      ₹{location.annual_fee || (location.monthly_fee * 12)}
+                    </Typography>
                   </TableCell>
                   <TableCell align="center">
                     <Typography variant="body2" color="text.secondary">
@@ -453,7 +374,7 @@ export default function TransportFees() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
                   <Typography variant="h6" color="text.secondary">
                     No transport locations found. Add your first location!
                   </Typography>
@@ -500,79 +421,41 @@ export default function TransportFees() {
                 />
               </Grid>
 
-              <Grid item xs={12}>
-                <Divider sx={{ my: 2 }}>
-                  <Typography variant="h6" color="primary">
-                    Fee Structure
-                  </Typography>
-                </Divider>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Monthly Fee *"
+                  name="monthly_fee"
+                  type="number"
+                  value={Formik.values.monthly_fee}
+                  onChange={Formik.handleChange}
+                  onBlur={Formik.handleBlur}
+                  error={Formik.touched.monthly_fee && Boolean(Formik.errors.monthly_fee)}
+                  helperText={Formik.touched.monthly_fee && Formik.errors.monthly_fee}
+                  placeholder="Enter monthly fee"
+                  InputProps={{
+                    startAdornment: <Typography sx={{ mr: 1 }}>₹</Typography>,
+                  }}
+                />
               </Grid>
 
-              {/* Dynamic Fee Inputs */}
-              {feeStructure.map((fee, index) => (
-                <Grid item xs={12} key={index}>
-                  <FeeCard>
-                    <CardContent>
-                      <Grid container spacing={2} alignItems="center">
-                        <Grid item xs={12} md={5}>
-                          <TextField
-                            fullWidth
-                            label="Period Name *"
-                            value={fee.period_name}
-                            onChange={(e) => updateFeeRow(index, 'period_name', e.target.value)}
-                            placeholder="e.g., Monthly, Quarterly, Annual"
-                          />
-                        </Grid>
-                        <Grid item xs={12} md={5}>
-                          <TextField
-                            fullWidth
-                            label="Amount *"
-                            type="number"
-                            value={fee.amount}
-                            onChange={(e) => updateFeeRow(index, 'amount', e.target.value)}
-                            placeholder="Enter amount"
-                            InputProps={{
-                              startAdornment: <Typography sx={{ mr: 1 }}>₹</Typography>,
-                            }}
-                          />
-                        </Grid>
-                        <Grid item xs={12} md={2}>
-                          <Box sx={{ display: 'flex', gap: 1 }}>
-                            {index === feeStructure.length - 1 && (
-                              <Tooltip title="Add Fee Period">
-                                <IconButton
-                                  color="primary"
-                                  onClick={addFeeRow}
-                                  sx={{
-                                    border: '2px solid #2196F3',
-                                    '&:hover': { backgroundColor: '#e3f2fd' }
-                                  }}
-                                >
-                                  <AddCircleOutlineIcon />
-                                </IconButton>
-                              </Tooltip>
-                            )}
-                            {feeStructure.length > 1 && (
-                              <Tooltip title="Remove Fee Period">
-                                <IconButton
-                                  color="error"
-                                  onClick={() => removeFeeRow(index)}
-                                  sx={{
-                                    border: '2px solid #f44336',
-                                    '&:hover': { backgroundColor: '#ffebee' }
-                                  }}
-                                >
-                                  <RemoveCircleOutlineIcon />
-                                </IconButton>
-                              </Tooltip>
-                            )}
-                          </Box>
-                        </Grid>
-                      </Grid>
-                    </CardContent>
-                  </FeeCard>
-                </Grid>
-              ))}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Annual Fee"
+                  name="annual_fee"
+                  type="number"
+                  value={Formik.values.annual_fee}
+                  onChange={Formik.handleChange}
+                  onBlur={Formik.handleBlur}
+                  error={Formik.touched.annual_fee && Boolean(Formik.errors.annual_fee)}
+                  helperText={Formik.touched.annual_fee && Formik.errors.annual_fee || "Leave empty to auto-calculate (Monthly × 12)"}
+                  placeholder="Auto-calculated if empty"
+                  InputProps={{
+                    startAdornment: <Typography sx={{ mr: 1 }}>₹</Typography>,
+                  }}
+                />
+              </Grid>
 
               <Grid item xs={12}>
                 <TextField

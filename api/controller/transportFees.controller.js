@@ -6,13 +6,38 @@ module.exports = {
     createTransportFees: async (req, res) => {
         try {
             const schoolId = req.user.schoolId;
-            const { location_name, distance, monthly_fee, annual_fee, description } = req.body;
+            const { location_name, distance, fee_structure, monthly_fee, annual_fee, description } = req.body;
 
             // Validation
-            if (!location_name || !monthly_fee) {
+            if (!location_name) {
                 return res.status(400).json({
                     success: false,
-                    message: "Location name and monthly fee are required."
+                    message: "Location name is required."
+                });
+            }
+
+            // Validate fee structure
+            if (fee_structure && Array.isArray(fee_structure)) {
+                if (fee_structure.length === 0) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "At least one fee period is required."
+                    });
+                }
+                // Validate each fee entry
+                for (const fee of fee_structure) {
+                    if (!fee.period_name || fee.amount === undefined || fee.amount === null) {
+                        return res.status(400).json({
+                            success: false,
+                            message: "Each fee entry must have a period name and amount."
+                        });
+                    }
+                }
+            } else if (!monthly_fee) {
+                // Fallback: If no fee_structure, monthly_fee is required
+                return res.status(400).json({
+                    success: false,
+                    message: "Either fee structure or monthly fee is required."
                 });
             }
 
@@ -30,15 +55,26 @@ module.exports = {
             }
 
             // Create new transport fees entry
-            const newTransportFees = new TransportFees({
+            const transportData = {
                 school: schoolId,
                 location_name: location_name.trim(),
                 distance: distance || '',
-                monthly_fee: Number(monthly_fee),
-                annual_fee: annual_fee ? Number(annual_fee) : null,
                 description: description || ''
-            });
+            };
 
+            // Add fee structure if provided
+            if (fee_structure && Array.isArray(fee_structure) && fee_structure.length > 0) {
+                transportData.fee_structure = fee_structure.map(f => ({
+                    period_name: f.period_name.trim(),
+                    amount: Number(f.amount)
+                }));
+            } else {
+                // Backward compatibility
+                if (monthly_fee) transportData.monthly_fee = Number(monthly_fee);
+                if (annual_fee) transportData.annual_fee = Number(annual_fee);
+            }
+
+            const newTransportFees = new TransportFees(transportData);
             const savedData = await newTransportFees.save();
 
             res.status(201).json({
@@ -141,7 +177,7 @@ module.exports = {
         try {
             const { id } = req.params;
             const schoolId = req.user.schoolId;
-            const { location_name, distance, monthly_fee, annual_fee, description, is_active } = req.body;
+            const { location_name, distance, fee_structure, monthly_fee, annual_fee, description, is_active } = req.body;
 
             const transportFees = await TransportFees.findOne({
                 _id: id,
@@ -158,10 +194,20 @@ module.exports = {
             // Update fields
             if (location_name) transportFees.location_name = location_name.trim();
             if (distance !== undefined) transportFees.distance = distance;
-            if (monthly_fee !== undefined) transportFees.monthly_fee = Number(monthly_fee);
-            if (annual_fee !== undefined) transportFees.annual_fee = Number(annual_fee);
             if (description !== undefined) transportFees.description = description;
             if (is_active !== undefined) transportFees.is_active = is_active;
+
+            // Update fee structure if provided
+            if (fee_structure && Array.isArray(fee_structure) && fee_structure.length > 0) {
+                transportFees.fee_structure = fee_structure.map(f => ({
+                    period_name: f.period_name.trim(),
+                    amount: Number(f.amount)
+                }));
+            } else {
+                // Backward compatibility - update legacy fields
+                if (monthly_fee !== undefined) transportFees.monthly_fee = Number(monthly_fee);
+                if (annual_fee !== undefined) transportFees.annual_fee = Number(annual_fee);
+            }
 
             const updatedData = await transportFees.save();
 
