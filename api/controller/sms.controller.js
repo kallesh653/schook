@@ -79,6 +79,116 @@ const getTemplates = async (req, res) => {
     }
 };
 
+// Get single template by ID
+const getTemplateById = async (req, res) => {
+    try {
+        const schoolId = req.user.schoolId || req.user.id;
+        const { id } = req.params;
+
+        const template = await SmsTemplate.findOne({ _id: id, school: schoolId })
+            .populate('school', 'school_name');
+
+        if (!template) {
+            return res.status(404).json({
+                success: false,
+                message: 'Template not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            data: template
+        });
+    } catch (error) {
+        console.error('Error fetching template:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching template',
+            error: error.message
+        });
+    }
+};
+
+// Update SMS template
+const updateTemplate = async (req, res) => {
+    try {
+        const schoolId = req.user.schoolId || req.user.id;
+        const { id } = req.params;
+
+        const template = await SmsTemplate.findOne({ _id: id, school: schoolId });
+
+        if (!template) {
+            return res.status(404).json({
+                success: false,
+                message: 'Template not found'
+            });
+        }
+
+        // Update fields
+        Object.keys(req.body).forEach(key => {
+            if (key !== '_id' && key !== 'school' && key !== 'created_by') {
+                template[key] = req.body[key];
+            }
+        });
+
+        template.updated_by = req.user.id;
+
+        // Regenerate sample message if variables changed
+        if (template.variables && template.variables.length > 0) {
+            const sampleData = {};
+            template.variables.forEach(variable => {
+                sampleData[variable.variable_name] = variable.example || `{{${variable.variable_name}}}`;
+            });
+            template.sample_message = template.processTemplate(sampleData);
+        }
+
+        await template.save();
+
+        res.json({
+            success: true,
+            message: 'Template updated successfully',
+            data: template
+        });
+    } catch (error) {
+        console.error('Error updating template:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating template',
+            error: error.message
+        });
+    }
+};
+
+// Delete SMS template
+const deleteTemplate = async (req, res) => {
+    try {
+        const schoolId = req.user.schoolId || req.user.id;
+        const { id } = req.params;
+
+        const template = await SmsTemplate.findOneAndDelete({ _id: id, school: schoolId });
+
+        if (!template) {
+            return res.status(404).json({
+                success: false,
+                message: 'Template not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Template deleted successfully',
+            data: template
+        });
+    } catch (error) {
+        console.error('Error deleting template:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error deleting template',
+            error: error.message
+        });
+    }
+};
+
 // Initialize default templates for a school
 const initializeDefaultTemplates = async (req, res) => {
     try {
@@ -921,6 +1031,9 @@ const testGatewayConnection = async (req, res) => {
 module.exports = {
     createTemplate,
     getTemplates,
+    getTemplateById,
+    updateTemplate,
+    deleteTemplate,
     initializeDefaultTemplates,
     sendSmsFromTemplate,
     sendAbsentStudentsSms,

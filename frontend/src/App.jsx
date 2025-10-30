@@ -52,7 +52,7 @@ import AdvancedHome from "./client/components/home/AdvancedHome";
 import ProtectedWebsiteBuilder from "./website-builder/ProtectedWebsiteBuilder";
 import TransportFees from "./school/components/transport/TransportFees";
 import MarkSheetGenerator from "./school/components/marksheet/MarkSheetGenerator";
-import SmsManagement from "./school/components/sms/SmsManagement";
+import SmsManagement from "./school/components/sms/SmsManagementNew";
 import ProtectedRoute from "./guards/ProtectedRoute";
 import { AuthContext, AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "@emotion/react";

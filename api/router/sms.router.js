@@ -9,6 +9,9 @@ router.use(authMiddleware(['SCHOOL']));
 // SMS Template routes
 router.post('/templates', smsController.createTemplate);
 router.get('/templates', smsController.getTemplates);
+router.get('/templates/:id', smsController.getTemplateById);
+router.put('/templates/:id', smsController.updateTemplate);
+router.delete('/templates/:id', smsController.deleteTemplate);
 router.post('/templates/initialize-defaults', smsController.initializeDefaultTemplates);
 
 // SMS Sending routes

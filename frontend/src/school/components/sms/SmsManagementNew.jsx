@@ -150,11 +150,11 @@ const SmsManagementNew = () => {
             setLoading(true);
             if (selectedTemplate) {
                 // Update
-                await axios.put(`${baseUrl}/sms/template/${selectedTemplate._id}`, templateForm);
+                await axios.put(`${baseUrl}/sms/templates/${selectedTemplate._id}`, templateForm);
                 setMessage('Template updated successfully');
             } else {
                 // Create
-                await axios.post(`${baseUrl}/sms/template`, templateForm);
+                await axios.post(`${baseUrl}/sms/templates`, templateForm);
                 setMessage('Template created successfully');
             }
             setMessageType('success');
@@ -175,7 +175,7 @@ const SmsManagementNew = () => {
         if (!window.confirm('Are you sure you want to delete this template?')) return;
 
         try {
-            await axios.delete(`${baseUrl}/sms/template/${id}`);
+            await axios.delete(`${baseUrl}/sms/templates/${id}`);
             setMessage('Template deleted successfully');
             setMessageType('success');
             fetchTemplates();
@@ -202,17 +202,48 @@ const SmsManagementNew = () => {
 
         try {
             setLoading(true);
-            await axios.post(`${baseUrl}/sms/send`, {
+
+            // Get selected class details
+            const selectedClassObj = classes.find(c => c._id === selectedClass);
+            const className = selectedClassObj?.class_text || selectedClassObj?.class_name || '';
+
+            // Prepare recipients array with full student data
+            const recipients = students
+                .filter(student => selectedStudents.includes(student._id))
+                .map(student => ({
+                    phone: student.guardian_phone || student.phone || '',
+                    name: student.guardian || 'Parent',
+                    type: 'parent',
+                    student_id: student._id,
+                    student_name: student.name,
+                    class_id: selectedClass,
+                    class_name: className,
+                    data: {
+                        guardian_name: student.guardian || 'Parent',
+                        student_name: student.name,
+                        class: className,
+                        email: student.email || '',
+                        school_name: 'School' // This should come from school context
+                    }
+                }));
+
+            const requestData = {
                 template_id: selectedTemplateForSend || null,
-                custom_message: customMessage || null,
-                student_ids: selectedStudents,
-                class_id: selectedClass
-            });
-            setMessage(`SMS sent successfully to ${selectedStudents.length} students`);
-            setMessageType('success');
-            setSendDialog(false);
-            fetchSmsLogs();
-            resetSendForm();
+                recipients: recipients,
+                data: {
+                    school_name: 'School' // This should come from school context
+                }
+            };
+
+            const response = await axios.post(`${baseUrl}/sms/send`, requestData);
+
+            if (response.data.success) {
+                setMessage(`SMS sent successfully to ${response.data.data.success_count} students`);
+                setMessageType('success');
+                setSendDialog(false);
+                fetchSmsLogs();
+                resetSendForm();
+            }
         } catch (error) {
             console.error('Error sending SMS:', error);
             setMessage(error.response?.data?.message || 'Error sending SMS');
@@ -493,7 +524,7 @@ const SmsManagementNew = () => {
                                     </MenuItem>
                                     {classes.map((cls) => (
                                         <MenuItem key={cls._id} value={cls._id}>
-                                            {cls.class_name}
+                                            {cls.class_text || cls.class_name}
                                         </MenuItem>
                                     ))}
                                 </Select>
