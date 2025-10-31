@@ -45,7 +45,6 @@ import NoticeSchool from "./school/components/notice/NoticeSchool";
 import NoticeTeacher from "./teacher/components/notice/Notice";
 import NoticeStudent from "./student/components/notice/NoticeStudent";
 import StudentRecords from "./school/components/student-records/StudentRecords";
-import HomePageManagement from "./school/components/home-page-management/HomePageManagement";
 import PublicHomePage from "./client/components/public-home/PublicHomePage";
 import SimpleHome from "./client/components/home/SimpleHome";
 import AdvancedHome from "./client/components/home/AdvancedHome";
@@ -70,7 +69,6 @@ function App() {
             
           <Route path="school"  element={<ProtectedRoute allowedRoles={['SCHOOL']}><School/></ProtectedRoute>}>
               <Route index element={<SchoolDashboard />} />
-              <Route path="home-page-management" element={<HomePageManagement />} />
               <Route path="courses" element={<Courses />} />
               <Route path="class" element={<Class />} />
               <Route path="class-details" element={<ClassDetails />} />

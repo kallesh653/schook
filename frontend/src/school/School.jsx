@@ -277,7 +277,6 @@ export default function School() {
     const navArr = [
         {link:"/", component:"Home", icon:HomeIcon, category: "main"},
         { link: "/school", component: "Dashboard", icon: DashboardIcon, category: "main" },
-        { link: "/school/home-page-management", component: "Website Management", icon: SettingsIcon, category: "main" },
         { link: "/school/courses", component: "Courses", icon: SchoolIcon, category: "academic" },
         { link: "/school/class", component: "Classes", icon:FormatListNumberedIcon, category: "academic" },
         { link: "/school/subject", component: "Subjects", icon: MenuBookIcon, category: "academic" },
