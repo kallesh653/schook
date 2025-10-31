@@ -422,10 +422,10 @@ const FrontPageManagement = () => {
         boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)'
       }}>
         <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold', mb: 1 }}>
-          🎨 Home Page Management
+          🎨 Front Page Management
         </Typography>
         <Typography variant="h6" sx={{ opacity: 0.9 }}>
-          Complete control of your website's home page
+          Complete control of your website's front page
         </Typography>
       </Box>
 
