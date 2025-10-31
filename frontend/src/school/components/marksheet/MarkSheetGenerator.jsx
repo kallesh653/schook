@@ -218,7 +218,7 @@ const MarkSheetGenerator = () => {
             const headers = token ? { Authorization: token } : {};
 
             const response = await axios.get(`${baseUrl}/class/fetch-all`, { headers });
-            setClasses(response.data || []);
+            setClasses(response.data.data || []);
         } catch (error) {
             console.error('Error fetching classes:', error);
             setSnackbar({
@@ -236,7 +236,7 @@ const MarkSheetGenerator = () => {
             const headers = token ? { Authorization: token } : {};
 
             const response = await axios.get(`${baseUrl}/examination/all`, { headers });
-            setExaminations(response.data || []);
+            setExaminations(response.data.data || []);
         } catch (error) {
             console.error('Error fetching examinations:', error);
             setSnackbar({
@@ -993,8 +993,8 @@ const MarkSheetGenerator = () => {
                                     label="Examination"
                                 >
                                     {examinations.map(exam => (
-                                        <MenuItem key={exam._id} value={exam.examination_name}>
-                                            {exam.examination_name}
+                                        <MenuItem key={exam._id} value={exam.examType}>
+                                            {exam.examType} - {exam.class?.class_name || 'All Classes'}
                                         </MenuItem>
                                     ))}
                                     <MenuItem value="First Term">First Term</MenuItem>
