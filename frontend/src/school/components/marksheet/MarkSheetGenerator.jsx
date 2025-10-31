@@ -301,20 +301,41 @@ const MarkSheetGenerator = () => {
     }, []);
 
     // Handle class selection
-    const handleClassChange = (classObj) => {
+    const handleClassChange = async (classObj) => {
         if (classObj) {
             // Create class display name: "Class 10 - A" or "Class 10"
             const classDisplay = `Class ${classObj.class_num}${classObj.class_text ? ' - ' + classObj.class_text : ''}`;
             setSelectedClass(classDisplay);
             setSelectedClassId(classObj._id);
 
-            // Filter students for this class - student.class is a string like "Class 10 - A"
-            const classStudents = allStudents.filter(student => {
-                // Match exactly or match class number
-                return student.class === classDisplay ||
-                       student.class?.includes(`Class ${classObj.class_num}`);
-            });
-            setStudents(classStudents);
+            // Fetch students for this specific class from backend
+            try {
+                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                const headers = token ? { Authorization: token } : {};
+
+                // Fetch students filtered by class_id
+                const response = await axios.get(`${baseUrl}/student-records?class_id=${classObj._id}&limit=1000`, { headers });
+                const studentRecords = response.data.data || [];
+
+                const transformedStudents = studentRecords.map(record => ({
+                    id: record._id,
+                    name: record.student_name,
+                    class: record.class,
+                    class_id: record.class_id,
+                    section: record.section,
+                    roll_number: record.roll_number
+                }));
+
+                setStudents(transformedStudents);
+            } catch (error) {
+                console.error('Error fetching students for class:', error);
+                setSnackbar({
+                    open: true,
+                    message: 'Error loading students for this class',
+                    severity: 'error'
+                });
+                setStudents([]);
+            }
 
             setFormData(prev => ({
                 ...prev,

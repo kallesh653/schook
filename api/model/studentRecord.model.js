@@ -17,7 +17,8 @@ const studentRecordSchema = new mongoose.Schema({
     school_name: { type: String },
     school_id: { type: String },
     established_year: { type: Number },
-    class: { type: String },
+    class: { type: String }, // String like "Class 10 - A" for display
+    class_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Class' }, // Reference to Class model
     section: { type: String },
     roll_number: { type: String },
     admission_number: { type: String },

@@ -80,29 +80,37 @@ module.exports = {
         try {
             console.log('Getting student records for user:', req.user);
             const schoolId = req.user?.schoolId;
-            
-            // For testing without auth, allow fetching all records
-            if (!schoolId) {
-                console.log('No school ID found, fetching all records for testing');
-            }
-            
-            const { page = 1, limit = 10, class: classFilter, status } = req.query;
-            
+
+            const { page = 1, limit = 10, class: classFilter, class_id: classIdFilter, status } = req.query;
+
             let query = {};
-            // Don't filter by school for now to see all records
-            if (classFilter) query.class = classFilter;
+
+            // Filter by school if schoolId is available
+            if (schoolId) {
+                query.school = schoolId;
+            }
+
+            // Filter by class string or class_id if provided
+            if (classIdFilter) {
+                query.class_id = classIdFilter;
+            } else if (classFilter) {
+                query.class = classFilter;
+            }
+
             if (status) query.status = status;
-            
+
             console.log('Query for student records:', query);
-            
+
             const records = await StudentRecord.find(query)
+                .populate('class_id', 'class_num class_text') // Populate class reference
+                .populate('school', 'school_name')
                 .sort({ created_at: -1 })
                 .limit(limit * 1)
                 .skip((page - 1) * limit);
-                
+
             console.log('Found records:', records.length);
             const total = await StudentRecord.countDocuments(query);
-            
+
             res.status(200).json({
                 success: true,
                 data: records,
