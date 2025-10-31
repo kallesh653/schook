@@ -226,6 +226,112 @@ const SmsManagement = () => {
         }
     };
 
+    // Edit template
+    const handleEditTemplate = (template) => {
+        setEditingTemplate(template);
+        setTemplateForm({
+            template_name: template.template_name,
+            template_code: template.template_code,
+            template_type: template.template_type,
+            message_template: template.message_template,
+            variables: template.variables || [],
+            is_active: template.is_active,
+            priority: template.priority || 'medium'
+        });
+        setTemplateDialog(true);
+    };
+
+    // Delete template
+    const handleDeleteTemplate = async (templateId) => {
+        if (!window.confirm('Are you sure you want to delete this template? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const headers = token ? { 'Authorization': token } : {};
+
+            await axios.delete(`${baseUrl}/sms/templates/${templateId}`, { headers });
+            showMessage('Template deleted successfully', 'success');
+            fetchData();
+        } catch (error) {
+            console.error('Error deleting template:', error);
+            showMessage('Error deleting template: ' + (error.response?.data?.message || error.message), 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Save template (create or update)
+    const handleSaveTemplate = async () => {
+        try {
+            if (!templateForm.template_name || !templateForm.template_code || !templateForm.message_template) {
+                showMessage('Please fill in all required fields', 'warning');
+                return;
+            }
+
+            setLoading(true);
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const headers = token ? { 'Authorization': token } : {};
+
+            if (editingTemplate) {
+                // Update existing template
+                await axios.put(`${baseUrl}/sms/templates/${editingTemplate._id}`, templateForm, { headers });
+                showMessage('Template updated successfully', 'success');
+            } else {
+                // Create new template
+                await axios.post(`${baseUrl}/sms/templates`, templateForm, { headers });
+                showMessage('Template created successfully', 'success');
+            }
+
+            setTemplateDialog(false);
+            setEditingTemplate(null);
+            setTemplateForm({
+                template_name: '',
+                template_code: '',
+                template_type: 'general',
+                message_template: '',
+                variables: [],
+                is_active: true,
+                priority: 'medium'
+            });
+            fetchData();
+        } catch (error) {
+            console.error('Error saving template:', error);
+            showMessage('Error saving template: ' + (error.response?.data?.message || error.message), 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Add variable to template
+    const handleAddVariable = () => {
+        const variableName = prompt('Enter variable name (e.g., student_name, guardian_name):');
+        if (variableName) {
+            const example = prompt(`Enter example value for ${variableName}:`);
+            setTemplateForm(prev => ({
+                ...prev,
+                variables: [
+                    ...prev.variables,
+                    {
+                        variable_name: variableName.trim(),
+                        example: example || variableName,
+                        description: `Variable for ${variableName}`
+                    }
+                ]
+            }));
+        }
+    };
+
+    // Remove variable from template
+    const handleRemoveVariable = (index) => {
+        setTemplateForm(prev => ({
+            ...prev,
+            variables: prev.variables.filter((_, i) => i !== index)
+        }));
+    };
+
     // Send SMS to absent students
     const sendAbsentStudentsSms = async () => {
         try {
@@ -857,10 +963,19 @@ const SmsManagement = () => {
                                                             />
                                                         </Box>
                                                         <Box>
-                                                            <IconButton size="small">
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() => handleEditTemplate(template)}
+                                                                sx={{ '&:hover': { backgroundColor: 'rgba(33, 150, 243, 0.1)' } }}
+                                                            >
                                                                 <EditIcon />
                                                             </IconButton>
-                                                            <IconButton size="small" color="error">
+                                                            <IconButton
+                                                                size="small"
+                                                                color="error"
+                                                                onClick={() => handleDeleteTemplate(template._id)}
+                                                                sx={{ '&:hover': { backgroundColor: 'rgba(244, 67, 54, 0.1)' } }}
+                                                            >
                                                                 <DeleteIcon />
                                                             </IconButton>
                                                         </Box>
@@ -1099,6 +1214,227 @@ const SmsManagement = () => {
                     )}
                 </CardContent>
             </StyledCard>
+
+            {/* Template Create/Edit Dialog */}
+            <Dialog
+                open={templateDialog}
+                onClose={() => {
+                    setTemplateDialog(false);
+                    setEditingTemplate(null);
+                    setTemplateForm({
+                        template_name: '',
+                        template_code: '',
+                        template_type: 'general',
+                        message_template: '',
+                        variables: [],
+                        is_active: true,
+                        priority: 'medium'
+                    });
+                }}
+                maxWidth="md"
+                fullWidth
+                PaperProps={{ sx: { borderRadius: '16px' } }}
+            >
+                <DialogTitle sx={{ pb: 1, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <TemplateIcon />
+                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                            {editingTemplate ? 'Edit SMS Template' : 'Create New SMS Template'}
+                        </Typography>
+                    </Box>
+                </DialogTitle>
+
+                <DialogContent sx={{ px: 3, py: 3 }}>
+                    <Grid container spacing={3}>
+                        {/* Template Name */}
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                fullWidth
+                                label="Template Name"
+                                value={templateForm.template_name}
+                                onChange={(e) => setTemplateForm(prev => ({ ...prev, template_name: e.target.value }))}
+                                placeholder="e.g., Absent Student Alert"
+                                required
+                            />
+                        </Grid>
+
+                        {/* Template Code */}
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                fullWidth
+                                label="Template Code"
+                                value={templateForm.template_code}
+                                onChange={(e) => setTemplateForm(prev => ({ ...prev, template_code: e.target.value.toUpperCase() }))}
+                                placeholder="e.g., ABSENT_ALERT"
+                                helperText="Unique code (uppercase, no spaces)"
+                                required
+                            />
+                        </Grid>
+
+                        {/* Template Type */}
+                        <Grid item xs={12} md={6}>
+                            <FormControl fullWidth>
+                                <InputLabel>Template Type</InputLabel>
+                                <Select
+                                    value={templateForm.template_type}
+                                    onChange={(e) => setTemplateForm(prev => ({ ...prev, template_type: e.target.value }))}
+                                    label="Template Type"
+                                >
+                                    <MenuItem value="attendance">Attendance</MenuItem>
+                                    <MenuItem value="fees">Fees</MenuItem>
+                                    <MenuItem value="exam">Exam</MenuItem>
+                                    <MenuItem value="general">General</MenuItem>
+                                    <MenuItem value="emergency">Emergency</MenuItem>
+                                    <MenuItem value="event">Event</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+
+                        {/* Priority */}
+                        <Grid item xs={12} md={6}>
+                            <FormControl fullWidth>
+                                <InputLabel>Priority</InputLabel>
+                                <Select
+                                    value={templateForm.priority}
+                                    onChange={(e) => setTemplateForm(prev => ({ ...prev, priority: e.target.value }))}
+                                    label="Priority"
+                                >
+                                    <MenuItem value="low">Low</MenuItem>
+                                    <MenuItem value="medium">Medium</MenuItem>
+                                    <MenuItem value="high">High</MenuItem>
+                                    <MenuItem value="urgent">Urgent</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+
+                        {/* Message Template */}
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                multiline
+                                rows={4}
+                                label="Message Template"
+                                value={templateForm.message_template}
+                                onChange={(e) => setTemplateForm(prev => ({ ...prev, message_template: e.target.value }))}
+                                placeholder="Dear {{guardian_name}}, your child {{student_name}} from {{class}} is absent today..."
+                                helperText="Use {{variable_name}} for dynamic content. Click 'Add Variable' to add variables."
+                                required
+                            />
+                        </Grid>
+
+                        {/* Variables Section */}
+                        <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+                                    Template Variables
+                                </Typography>
+                                <Button
+                                    size="small"
+                                    variant="outlined"
+                                    startIcon={<AddIcon />}
+                                    onClick={handleAddVariable}
+                                    sx={{ borderRadius: '20px' }}
+                                >
+                                    Add Variable
+                                </Button>
+                            </Box>
+
+                            {templateForm.variables.length > 0 ? (
+                                <Paper variant="outlined" sx={{ p: 2 }}>
+                                    {templateForm.variables.map((variable, index) => (
+                                        <Box
+                                            key={index}
+                                            sx={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                mb: 1,
+                                                p: 1,
+                                                backgroundColor: '#f5f5f5',
+                                                borderRadius: '8px'
+                                            }}
+                                        >
+                                            <Box>
+                                                <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
+                                                    {'{{' + variable.variable_name + '}}'}
+                                                </Typography>
+                                                <Typography variant="caption" color="textSecondary">
+                                                    Example: {variable.example}
+                                                </Typography>
+                                            </Box>
+                                            <IconButton
+                                                size="small"
+                                                color="error"
+                                                onClick={() => handleRemoveVariable(index)}
+                                            >
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
+                                        </Box>
+                                    ))}
+                                </Paper>
+                            ) : (
+                                <Typography variant="caption" color="textSecondary">
+                                    No variables added yet. Click "Add Variable" to add dynamic content.
+                                </Typography>
+                            )}
+                        </Grid>
+
+                        {/* Preview Section */}
+                        {templateForm.message_template && (
+                            <Grid item xs={12}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                    Preview
+                                </Typography>
+                                <Paper sx={{ p: 2, backgroundColor: '#e3f2fd', border: '1px solid #2196f3' }}>
+                                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                                        {templateForm.message_template}
+                                    </Typography>
+                                </Paper>
+                            </Grid>
+                        )}
+
+                        {/* Active Status */}
+                        <Grid item xs={12}>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={templateForm.is_active}
+                                        onChange={(e) => setTemplateForm(prev => ({ ...prev, is_active: e.target.checked }))}
+                                    />
+                                }
+                                label="Template Active"
+                            />
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+
+                <DialogActions sx={{ p: 3, gap: 2 }}>
+                    <Button
+                        onClick={() => {
+                            setTemplateDialog(false);
+                            setEditingTemplate(null);
+                        }}
+                        variant="outlined"
+                        sx={{ borderRadius: '25px', textTransform: 'none' }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleSaveTemplate}
+                        variant="contained"
+                        disabled={loading}
+                        startIcon={editingTemplate ? <EditIcon /> : <AddIcon />}
+                        sx={{
+                            background: 'linear-gradient(45deg, #4caf50 30%, #66bb6a 90%)',
+                            borderRadius: '25px',
+                            textTransform: 'none',
+                            fontWeight: 600
+                        }}
+                    >
+                        {editingTemplate ? 'Update Template' : 'Create Template'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             {/* Approval Dialog */}
             <Dialog
