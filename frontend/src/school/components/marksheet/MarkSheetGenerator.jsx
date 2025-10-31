@@ -126,6 +126,11 @@ const MarkSheetGenerator = () => {
     const { triggerDashboardRefresh } = useDashboard();
     const [markSheets, setMarkSheets] = useState([]);
     const [students, setStudents] = useState([]);
+    const [allStudents, setAllStudents] = useState([]);
+    const [classes, setClasses] = useState([]);
+    const [examinations, setExaminations] = useState([]);
+    const [selectedClass, setSelectedClass] = useState('');
+    const [selectedClassId, setSelectedClassId] = useState('');
     const [openDialog, setOpenDialog] = useState(false);
     const [dialogMode, setDialogMode] = useState('create');
     const [selectedMarkSheet, setSelectedMarkSheet] = useState(null);
@@ -206,11 +211,47 @@ const MarkSheetGenerator = () => {
         };
     };
 
-    // Fetch students
+    // Fetch classes
+    const fetchClasses = async () => {
+        try {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const headers = token ? { Authorization: token } : {};
+
+            const response = await axios.get(`${baseUrl}/class/fetch-all`, { headers });
+            setClasses(response.data || []);
+        } catch (error) {
+            console.error('Error fetching classes:', error);
+            setSnackbar({
+                open: true,
+                message: 'Error fetching classes: ' + (error.response?.data?.message || error.message),
+                severity: 'error'
+            });
+        }
+    };
+
+    // Fetch examinations
+    const fetchExaminations = async () => {
+        try {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const headers = token ? { Authorization: token } : {};
+
+            const response = await axios.get(`${baseUrl}/examination/all`, { headers });
+            setExaminations(response.data || []);
+        } catch (error) {
+            console.error('Error fetching examinations:', error);
+            setSnackbar({
+                open: true,
+                message: 'Error fetching examinations: ' + (error.response?.data?.message || error.message),
+                severity: 'error'
+            });
+        }
+    };
+
+    // Fetch all students
     const fetchStudents = async () => {
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            const headers = token ? { Authorization: token } : {};
 
             const response = await axios.get(`${baseUrl}/student-records`, { headers });
             const studentRecords = response.data.data || [];
@@ -219,11 +260,12 @@ const MarkSheetGenerator = () => {
                 id: record._id,
                 name: record.student_name,
                 class: record.class,
+                classId: record.class_id,
                 section: record.section,
                 roll_number: record.roll_number
             }));
 
-            setStudents(transformedStudents);
+            setAllStudents(transformedStudents);
         } catch (error) {
             console.error('Error fetching students:', error);
             setSnackbar({
@@ -238,7 +280,7 @@ const MarkSheetGenerator = () => {
     const fetchMarkSheets = async () => {
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            const headers = token ? { Authorization: token } : {};
 
             const response = await axios.get(`${baseUrl}/marksheets`, { headers });
             setMarkSheets(response.data.data || []);
@@ -253,9 +295,34 @@ const MarkSheetGenerator = () => {
     };
 
     useEffect(() => {
+        fetchClasses();
+        fetchExaminations();
         fetchStudents();
         fetchMarkSheets();
     }, []);
+
+    // Handle class selection
+    const handleClassChange = (classObj) => {
+        if (classObj) {
+            setSelectedClass(classObj.class_name);
+            setSelectedClassId(classObj._id);
+
+            // Filter students for this class
+            const classStudents = allStudents.filter(student =>
+                student.classId === classObj._id || student.class === classObj.class_name
+            );
+            setStudents(classStudents);
+
+            setFormData(prev => ({
+                ...prev,
+                class: classObj.class_name,
+                section: classObj.section || '',
+                student_id: '',
+                student_name: '',
+                roll_number: ''
+            }));
+        }
+    };
 
     const handleOpenDialog = (mode, markSheet = null) => {
         setDialogMode(mode);
@@ -274,6 +341,9 @@ const MarkSheetGenerator = () => {
     const handleCloseDialog = () => {
         setOpenDialog(false);
         setSelectedMarkSheet(null);
+        setSelectedClass('');
+        setSelectedClassId('');
+        setStudents([]);
         resetForm();
     };
 
@@ -380,7 +450,7 @@ const MarkSheetGenerator = () => {
     const handleSubmit = async () => {
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            const headers = token ? { Authorization: token } : {};
 
             // Validation
             if (!formData.student_name || !formData.examination) {
@@ -456,7 +526,7 @@ const MarkSheetGenerator = () => {
         if (window.confirm('Are you sure you want to delete this mark sheet?')) {
             try {
                 const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-                const headers = token ? { Authorization: `Bearer ${token}` } : {};
+                const headers = token ? { Authorization: token } : {};
 
                 await axios.delete(`${baseUrl}/marksheets/${id}`, { headers });
                 setSnackbar({ open: true, message: 'Mark sheet deleted successfully!', severity: 'success' });
@@ -472,7 +542,7 @@ const MarkSheetGenerator = () => {
     const handleDownloadPDF = async (markSheet) => {
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            const headers = token ? { Authorization: token } : {};
 
             const response = await axios.get(`${baseUrl}/marksheets/${markSheet._id}/pdf`, { headers });
 
@@ -821,18 +891,37 @@ const MarkSheetGenerator = () => {
                             </Typography>
                         </Grid>
 
+                        {/* Class Selection - FIRST */}
                         <Grid item xs={12} md={6}>
                             <Autocomplete
-                                options={students}
-                                getOptionLabel={(option) => `${option.name} - ${option.class} (${option.roll_number})`}
-                                onChange={(event, value) => handleStudentSelect(value)}
+                                options={classes}
+                                getOptionLabel={(option) => `${option.class_name} - ${option.section || 'No Section'}`}
+                                onChange={(event, value) => handleClassChange(value)}
                                 disabled={dialogMode === 'view'}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
-                                        label="Select Student"
+                                        label="Select Class First *"
                                         required
-                                        helperText="Search and select student from records"
+                                        helperText="Select a class to see students from that class"
+                                    />
+                                )}
+                            />
+                        </Grid>
+
+                        {/* Student Selection - SECOND (shows only after class is selected) */}
+                        <Grid item xs={12} md={6}>
+                            <Autocomplete
+                                options={students}
+                                getOptionLabel={(option) => `${option.name} - Roll: ${option.roll_number}`}
+                                onChange={(event, value) => handleStudentSelect(value)}
+                                disabled={dialogMode === 'view' || !selectedClass}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Select Student *"
+                                        required
+                                        helperText={!selectedClass ? "Please select a class first" : `${students.length} students found in ${selectedClass}`}
                                     />
                                 )}
                             />
@@ -857,7 +946,7 @@ const MarkSheetGenerator = () => {
                                 name="class"
                                 value={formData.class}
                                 onChange={handleInputChange}
-                                disabled={dialogMode === 'view'}
+                                disabled
                                 required
                             />
                         </Grid>
@@ -903,6 +992,11 @@ const MarkSheetGenerator = () => {
                                     disabled={dialogMode === 'view'}
                                     label="Examination"
                                 >
+                                    {examinations.map(exam => (
+                                        <MenuItem key={exam._id} value={exam.examination_name}>
+                                            {exam.examination_name}
+                                        </MenuItem>
+                                    ))}
                                     <MenuItem value="First Term">First Term</MenuItem>
                                     <MenuItem value="Second Term">Second Term</MenuItem>
                                     <MenuItem value="Final Exam">Final Exam</MenuItem>
