@@ -259,8 +259,7 @@ const MarkSheetGenerator = () => {
             const transformedStudents = studentRecords.map(record => ({
                 id: record._id,
                 name: record.student_name,
-                class: record.class,
-                classId: record.class_id,
+                class: record.class, // This is a string like "Class 10 - A"
                 section: record.section,
                 roll_number: record.roll_number
             }));
@@ -304,19 +303,23 @@ const MarkSheetGenerator = () => {
     // Handle class selection
     const handleClassChange = (classObj) => {
         if (classObj) {
-            setSelectedClass(classObj.class_name);
+            // Create class display name: "Class 10 - A" or "Class 10"
+            const classDisplay = `Class ${classObj.class_num}${classObj.class_text ? ' - ' + classObj.class_text : ''}`;
+            setSelectedClass(classDisplay);
             setSelectedClassId(classObj._id);
 
-            // Filter students for this class
-            const classStudents = allStudents.filter(student =>
-                student.classId === classObj._id || student.class === classObj.class_name
-            );
+            // Filter students for this class - student.class is a string like "Class 10 - A"
+            const classStudents = allStudents.filter(student => {
+                // Match exactly or match class number
+                return student.class === classDisplay ||
+                       student.class?.includes(`Class ${classObj.class_num}`);
+            });
             setStudents(classStudents);
 
             setFormData(prev => ({
                 ...prev,
-                class: classObj.class_name,
-                section: classObj.section || '',
+                class: classDisplay,
+                section: classObj.class_text || '',
                 student_id: '',
                 student_name: '',
                 roll_number: ''
@@ -895,7 +898,7 @@ const MarkSheetGenerator = () => {
                         <Grid item xs={12} md={6}>
                             <Autocomplete
                                 options={classes}
-                                getOptionLabel={(option) => `${option.class_name} - ${option.section || 'No Section'}`}
+                                getOptionLabel={(option) => `Class ${option.class_num}${option.class_text ? ' - ' + option.class_text : ''}`}
                                 onChange={(event, value) => handleClassChange(value)}
                                 disabled={dialogMode === 'view'}
                                 renderInput={(params) => (
@@ -994,7 +997,7 @@ const MarkSheetGenerator = () => {
                                 >
                                     {examinations.map(exam => (
                                         <MenuItem key={exam._id} value={exam.examType}>
-                                            {exam.examType} - {exam.class?.class_name || 'All Classes'}
+                                            {exam.examType}{exam.class ? ` - Class ${exam.class.class_num}${exam.class.class_text ? ' ' + exam.class.class_text : ''}` : ' - All Classes'}
                                         </MenuItem>
                                     ))}
                                     <MenuItem value="First Term">First Term</MenuItem>
