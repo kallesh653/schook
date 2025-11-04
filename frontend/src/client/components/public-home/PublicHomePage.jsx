@@ -1034,30 +1034,7 @@ const PublicHomePage = () => {
               >
                 {header?.tagline || 'Shaping Tomorrow\'s Leaders Today'}
               </Typography>
-              <Button
-                variant="contained"
-                size="large"
-                endIcon={<ArrowForward />}
-                onClick={() => navigate('/register')}
-                sx={{
-                  background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
-                  color: 'white',
-                  px: 6,
-                  py: 2.5,
-                  fontSize: '1.3rem',
-                  fontWeight: 'bold',
-                  borderRadius: '15px',
-                  boxShadow: '0 10px 30px rgba(245, 158, 11, 0.4)',
-                  transition: 'all 0.4s ease',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
-                    transform: 'translateY(-5px) scale(1.05)',
-                    boxShadow: '0 15px 40px rgba(245, 158, 11, 0.6)'
-                  }
-                }}
-              >
-                Enroll Now
-              </Button>
+              {/* Enroll Now button removed as requested */}
             </Container>
           </HeroContent>
         </HeroSection>

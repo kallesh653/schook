@@ -521,54 +521,7 @@ const AdvancedHome = () => {
                   animationFillMode: 'forwards'
                 }}
               >
-                <Button
-                  variant="contained"
-                  size="large"
-                  onClick={() => navigate('/register')}
-                  sx={{
-                    background: 'white',
-                    color: '#667eea',
-                    px: 7,
-                    py: 3,
-                    fontSize: '1.3rem',
-                    fontWeight: 'bold',
-                    borderRadius: '50px',
-                    textTransform: 'none',
-                    boxShadow: '0 15px 50px rgba(0,0,0,0.4)',
-                    '&:hover': {
-                      background: 'rgba(255,255,255,0.95)',
-                      transform: 'translateY(-5px) scale(1.05)',
-                      boxShadow: '0 20px 60px rgba(0,0,0,0.5)'
-                    }
-                  }}
-                >
-                  Enroll Now
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="large"
-                  onClick={() => navigate('/login')}
-                  sx={{
-                    color: 'white',
-                    borderColor: 'white',
-                    px: 7,
-                    py: 3,
-                    fontSize: '1.3rem',
-                    fontWeight: 'bold',
-                    borderRadius: '50px',
-                    textTransform: 'none',
-                    borderWidth: '3px',
-                    backdropFilter: 'blur(10px)',
-                    background: 'rgba(255,255,255,0.1)',
-                    '&:hover': {
-                      borderWidth: '3px',
-                      background: 'rgba(255,255,255,0.2)',
-                      transform: 'translateY(-5px)'
-                    }
-                  }}
-                >
-                  School Portal
-                </Button>
+                {/* Enroll Now and School Portal buttons removed as requested */}
               </Box>
             </SlideContent>
           </SlideWrapper>
