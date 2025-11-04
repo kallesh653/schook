@@ -85,21 +85,37 @@ module.exports = {
 
             let query = {};
 
-            // Filter by school if schoolId is available
-            if (schoolId) {
+            // Filter by school if schoolId is available AND class_id is not specified
+            // When filtering by class_id, we prioritize that over school filtering
+            if (schoolId && !classIdFilter) {
                 query.school = schoolId;
             }
 
             // Filter by class string or class_id if provided
             if (classIdFilter) {
-                query.class_id = classIdFilter;
+                console.log('Filtering by class_id:', classIdFilter);
+
+                // First check if ANY students have class_id populated
+                const studentsWithClassId = await StudentRecord.countDocuments({ class_id: { $exists: true, $ne: null } });
+                console.log(`Students with class_id populated: ${studentsWithClassId}`);
+
+                if (studentsWithClassId > 0) {
+                    // If some students have class_id, filter by it
+                    query.class_id = classIdFilter;
+                } else {
+                    // If NO students have class_id populated, show all students
+                    // This handles legacy data where class_id hasn't been set yet
+                    console.log('No students have class_id populated - showing all students');
+                    // Don't add any class filter - return all students
+                }
             } else if (classFilter) {
+                console.log('Filtering by class string:', classFilter);
                 query.class = classFilter;
             }
 
             if (status) query.status = status;
 
-            console.log('Query for student records:', query);
+            console.log('Query for student records:', JSON.stringify(query));
 
             const records = await StudentRecord.find(query)
                 .populate('class_id', 'class_num class_text') // Populate class reference
@@ -122,10 +138,10 @@ module.exports = {
             });
         } catch (error) {
             console.error('Error in getAllStudentRecords:', error);
-            res.status(500).json({ 
-                success: false, 
+            res.status(500).json({
+                success: false,
                 message: 'Error fetching student records',
-                error: error.message 
+                error: error.message
             });
         }
     },

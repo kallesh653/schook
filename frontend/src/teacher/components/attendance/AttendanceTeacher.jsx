@@ -18,9 +18,10 @@ const AttendanceTeacher = () => {
   useEffect(() => {
     const fetchStudentsAndCheckAttendance = async () => {
       try {
-        const attendee = await axios.get(`${baseUrl}/class/attendee`);
-        console.log("attendee",attendee)
-         setAttendeeClass(attendee.data);
+        // NEW: Get classes from schedule instead of attendee field
+        const scheduleClasses = await axios.get(`${baseUrl}/period/teacher-classes-schedule`);
+        console.log("Classes from schedule:", scheduleClasses)
+         setAttendeeClass(scheduleClasses.data);
 
          if(attendeeClass.length>0 && selectedClass){
             // Check if attendance is already taken for today
@@ -31,7 +32,7 @@ const AttendanceTeacher = () => {
         if (!attendanceResponse.data.attendanceTaken) {
             const studentsResponse = await axios.get(`${baseUrl}/student/fetch-with-query`, { params: { student_class: selectedClass.id} }); // Fetch based on class
             setStudents(studentsResponse.data.data);
-  
+
             // Initialize attendance status for each student
             const initialStatus = {};
             studentsResponse.data.data.forEach((student) => {
@@ -40,10 +41,10 @@ const AttendanceTeacher = () => {
             setAttendanceStatus(initialStatus);
           }
          }
-        
-      
-      
-      
+
+
+
+
 
         setLoading(false);
       } catch (error) {
@@ -99,9 +100,9 @@ const AttendanceTeacher = () => {
     <Container>
       <Typography variant="h4" gutterBottom>Mark Attendance for All Students</Typography>
       {attendeeClass.length>0? <Alert severity="info" sx={{ mb: 3 }}>
-          Your Are Attendee of {attendeeClass.length} class{attendeeClass.length>1 && 'es'}. Select the class and Take attendance.
+          You teach {attendeeClass.length} class{attendeeClass.length>1 && 'es'} (based on schedule). Select the class and take attendance.
         </Alert>:
-        <Alert severity='info'>You are not attendee of any Class.</Alert>}
+        <Alert severity='info'>You are not assigned to teach any classes in the schedule.</Alert>}
      {attendeeClass.length>0 && <FormControl fullWidth sx={{ mb: 3 }}>
         <InputLabel>Select Class</InputLabel>
         <Select value={selectedClass?`${selectedClass.id},${selectedClass.class_text}`:""} onChange={handleClassChange}>

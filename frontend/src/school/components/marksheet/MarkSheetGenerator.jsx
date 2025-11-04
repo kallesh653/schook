@@ -247,21 +247,27 @@ const MarkSheetGenerator = () => {
         }
     };
 
-    // Fetch all students
+    // Fetch all students from Student collection
     const fetchStudents = async () => {
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             const headers = token ? { Authorization: token } : {};
 
-            const response = await axios.get(`${baseUrl}/student-records`, { headers });
-            const studentRecords = response.data.data || [];
+            // Use new Student API endpoint
+            const response = await axios.get(`${baseUrl}/student/fetch-all?status=Active&limit=1000`, { headers });
+            const students = response.data.data || [];
 
-            const transformedStudents = studentRecords.map(record => ({
-                id: record._id,
-                name: record.student_name,
-                class: record.class, // This is a string like "Class 10 - A"
-                section: record.section,
-                roll_number: record.roll_number
+            console.log('Fetched students from Student collection:', students.length);
+
+            const transformedStudents = students.map(student => ({
+                id: student._id,
+                name: student.name,
+                class: student.class_name || 'Not Assigned',
+                class_id: student.student_class,
+                section: student.section,
+                roll_number: student.roll_number,
+                email: student.email,
+                student_image: student.student_image
             }));
 
             setAllStudents(transformedStudents);
@@ -308,30 +314,52 @@ const MarkSheetGenerator = () => {
             setSelectedClass(classDisplay);
             setSelectedClassId(classObj._id);
 
-            // Fetch students for this specific class from backend
+            // Fetch students for this specific class from Student collection
             try {
                 const token = localStorage.getItem('token') || sessionStorage.getItem('token');
                 const headers = token ? { Authorization: token } : {};
 
-                // Fetch students filtered by class_id
-                const response = await axios.get(`${baseUrl}/student-records?class_id=${classObj._id}&limit=1000`, { headers });
-                const studentRecords = response.data.data || [];
+                console.log('Fetching students for class:', classObj._id);
 
-                const transformedStudents = studentRecords.map(record => ({
-                    id: record._id,
-                    name: record.student_name,
-                    class: record.class,
-                    class_id: record.class_id,
-                    section: record.section,
-                    roll_number: record.roll_number
+                // Use new Student API endpoint - fetch by class
+                const response = await axios.get(`${baseUrl}/student/fetch-class/${classObj._id}`, { headers });
+
+                console.log('Student API response:', response.data);
+                const students = response.data.data || [];
+                console.log(`Found ${students.length} students for class ${classDisplay}`);
+
+                const transformedStudents = students.map(student => ({
+                    id: student._id,
+                    name: student.name,
+                    class: student.class_name || classDisplay,
+                    class_id: student.student_class,
+                    section: student.section || classObj.class_text,
+                    roll_number: student.roll_number,
+                    email: student.email,
+                    student_image: student.student_image
                 }));
 
                 setStudents(transformedStudents);
+
+                if (students.length === 0) {
+                    setSnackbar({
+                        open: true,
+                        message: `No students found in ${classDisplay}. Please add students to this class first.`,
+                        severity: 'warning'
+                    });
+                } else {
+                    setSnackbar({
+                        open: true,
+                        message: `Loaded ${students.length} students from ${classDisplay}`,
+                        severity: 'success'
+                    });
+                }
             } catch (error) {
                 console.error('Error fetching students for class:', error);
+                console.error('Error response:', error.response?.data);
                 setSnackbar({
                     open: true,
-                    message: 'Error loading students for this class',
+                    message: 'Error loading students: ' + (error.response?.data?.message || error.message),
                     severity: 'error'
                 });
                 setStudents([]);

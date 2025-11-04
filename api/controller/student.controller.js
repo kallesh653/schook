@@ -382,6 +382,222 @@ updateStudentWithId : async (req, res) => {
             console.log("Error in isStudentLoggedIn", error);
             res.status(500).json({success:false, message:"Server Error in Student Logged in check. Try later"})
         }
+    },
+
+    // ===== NEW PROFESSIONAL API ENDPOINTS =====
+
+    /**
+     * Get all students with advanced filtering, pagination, and population
+     * Query params: page, limit, student_class, status, search, school
+     */
+    getAllStudents: async (req, res) => {
+        try {
+            console.log('=== GET ALL STUDENTS ===');
+            console.log('Query params:', req.query);
+            console.log('User:', req.user);
+
+            const {
+                page = 1,
+                limit = 100,
+                student_class,
+                status = 'Active',
+                search,
+                school
+            } = req.query;
+
+            // Build query
+            let query = {};
+
+            // Filter by school (from authenticated user or query param)
+            const schoolId = school || req.user?.schoolId;
+            if (schoolId) {
+                query.school = schoolId;
+            }
+
+            // Filter by class
+            if (student_class) {
+                query.student_class = student_class;
+            }
+
+            // Filter by status
+            if (status && status !== 'All') {
+                query.status = status;
+            }
+
+            // Search by name, email, or roll number
+            if (search) {
+                query.$or = [
+                    { name: { $regex: search, $options: 'i' } },
+                    { email: { $regex: search, $options: 'i' } },
+                    { roll_number: { $regex: search, $options: 'i' } },
+                    { admission_number: { $regex: search, $options: 'i' } }
+                ];
+            }
+
+            console.log('MongoDB query:', JSON.stringify(query));
+
+            // Execute query with pagination and population
+            const students = await Student.find(query)
+                .populate('student_class', 'class_num class_text')
+                .populate('school', 'school_name school_id established_year')
+                .populate('course', 'course_name')
+                .select('-password') // Exclude password field
+                .sort({ roll_number: 1, name: 1 })
+                .limit(limit * 1)
+                .skip((page - 1) * limit)
+                .lean(); // Convert to plain JavaScript objects for better performance
+
+            // Get total count for pagination
+            const total = await Student.countDocuments(query);
+
+            // Transform data to include class display name
+            const transformedStudents = students.map(student => ({
+                ...student,
+                class_name: student.student_class ?
+                    `Class ${student.student_class.class_num}${student.student_class.class_text ? ' - ' + student.student_class.class_text : ''}` :
+                    student.class_name || 'Not Assigned'
+            }));
+
+            console.log(`✅ Found ${students.length} students (Total: ${total})`);
+
+            res.status(200).json({
+                success: true,
+                data: transformedStudents,
+                pagination: {
+                    current: Number(page),
+                    pages: Math.ceil(total / limit),
+                    total,
+                    limit: Number(limit)
+                }
+            });
+
+        } catch (error) {
+            console.error('❌ Error in getAllStudents:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error fetching students',
+                error: error.message
+            });
+        }
+    },
+
+    /**
+     * Get students by specific class ID
+     * Params: classId
+     */
+    getStudentsByClass: async (req, res) => {
+        try {
+            console.log('=== GET STUDENTS BY CLASS ===');
+            const { classId } = req.params;
+            console.log('Class ID:', classId);
+
+            if (!classId) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Class ID is required'
+                });
+            }
+
+            // Use the static method from model
+            const students = await Student.findByClass(classId);
+
+            // Transform to include class display name
+            const transformedStudents = students.map(student => {
+                const studentObj = student.toObject();
+                return {
+                    ...studentObj,
+                    class_name: student.student_class ?
+                        `Class ${student.student_class.class_num}${student.student_class.class_text ? ' - ' + student.student_class.class_text : ''}` :
+                        'Not Assigned'
+                };
+            });
+
+            console.log(`✅ Found ${students.length} students in class ${classId}`);
+
+            res.status(200).json({
+                success: true,
+                data: transformedStudents,
+                count: students.length
+            });
+
+        } catch (error) {
+            console.error('❌ Error in getStudentsByClass:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error fetching students by class',
+                error: error.message
+            });
+        }
+    },
+
+    /**
+     * Get student statistics
+     */
+    getStudentStats: async (req, res) => {
+        try {
+            console.log('=== GET STUDENT STATISTICS ===');
+            const schoolId = req.user?.schoolId;
+
+            const query = schoolId ? { school: schoolId } : {};
+
+            const totalStudents = await Student.countDocuments(query);
+            const activeStudents = await Student.countDocuments({ ...query, status: 'Active' });
+            const inactiveStudents = await Student.countDocuments({ ...query, status: 'Inactive' });
+            const graduatedStudents = await Student.countDocuments({ ...query, status: 'Graduated' });
+
+            // Fee statistics
+            const feeAggregation = await Student.aggregate([
+                { $match: query },
+                {
+                    $group: {
+                        _id: null,
+                        totalFees: { $sum: '$fees.total_fees' },
+                        totalPaid: { $sum: '$fees.paid_fees' },
+                        totalBalance: { $sum: '$fees.balance_fees' }
+                    }
+                }
+            ]);
+
+            const feeStats = feeAggregation[0] || {
+                totalFees: 0,
+                totalPaid: 0,
+                totalBalance: 0
+            };
+
+            // Students with pending fees
+            const studentsWithPendingFees = await Student.countDocuments({
+                ...query,
+                'fees.balance_fees': { $gt: 0 }
+            });
+
+            const stats = {
+                totalStudents,
+                activeStudents,
+                inactiveStudents,
+                graduatedStudents,
+                fees: {
+                    total: feeStats.totalFees,
+                    collected: feeStats.totalPaid,
+                    pending: feeStats.totalBalance,
+                    studentsWithPendingFees
+                }
+            };
+
+            console.log('✅ Student statistics:', stats);
+
+            res.status(200).json({
+                success: true,
+                data: stats
+            });
+
+        } catch (error) {
+            console.error('❌ Error in getStudentStats:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error fetching student statistics',
+                error: error.message
+            });
+        }
     }
-   
+
 }

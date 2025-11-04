@@ -93,9 +93,9 @@ const SchoolDashboard = () => {
   const [type, setType] = useState("success");
   const resetMessage = () => setMessage("");
 
-  // Function to calculate proper fee statistics from student records
-  const calculateFeesFromRecords = (studentRecords) => {
-    if (!studentRecords || studentRecords.length === 0) {
+  // Function to calculate proper fee statistics from students
+  const calculateFeesFromStudents = (students) => {
+    if (!students || students.length === 0) {
       return {
         totalFees: 0,
         collectedFees: 0,
@@ -111,15 +111,15 @@ const SchoolDashboard = () => {
     const today = new Date();
     const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-    studentRecords.forEach(record => {
-      if (record.fees) {
-        // Use the simple fees structure from studentRecord.model.js
-        totalFees += (record.fees.total_fees || 0);
-        collectedFees += (record.fees.paid_fees || 0);
+    students.forEach(student => {
+      if (student.fees) {
+        // Use fees structure from student.model.js
+        totalFees += (student.fees.total_fees || 0);
+        collectedFees += (student.fees.paid_fees || 0);
 
         // Calculate today's collection from payment history if it exists
-        if (record.fees.fee_payment_history && record.fees.fee_payment_history.length > 0) {
-          record.fees.fee_payment_history.forEach(payment => {
+        if (student.fees.fee_payment_history && student.fees.fee_payment_history.length > 0) {
+          student.fees.fee_payment_history.forEach(payment => {
             const paymentDate = new Date(payment.payment_date);
             if (paymentDate >= todayStart && paymentDate < new Date(todayStart.getTime() + 24*60*60*1000)) {
               todayCollected += payment.amount || 0;
@@ -164,16 +164,15 @@ const SchoolDashboard = () => {
         // Get authorization token
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        
-        // Fetch all data in parallel
-        const [studentRes, teacherRes, classesRes, subjectsRes, schoolData, studentRecordsRes, studentRecordsStatsRes] = await Promise.all([
-          axios.get(`${baseUrl}/student/fetch-with-query`, {params:{}, headers}),
+
+        // Fetch all data in parallel - now using Students collection
+        const [studentsRes, teacherRes, classesRes, subjectsRes, schoolData, attendanceRes] = await Promise.all([
+          axios.get(`${baseUrl}/student/fetch-all?status=Active&limit=1000`, {headers}),
           axios.get(`${baseUrl}/teacher/fetch-with-query`, {params:{}, headers}),
           axios.get(`${baseUrl}/class/fetch-all`, {headers}),
           axios.get(`${baseUrl}/subject/fetch-all`, {headers}),
           axios.get(`${baseUrl}/school/fetch-single`, {headers}),
-          axios.get(`${baseUrl}/student-records`, {headers}).catch(() => ({data: {data: []}})),
-          axios.get(`${baseUrl}/student-records/stats`, {headers}).catch(() => ({data: {data: {totalStudents: 0, activeStudents: 0, totalFeesCollected: 0, totalFeesBalance: 0}}}))
+          axios.get(`${baseUrl}/attendance`, {headers}).catch(() => ({data: {data: []}}))
         ]);
 
         // Set school details
@@ -181,41 +180,64 @@ const SchoolDashboard = () => {
         setSchoolName(schoolData.data.data.school_name);
         setSchoolImage(schoolData.data.data.school_image);
 
-        // Set basic counts - prioritize student records if available
-        const studentRecords = studentRecordsRes.data.data || [];
-        const recordsStats = studentRecordsStatsRes.data.data || {};
+        // Get students data
+        const students = studentsRes.data.data || [];
+        console.log('🔍 Students from Students collection:', students.length);
 
-        setTotalStudents(recordsStats.totalStudents || studentRes.data.data.length);
+        // Set basic counts from Students collection
+        setTotalStudents(students.length);
         setTotalTeachers(teacherRes.data.data.length);
         setClasses(classesRes.data.data || dummyData.classes);
         setSubjects(subjectsRes.data.data || dummyData.subjects);
 
-        // Calculate real fees from student records data
-        console.log('🔍 Student Records from API:', studentRecordsRes.data);
-        console.log('🔍 Student Records Stats from API:', recordsStats);
+        // Calculate fees from Students collection
+        const calculatedStats = calculateFeesFromStudents(students);
+        console.log('💰 Calculated Fee Stats from Students:', calculatedStats);
 
-        // Calculate proper fee statistics from actual student records
-        const calculatedStats = calculateFeesFromRecords(studentRecords);
-        console.log('💰 Calculated Fee Stats from Records:', calculatedStats);
+        setFeesStats(calculatedStats);
 
-        // Use API stats if available, otherwise use calculated stats
-        const newFeesStats = {
-          totalFees: recordsStats.totalFees || calculatedStats.totalFees,
-          collectedFees: recordsStats.totalFeesCollected || calculatedStats.collectedFees,
-          todayCollected: recordsStats.todayFeesCollected || calculatedStats.todayCollected,
-          balanceFees: recordsStats.totalFeesBalance || calculatedStats.balanceFees
-        };
+        // Calculate real attendance from attendance records
+        const attendanceRecords = attendanceRes.data.data || [];
+        const today = new Date().toISOString().split('T')[0];
 
-        console.log('💰 Final Fee Stats:', newFeesStats);
-        setFeesStats(newFeesStats);
+        // Filter today's attendance
+        const todayAttendance = attendanceRecords.filter(record => {
+          const recordDate = new Date(record.date).toISOString().split('T')[0];
+          return recordDate === today;
+        });
+
+        // Count present and absent
+        let presentToday = 0;
+        let absentToday = 0;
+
+        if (todayAttendance.length > 0) {
+          todayAttendance.forEach(record => {
+            if (record.present === true || record.status === 'Present') {
+              presentToday++;
+            } else if (record.present === false || record.status === 'Absent') {
+              absentToday++;
+            }
+          });
+        }
+
+        const attendancePercentage = students.length > 0 && presentToday > 0
+          ? Math.round((presentToday / students.length) * 100)
+          : 0;
 
         setAttendanceStats({
-          totalStudents: recordsStats.totalStudents || 0,
-          presentToday: Math.floor((recordsStats.activeStudents || 0) * 0.85), // Approximate
-          absentToday: Math.floor((recordsStats.activeStudents || 0) * 0.15), // Approximate
-          attendancePercentage: recordsStats.activeStudents ? Math.floor(85) : 0
+          totalStudents: students.length,
+          presentToday: presentToday,
+          absentToday: absentToday,
+          attendancePercentage: attendancePercentage
         });
-        
+
+        console.log('📊 Attendance Stats:', {
+          totalStudents: students.length,
+          presentToday,
+          absentToday,
+          attendancePercentage
+        });
+
       } catch (error) {
         console.log('Dashboard fetch error:', error);
         // Fallback to dummy data
@@ -230,6 +252,13 @@ const SchoolDashboard = () => {
           collectedFees: 0,
           todayCollected: 0,
           balanceFees: 0
+        });
+
+        setAttendanceStats({
+          totalStudents: 0,
+          presentToday: 0,
+          absentToday: 0,
+          attendancePercentage: 0
         });
       } finally {
         setLoading(false);

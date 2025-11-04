@@ -106,8 +106,9 @@ const MarksEntry = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [viewDialog, setViewDialog] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [savedMarksCount, setSavedMarksCount] = useState(0);
 
-  const examTypes = ['Midterm', 'Final', 'Unit Test', 'Quiz', 'Assignment', 'Mock Test'];
+  const examTypes = ['First Term', 'Second Term', 'Final Exam', 'Midterm', 'Unit Test 1', 'Unit Test 2', 'Pre-Board', 'Half Yearly', 'Annual', 'Quiz', 'Assignment', 'Mock Test'];
 
   // Fetch Classes
   useEffect(() => {
@@ -116,14 +117,17 @@ const MarksEntry = () => {
 
   const fetchClasses = async () => {
     try {
-      const response = await axios.get(`${baseUrl}/class/fetch-all`);
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const headers = token ? { Authorization: token } : {};
+
+      const response = await axios.get(`${baseUrl}/class/fetch-all`, { headers });
       setClasses(response.data.data || []);
       if (response.data.data && response.data.data.length > 0) {
         setSelectedClass(response.data.data[0]._id);
       }
     } catch (error) {
       console.error('Error fetching classes:', error);
-      showSnackbar('Error fetching classes', 'error');
+      showSnackbar('Error fetching classes: ' + (error.response?.data?.message || error.message), 'error');
     }
   };
 
@@ -136,15 +140,24 @@ const MarksEntry = () => {
 
   const fetchStudents = async () => {
     try {
-      const response = await axios.get(`${baseUrl}/student/fetch-class/${selectedClass}`);
-      const studentData = response.data.data || [];
-      setStudents(studentData);
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const headers = token ? { Authorization: token } : {};
+
+      console.log('Fetching students for class:', selectedClass);
+
+      // Use new Student API endpoint - fetch by class
+      const response = await axios.get(`${baseUrl}/student/fetch-class/${selectedClass}`, { headers });
+      const students = response.data.data || [];
+
+      console.log(`Found ${students.length} students from Student collection`);
+
+      setStudents(students);
 
       // Initialize marks data for students
-      const initialMarks = studentData.map(student => ({
+      const initialMarks = students.map(student => ({
         student_id: student._id,
         student_name: student.name,
-        roll_number: student.roll_no || 'N/A',
+        roll_number: student.roll_number || 'N/A',
         marks: '',
         max_marks: 100,
         remarks: ''
@@ -152,7 +165,7 @@ const MarksEntry = () => {
       setMarksData(initialMarks);
     } catch (error) {
       console.error('Error fetching students:', error);
-      showSnackbar('Error fetching students', 'error');
+      showSnackbar('Error fetching students: ' + (error.response?.data?.message || error.message), 'error');
     }
   };
 
@@ -165,13 +178,17 @@ const MarksEntry = () => {
 
   const fetchSubjects = async () => {
     try {
-      const response = await axios.get(`${baseUrl}/subject/fetch-class/${selectedClass}`);
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const headers = token ? { Authorization: token } : {};
+
+      const response = await axios.get(`${baseUrl}/subject/fetch-class/${selectedClass}`, { headers });
       setSubjects(response.data.data || []);
       if (response.data.data && response.data.data.length > 0) {
         setSelectedSubject(response.data.data[0]._id);
       }
     } catch (error) {
       console.error('Error fetching subjects:', error);
+      showSnackbar('Error fetching subjects: ' + (error.response?.data?.message || error.message), 'error');
     }
   };
 
@@ -227,11 +244,14 @@ const MarksEntry = () => {
         const percentage = (marks / maxMarks) * 100;
         const grade = calculateGrade(marks, maxMarks);
 
+        const classDisplay = `Class ${classInfo?.class_num || ''}${classInfo?.class_text ? ' - ' + classInfo.class_text : ''}`;
+
         const marksheetData = {
           student_id: item.student_id,
           student_name: item.student_name,
-          class: classInfo?.class_text || 'N/A',
-          section: classInfo?.section || 'A',
+          class: classDisplay,
+          class_id: selectedClass,
+          section: classInfo?.class_text || 'A',
           roll_number: item.roll_number,
           examination: examType,
           academic_year: academicYear,
@@ -250,14 +270,15 @@ const MarksEntry = () => {
           result: percentage >= 33 ? 'Pass' : 'Fail',
           teacher_name: teacherName,
           school_name: schoolName,
+          school_id: schoolId,
           issue_date: new Date(examDate),
           status: 'Issued',
           created_by: teacherName
         };
 
-        return axios.post(`${baseUrl}/marksheet/create`, marksheetData, {
+        return axios.post(`${baseUrl}/marksheets`, marksheetData, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
+            'Authorization': localStorage.getItem('token') || sessionStorage.getItem('token')
           }
         });
       });
@@ -265,6 +286,9 @@ const MarksEntry = () => {
       await Promise.all(marksheetPromises);
 
       showSnackbar(`✅ Marks saved successfully for ${validMarks.length} student(s)!`, 'success');
+
+      // Update saved marks count
+      setSavedMarksCount(prev => prev + validMarks.length);
 
       // Reset marks data after successful save
       const resetMarks = marksData.map(item => ({
@@ -311,6 +335,62 @@ const MarksEntry = () => {
           </Header>
 
           <Box sx={{ p: 4 }}>
+            {/* Statistics Cards */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', borderRadius: '16px' }}>
+                  <CardContent>
+                    <Box display="flex" alignItems="center" justifyContent="space-between">
+                      <Box>
+                        <Typography variant="h3" fontWeight="bold">{students.length}</Typography>
+                        <Typography variant="body2" sx={{ opacity: 0.9 }}>Total Students</Typography>
+                      </Box>
+                      <SchoolIcon sx={{ fontSize: 50, opacity: 0.8 }} />
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)', color: 'white', borderRadius: '16px' }}>
+                  <CardContent>
+                    <Box display="flex" alignItems="center" justifyContent="space-between">
+                      <Box>
+                        <Typography variant="h3" fontWeight="bold">{savedMarksCount}</Typography>
+                        <Typography variant="body2" sx={{ opacity: 0.9 }}>Marks Saved</Typography>
+                      </Box>
+                      <CheckIcon sx={{ fontSize: 50, opacity: 0.8 }} />
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white', borderRadius: '16px' }}>
+                  <CardContent>
+                    <Box display="flex" alignItems="center" justifyContent="space-between">
+                      <Box>
+                        <Typography variant="h3" fontWeight="bold">{subjects.length}</Typography>
+                        <Typography variant="body2" sx={{ opacity: 0.9 }}>Subjects Available</Typography>
+                      </Box>
+                      <AssignmentIcon sx={{ fontSize: 50, opacity: 0.8 }} />
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', color: 'white', borderRadius: '16px' }}>
+                  <CardContent>
+                    <Box display="flex" alignItems="center" justifyContent="space-between">
+                      <Box>
+                        <Typography variant="h3" fontWeight="bold">{examType || '-'}</Typography>
+                        <Typography variant="body2" sx={{ opacity: 0.9 }}>Current Exam</Typography>
+                      </Box>
+                      <GradeIcon sx={{ fontSize: 50, opacity: 0.8 }} />
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+
             {/* Selection Filters */}
             <Card sx={{ p: 3, mb: 4, background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}>
               <Typography variant="h5" gutterBottom fontWeight="bold" sx={{ color: '#667eea', mb: 3 }}>
@@ -328,7 +408,7 @@ const MarksEntry = () => {
                     >
                       {classes.map((cls) => (
                         <MenuItem key={cls._id} value={cls._id}>
-                          {cls.class_text}
+                          {`Class ${cls.class_num}${cls.class_text ? ' - ' + cls.class_text : ''}`}
                         </MenuItem>
                       ))}
                     </Select>
