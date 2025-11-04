@@ -358,8 +358,9 @@ const SchoolDashboard = () => {
 
   const navArr = [
     { link: "/school", component: "Dashboard", icon: DashboardIcon },
-    { link: "/school/front-page", component: "Front Page", icon: WebIcon },
-    { link: "/school/public-home", component: "Public Home", icon: WebIcon },
+    // Front Page and Public Home removed from Quick Access as requested
+    // { link: "/school/front-page", component: "Front Page", icon: WebIcon },
+    // { link: "/school/public-home", component: "Public Home", icon: WebIcon },
     { link: "/school/courses", component: "Courses", icon: SchoolIcon },
     { link: "/school/class", component: "Classes", icon:FormatListNumberedIcon },
     { link: "/school/subject", component: "Subjects", icon: MenuBookIcon },
