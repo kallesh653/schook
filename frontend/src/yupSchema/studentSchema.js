@@ -27,6 +27,9 @@ export const studentSchema = yup.object({
     guardian_phone: yup.string().min(10, "Phone must contain 10 characters").required("Phone is required"),
     aadhaar_number: yup.string()
         .matches(/^\d{12}$/, "Aadhaar number must be exactly 12 digits")
-        .required("Aadhaar number is required"),
+        .notRequired(),
     password: yup.string().required("Password is a required field."),
+    // Fees are optional
+    total_fees: yup.number().min(0, "Total fees cannot be negative").notRequired(),
+    advance_fees: yup.number().min(0, "Advance fees cannot be negative").notRequired(),
 })

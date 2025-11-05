@@ -366,7 +366,6 @@ const SchoolDashboard = () => {
     { link: "/school/subject", component: "Subjects", icon: MenuBookIcon },
     { link: "/school/students", component: "Students", icon: GroupIcon },
     { link: "/school/teachers", component: "Teachers", icon: GroupIcon },
-    { link: "/school/student-records", component: "Student Records", icon: AssignmentIndIcon },
     { link: "/school/fees", component: "Fees Mgt", icon: PaymentIcon },
     { link: "/school/periods", component: "Schedule", icon: CalendarMonthIcon },
     { link: "/school/attendance", component: "Attendance", icon: RecentActorsIcon },

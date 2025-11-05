@@ -178,15 +178,15 @@ const TeacherMarksEntry = () => {
     const fetchStudents = async () => {
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const response = await axios.get(`${baseUrl}/student-records`, {
+            const response = await axios.get(`${baseUrl}/student/fetch-with-query`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const studentRecords = response.data.data || [];
             const transformedStudents = studentRecords.map(record => ({
                 id: record._id,
-                name: record.student_name,
-                class: record.class,
-                section: record.section,
+                name: record.name,
+                class: record.student_class?.class_text || record.class || '',
+                section: record.student_class?.section || record.section || '',
                 roll_number: record.roll_number
             }));
             setStudents(transformedStudents);

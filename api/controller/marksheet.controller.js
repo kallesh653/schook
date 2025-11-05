@@ -1,5 +1,4 @@
 const Marksheet = require('../model/marksheet.model');
-const StudentRecord = require('../model/studentRecord.model');
 
 // Create a new marksheet
 const createMarksheet = async (req, res) => {
@@ -36,6 +35,7 @@ const createMarksheet = async (req, res) => {
 
         const marksheetData = {
             ...req.body,
+            school: req.user?.schoolId || req.user?.id,
             created_by: req.user?.id || req.user?.userId || 'system'
         };
 
@@ -84,11 +84,23 @@ const createMarksheet = async (req, res) => {
 // Get all marksheets
 const getAllMarksheets = async (req, res) => {
     try {
+        console.log('=== GET ALL MARKSHEETS ===');
+        console.log('Query params:', req.query);
+        console.log('User:', req.user);
+
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
 
-        const filter = {};
+        // Get school ID from authenticated user
+        const schoolId = req.user?.schoolId || req.user?.id;
+
+        const filter = {
+            $or: [
+                { school: schoolId },
+                { school: { $exists: false } } // For backward compatibility with old marksheets
+            ]
+        };
 
         // Add filters
         if (req.query.class) filter.class = req.query.class;
@@ -100,6 +112,8 @@ const getAllMarksheets = async (req, res) => {
             filter.student_name = { $regex: req.query.student_name, $options: 'i' };
         }
 
+        console.log('Filter:', JSON.stringify(filter, null, 2));
+
         const marksheets = await Marksheet.find(filter)
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -107,6 +121,8 @@ const getAllMarksheets = async (req, res) => {
             .populate('student_id', 'student_name class section roll_number');
 
         const total = await Marksheet.countDocuments(filter);
+
+        console.log(`✅ Found ${marksheets.length} marksheets (Total: ${total})`);
 
         res.json({
             success: true,
@@ -118,7 +134,7 @@ const getAllMarksheets = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Error fetching marksheets:', error);
+        console.error('❌ Error fetching marksheets:', error);
         res.status(500).json({
             success: false,
             message: 'Error fetching marksheets',

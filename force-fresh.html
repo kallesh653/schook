@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Force Fresh Load</title>
+    <script>
+        // Unregister all service workers
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
+
+        // Clear all storage
+        localStorage.clear();
+        sessionStorage.clear();
+
+        // Clear all cookies
+        document.cookie.split(";").forEach(function(c) {
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+
+        // Force reload with unique timestamp
+        setTimeout(function() {
+            window.location.href = '/?_force=' + new Date().getTime() + '&_v=1762244488351';
+        }, 500);
+    </script>
+</head>
+<body style="font-family: Arial; text-align: center; padding: 100px; background: #f0f0f0;">
+    <h1>🔄 Forcing Fresh Load...</h1>
+    <p>Clearing all cache, cookies, and storage...</p>
+    <p style="color: #666;">You will be redirected automatically in 1 second</p>
+</body>
+</html>

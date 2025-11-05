@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Box, Button, Card, CardContent, Grid, Fab, IconButton, Avatar } from '@mui/material';
+import { Container, Typography, Box, Button, Card, CardContent, Grid, Fab, IconButton, Avatar, AppBar, Toolbar } from '@mui/material';
 import { styled, keyframes } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -24,7 +24,11 @@ import {
   Phone as PhoneIcon,
   Email as EmailIcon,
   LocationOn as LocationIcon,
-  WhatsApp as WhatsAppIcon
+  WhatsApp as WhatsAppIcon,
+  Login as LoginIcon,
+  Home as HomeIcon,
+  Info as InfoIcon,
+  Notifications as NotificationsIcon
 } from '@mui/icons-material';
 
 // Animations
@@ -92,6 +96,18 @@ const shimmer = keyframes`
   100% { background-position: 1000px 0; }
 `;
 
+const wiggle = keyframes`
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  50% { transform: rotate(10deg); }
+  75% { transform: rotate(-10deg); }
+`;
+
+const scrollNews = keyframes`
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+`;
+
 // Slider Components - Beautiful large slider with animations
 const SliderContainer = styled(Box)({
   position: 'relative',
@@ -103,7 +119,7 @@ const SliderContainer = styled(Box)({
   marginBottom: '50px',
   borderRadius: '20px',
   boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  background: 'linear-gradient(135deg, #8B8B8D 0%, #6B6B6D 100%)',
   '@media (max-width: 1200px)': {
     height: '550px',
     maxHeight: '550px'
@@ -235,11 +251,11 @@ const StatsCard = styled(Card)({
     left: 0,
     right: 0,
     height: '5px',
-    background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)'
+    background: 'linear-gradient(90deg, #8B8B8D 0%, #6B6B6D 100%)'
   },
   '&:hover': {
     transform: 'translateY(-15px) scale(1.03)',
-    boxShadow: '0 20px 60px rgba(102, 126, 234, 0.3)'
+    boxShadow: '0 20px 60px rgba(139, 139, 141, 0.3)'
   }
 });
 
@@ -294,7 +310,7 @@ const WhatsAppButton = styled(Fab)({
 });
 
 const FeatureCard = styled(Card)({
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  background: 'linear-gradient(135deg, #8B8B8D 0%, #6B6B6D 100%)',
   color: 'white',
   borderRadius: '30px',
   padding: '50px 30px',
@@ -302,10 +318,10 @@ const FeatureCard = styled(Card)({
   textAlign: 'center',
   transition: 'all 0.4s ease',
   animation: `${fadeIn} 0.8s ease`,
-  boxShadow: '0 15px 40px rgba(102, 126, 234, 0.3)',
+  boxShadow: '0 15px 40px rgba(139, 139, 141, 0.3)',
   '&:hover': {
     transform: 'translateY(-15px) rotate(-2deg)',
-    boxShadow: '0 25px 70px rgba(102, 126, 234, 0.5)'
+    boxShadow: '0 25px 70px rgba(139, 139, 141, 0.5)'
   }
 });
 
@@ -328,12 +344,50 @@ const SectionTitle = styled(Typography)({
   fontWeight: 900,
   textAlign: 'center',
   marginBottom: '20px',
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
+  color: '#DC143C',
   '@media (max-width: 600px)': {
     fontSize: '2.5rem'
   }
+});
+
+const HeaderBar = styled(AppBar)({
+  background: 'linear-gradient(135deg, #8B8B8D 0%, #6B6B6D 100%)',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+});
+
+const AlertBanner = styled(Box)({
+  background: 'linear-gradient(135deg, #DC143C 0%, #B22222 50%, #DC143C 100%)',
+  backgroundSize: '200% auto',
+  animation: `${shimmer} 3s linear infinite`,
+  color: 'white',
+  padding: '16px 0',
+  overflow: 'hidden',
+  position: 'relative',
+  boxShadow: '0 6px 25px rgba(220, 20, 60, 0.5)',
+  borderBottom: '3px solid #FFD700',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'url("data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Cpath d="M0 0h20v20H0V0zm10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/%3E%3C/g%3E%3C/svg%3E")',
+    opacity: 0.2
+  }
+});
+
+const AlertContent = styled(Box)({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '20px',
+  animation: `${scrollNews} 60s linear infinite`,
+  whiteSpace: 'nowrap',
+  fontSize: '18px',
+  fontWeight: 'bold',
+  position: 'relative',
+  zIndex: 1
 });
 
 const AdvancedHome = () => {
@@ -470,7 +524,112 @@ const AdvancedHome = () => {
 
   return (
     <Box>
-      {/* Hero Slider */}
+      {/* ============= HEADER NAVIGATION ============= */}
+      <HeaderBar position="sticky" elevation={4}>
+        <Toolbar>
+          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+            <SchoolIcon sx={{ fontSize: 40, mr: 2, color: '#DC143C' }} />
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 'bold',
+                color: '#DC143C',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.2)'
+              }}
+            >
+              GenTime School
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
+            <Button
+              startIcon={<HomeIcon />}
+              sx={{
+                color: 'white',
+                fontWeight: 'bold',
+                '&:hover': { color: '#DC143C', backgroundColor: 'rgba(220, 20, 60, 0.1)' }
+              }}
+            >
+              Home
+            </Button>
+            <Button
+              startIcon={<InfoIcon />}
+              sx={{
+                color: 'white',
+                fontWeight: 'bold',
+                '&:hover': { color: '#DC143C', backgroundColor: 'rgba(220, 20, 60, 0.1)' }
+              }}
+            >
+              About Us
+            </Button>
+            <Button
+              startIcon={<BookIcon />}
+              sx={{
+                color: 'white',
+                fontWeight: 'bold',
+                '&:hover': { color: '#DC143C', backgroundColor: 'rgba(220, 20, 60, 0.1)' }
+              }}
+            >
+              Academics
+            </Button>
+            <Button
+              startIcon={<PhoneIcon />}
+              sx={{
+                color: 'white',
+                fontWeight: 'bold',
+                '&:hover': { color: '#DC143C', backgroundColor: 'rgba(220, 20, 60, 0.1)' }
+              }}
+            >
+              Contact
+            </Button>
+          </Box>
+
+          <Button
+            variant="contained"
+            startIcon={<LoginIcon />}
+            onClick={() => navigate('/login')}
+            sx={{
+              ml: 2,
+              backgroundColor: '#DC143C',
+              color: 'white',
+              fontWeight: 'bold',
+              '&:hover': {
+                backgroundColor: '#B22222',
+                transform: 'scale(1.05)'
+              }
+            }}
+          >
+            Login
+          </Button>
+        </Toolbar>
+      </HeaderBar>
+
+      {/* ============= BEAUTIFUL ALERT BANNER ============= */}
+      <AlertBanner>
+        <Box sx={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
+          <AlertContent>
+            <NotificationsIcon sx={{ fontSize: 30, animation: `${wiggle} 2s ease-in-out infinite` }} />
+            {['🎉 Special Offer: 20% Discount on Early Admission!', '⭐ Limited Seats Available - Apply Now!', '🏆 Best School Award 2024 Winner', '🎓 100% Placement Assistance for Graduates', '✨ New State-of-the-Art Facilities Launched'].map((msg, idx) => (
+              <React.Fragment key={idx}>
+                <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {msg}
+                </Typography>
+                <Box sx={{ fontSize: '24px' }}>⚡</Box>
+              </React.Fragment>
+            ))}
+            {['🎉 Special Offer: 20% Discount on Early Admission!', '⭐ Limited Seats Available - Apply Now!', '🏆 Best School Award 2024 Winner', '🎓 100% Placement Assistance for Graduates', '✨ New State-of-the-Art Facilities Launched'].map((msg, idx) => (
+              <React.Fragment key={`duplicate-${idx}`}>
+                <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {msg}
+                </Typography>
+                <Box sx={{ fontSize: '24px' }}>⚡</Box>
+              </React.Fragment>
+            ))}
+          </AlertContent>
+        </Box>
+      </AlertBanner>
+
+      {/* Hero Slider (rest of the code continues...) */}
       <Container maxWidth="xl" sx={{ px: { xs: 0, md: 3 }, mt: 3 }}>
         <SliderContainer>
         {slides.map((slide, index) => (
@@ -563,12 +722,12 @@ const AdvancedHome = () => {
                       width: 100,
                       height: 100,
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      background: 'linear-gradient(135deg, #8B8B8D 0%, #6B6B6D 100%)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       margin: '0 auto 25px',
-                      boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)'
+                      boxShadow: '0 10px 30px rgba(139, 139, 141, 0.3)'
                     }}
                   >
                     {stat.icon === 'students' && <SchoolIcon sx={{ fontSize: 50, color: 'white' }} />}
@@ -577,9 +736,7 @@ const AdvancedHome = () => {
                     {stat.icon === 'success' && <StarIcon sx={{ fontSize: 50, color: 'white' }} />}
                   </Box>
                   <Typography variant="h2" fontWeight="bold" sx={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
+                    color: '#DC143C',
                     mb: 1,
                     fontSize: '3.5rem'
                   }}>
@@ -635,12 +792,12 @@ const AdvancedHome = () => {
             {testimonials.map((testimonial, index) => (
               <Grid item xs={12} md={4} key={index}>
                 <TestimonialCard>
-                  <QuoteIcon sx={{ fontSize: 50, color: '#667eea', mb: 2 }} />
+                  <QuoteIcon sx={{ fontSize: 50, color: '#DC143C', mb: 2 }} />
                   <Typography variant="body1" sx={{ mb: 3, fontSize: '1.1rem', lineHeight: 1.8, fontStyle: 'italic' }}>
                     "{testimonial.text}"
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar sx={{ width: 60, height: 60, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                    <Avatar sx={{ width: 60, height: 60, background: 'linear-gradient(135deg, #8B8B8D 0%, #6B6B6D 100%)' }}>
                       {testimonial.name.charAt(0)}
                     </Avatar>
                     <Box>
@@ -769,7 +926,7 @@ const AdvancedHome = () => {
                   width: 80,
                   height: 80,
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: 'linear-gradient(135deg, #8B8B8D 0%, #6B6B6D 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -791,7 +948,7 @@ const AdvancedHome = () => {
                   width: 80,
                   height: 80,
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: 'linear-gradient(135deg, #8B8B8D 0%, #6B6B6D 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -813,7 +970,7 @@ const AdvancedHome = () => {
                   width: 80,
                   height: 80,
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: 'linear-gradient(135deg, #8B8B8D 0%, #6B6B6D 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -859,16 +1016,16 @@ const AdvancedHome = () => {
                   animation: `${fadeIn} 0.8s ease ${index * 0.2}s both`,
                   '&:hover': {
                     transform: 'translateY(-15px) scale(1.05)',
-                    boxShadow: '0 20px 50px rgba(102, 126, 234, 0.3)'
+                    boxShadow: '0 20px 50px rgba(139, 139, 141, 0.3)'
                   }
                 }}>
-                  <Box sx={{ color: '#667eea', mb: 2, animation: `${float} 3s ease-in-out infinite` }}>
+                  <Box sx={{ color: '#DC143C', mb: 2, animation: `${float} 3s ease-in-out infinite` }}>
                     {achievement.icon}
                   </Box>
                   <Typography variant="h5" fontWeight="bold" sx={{ mb: 1 }}>
                     {achievement.title}
                   </Typography>
-                  <Typography variant="h6" sx={{ color: '#667eea', mb: 2, fontWeight: 'bold' }}>
+                  <Typography variant="h6" sx={{ color: '#DC143C', mb: 2, fontWeight: 'bold' }}>
                     {achievement.year}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
@@ -924,7 +1081,7 @@ const AdvancedHome = () => {
                   }
                 }}>
                   <Box sx={{
-                    color: '#667eea',
+                    color: '#DC143C',
                     mb: 3,
                     display: 'flex',
                     justifyContent: 'center'
@@ -934,7 +1091,7 @@ const AdvancedHome = () => {
                   <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>
                     {event.title}
                   </Typography>
-                  <Typography variant="subtitle1" sx={{ color: '#667eea', mb: 2, fontWeight: 'bold' }}>
+                  <Typography variant="subtitle1" sx={{ color: '#DC143C', mb: 2, fontWeight: 'bold' }}>
                     {event.date}
                   </Typography>
                   <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
@@ -951,7 +1108,7 @@ const AdvancedHome = () => {
       <Box
         sx={{
           py: 12,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'linear-gradient(135deg, #8B8B8D 0%, #6B6B6D 100%)',
           color: 'white',
           textAlign: 'center'
         }}
@@ -969,7 +1126,7 @@ const AdvancedHome = () => {
             onClick={() => navigate('/register')}
             sx={{
               background: 'white',
-              color: '#667eea',
+              color: '#DC143C',
               px: 8,
               py: 3,
               fontSize: '1.4rem',

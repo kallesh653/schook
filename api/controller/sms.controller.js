@@ -1,7 +1,6 @@
 const SmsTemplate = require('../model/smsTemplate.model');
 const SmsLog = require('../model/smsLog.model');
 const Student = require('../model/student.model');
-const StudentRecord = require('../model/studentRecord.model');
 const Attendance = require('../model/attendance.model');
 const axios = require('axios');
 
@@ -1028,6 +1027,267 @@ const testGatewayConnection = async (req, res) => {
     }
 };
 
+// Get classes with students for SMS sending
+const getClassesWithStudents = async (req, res) => {
+    try {
+        const schoolId = req.user.schoolId || req.user.id;
+
+        // Get all students with their class information
+        const students = await Student.find({ school: schoolId })
+            .select('student_class')
+            .populate('student_class', 'class_text section')
+            .lean();
+
+        // Get unique classes that have students
+        const classMap = new Map();
+        students.forEach(student => {
+            if (student.student_class && student.student_class._id) {
+                const classId = student.student_class._id.toString();
+                if (!classMap.has(classId)) {
+                    classMap.set(classId, {
+                        _id: student.student_class._id,
+                        class_text: student.student_class.class_text,
+                        section: student.student_class.section || '',
+                        student_count: 1
+                    });
+                } else {
+                    classMap.get(classId).student_count += 1;
+                }
+            }
+        });
+
+        const classes = Array.from(classMap.values());
+
+        res.json({
+            success: true,
+            data: classes,
+            total: classes.length
+        });
+
+    } catch (error) {
+        console.error('Error fetching classes with students:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching classes',
+            error: error.message
+        });
+    }
+};
+
+// Get students by class for SMS sending
+const getStudentsByClass = async (req, res) => {
+    try {
+        const { class_id } = req.query;
+        const schoolId = req.user.schoolId || req.user.id;
+
+        if (!class_id) {
+            return res.status(400).json({
+                success: false,
+                message: 'Class ID is required'
+            });
+        }
+
+        // Get students from the specified class
+        const students = await Student.find({
+            school: schoolId,
+            student_class: class_id
+        })
+            .populate('student_class', 'class_text section')
+            .select('name guardian guardian_phone email age student_image rollNumber')
+            .lean();
+
+        // Filter students with valid guardian phone
+        const studentsWithContact = students
+            .filter(student => student.guardian_phone)
+            .map(student => ({
+                _id: student._id,
+                student_name: student.name,
+                roll_number: student.rollNumber || '-',
+                guardian_name: student.guardian,
+                guardian_phone: student.guardian_phone,
+                email: student.email || '',
+                class: student.student_class.class_text,
+                class_id: student.student_class._id,
+                age: student.age || 0,
+                student_image: student.student_image || ''
+            }));
+
+        res.json({
+            success: true,
+            data: {
+                students: studentsWithContact,
+                total_count: studentsWithContact.length,
+                class_name: studentsWithContact.length > 0 ? studentsWithContact[0].class : '',
+                students_without_contact: students.length - studentsWithContact.length
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching students by class:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching students',
+            error: error.message
+        });
+    }
+};
+
+// Send custom SMS to selected parents
+const sendCustomSmsToParents = async (req, res) => {
+    try {
+        const { template_id, student_ids, custom_message, custom_data } = req.body;
+        const schoolId = req.user.schoolId || req.user.id;
+
+        if (!student_ids || student_ids.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please select at least one student'
+            });
+        }
+
+        // Get template if provided
+        let template = null;
+        if (template_id) {
+            template = await SmsTemplate.findOne({ _id: template_id, school: schoolId });
+            if (!template) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Template not found'
+                });
+            }
+        }
+
+        // Get student details
+        const students = await Student.find({
+            _id: { $in: student_ids },
+            school: schoolId
+        })
+            .populate('student_class', 'class_text')
+            .lean();
+
+        const sentMessages = [];
+        const failedMessages = [];
+
+        for (const student of students) {
+            try {
+                if (!student.guardian_phone) {
+                    failedMessages.push({
+                        student_name: student.name,
+                        error: 'Guardian phone number not available'
+                    });
+                    continue;
+                }
+
+                let message = '';
+
+                if (template) {
+                    // Use template
+                    const templateData = {
+                        guardian_name: student.guardian || 'Parent',
+                        student_name: student.name,
+                        class: student.student_class?.class_text || '',
+                        school_name: req.user.school_name || 'Our School',
+                        ...custom_data
+                    };
+                    message = template.processTemplate(templateData);
+                } else if (custom_message) {
+                    // Use custom message
+                    message = custom_message
+                        .replace(/\{\{guardian_name\}\}/g, student.guardian || 'Parent')
+                        .replace(/\{\{student_name\}\}/g, student.name)
+                        .replace(/\{\{class\}\}/g, student.student_class?.class_text || '')
+                        .replace(/\{\{school_name\}\}/g, req.user.school_name || 'Our School');
+                } else {
+                    failedMessages.push({
+                        student_name: student.name,
+                        error: 'No message content provided'
+                    });
+                    continue;
+                }
+
+                // Create SMS log entry
+                const smsLog = new SmsLog({
+                    template_id: template?._id,
+                    template_code: template?.template_code,
+                    message_content: message,
+                    recipient_phone: student.guardian_phone,
+                    recipient_name: student.guardian,
+                    recipient_type: 'parent',
+                    student_id: student._id,
+                    student_name: student.name,
+                    class_id: student.student_class?._id,
+                    class_name: student.student_class?.class_text,
+                    sent_by: req.user.id,
+                    sent_by_name: req.user.name || 'Admin',
+                    school: schoolId,
+                    category: template?.template_type || 'general',
+                    priority: template?.priority || 'medium'
+                });
+
+                // Send SMS
+                const smsResult = await sendSmsMessage(student.guardian_phone, message);
+
+                if (smsResult.success) {
+                    await smsLog.markAsSent(smsResult.gatewayResponse);
+                    sentMessages.push({
+                        student_name: student.name,
+                        guardian_name: student.guardian,
+                        phone: student.guardian_phone,
+                        message: message,
+                        status: 'sent'
+                    });
+
+                    // Update template usage if template was used
+                    if (template) {
+                        template.usage_count += 1;
+                    }
+                } else {
+                    await smsLog.markAsFailed(smsResult.error);
+                    failedMessages.push({
+                        student_name: student.name,
+                        guardian_name: student.guardian,
+                        phone: student.guardian_phone,
+                        error: smsResult.error
+                    });
+                }
+
+            } catch (error) {
+                console.error(`Error sending SMS for student ${student.name}:`, error);
+                failedMessages.push({
+                    student_name: student.name,
+                    guardian_name: student.guardian,
+                    error: error.message
+                });
+            }
+        }
+
+        // Save template if it was used
+        if (template) {
+            await template.save();
+        }
+
+        res.json({
+            success: true,
+            message: `SMS sent to ${sentMessages.length} out of ${students.length} recipients`,
+            data: {
+                sent: sentMessages,
+                failed: failedMessages,
+                total: students.length,
+                success_count: sentMessages.length,
+                failure_count: failedMessages.length
+            }
+        });
+
+    } catch (error) {
+        console.error('Error sending custom SMS to parents:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error sending SMS to parents',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     createTemplate,
     getTemplates,
@@ -1043,5 +1303,8 @@ module.exports = {
     getAbsentStudentsList,
     getFeeBalanceStudentsList,
     updateGatewaySettings,
-    testGatewayConnection
+    testGatewayConnection,
+    getClassesWithStudents,
+    getStudentsByClass,
+    sendCustomSmsToParents
 };

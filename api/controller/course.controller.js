@@ -1,4 +1,5 @@
 const Course = require('../model/course.model');
+const Student = require('../model/student.model');
 
 // Create a new course
 const createCourse = async (req, res) => {
@@ -174,14 +175,31 @@ const deleteCourse = async (req, res) => {
     try {
         const { courseId } = req.params;
 
-        const deletedCourse = await Course.findByIdAndDelete(courseId);
-
-        if (!deletedCourse) {
+        // Check if course exists
+        const course = await Course.findById(courseId);
+        if (!course) {
             return res.status(404).json({
                 success: false,
                 message: 'Course not found'
             });
         }
+
+        // Check if any students are enrolled in this course
+        const enrolledStudents = await Student.countDocuments({
+            course: courseId,
+            status: 'Active'
+        });
+
+        if (enrolledStudents > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Cannot delete course. ${enrolledStudents} student(s) are currently enrolled in this course. Please transfer or remove the students first.`,
+                enrolledCount: enrolledStudents
+            });
+        }
+
+        // If no students enrolled, proceed with deletion
+        const deletedCourse = await Course.findByIdAndDelete(courseId);
 
         res.status(200).json({
             success: true,

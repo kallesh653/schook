@@ -60,24 +60,44 @@ module.exports = {
 
     },
     deleteClassWithId: async(req, res)=>{
-       
+
         try {
             let id = req.params.id;
             const schoolId = req.user.schoolId;
-            const classStudentCount =(await Student.find({student_class:id,school:schoolId})).length;
-            const classExamCount =(await Exam.find({class:id,school:schoolId})).length;
-            const classPeriodCount =(await Period.find({class:id,school:schoolId})).length;
+
+            // Check if class exists
+            const classData = await Class.findOne({_id:id,school:schoolId});
+            if (!classData) {
+                return res.status(404).json({success:false, message:"Class not found."});
+            }
+
+            // Count students, exams, and periods associated with this class
+            const classStudentCount = await Student.countDocuments({student_class:id,school:schoolId, status: 'Active'});
+            const classExamCount = await Exam.countDocuments({class:id,school:schoolId});
+            const classPeriodCount = await Period.countDocuments({class:id,school:schoolId});
+
             if((classStudentCount===0) && (classExamCount===0) && (classPeriodCount===0)){
                 await Class.findOneAndDelete({_id:id,school:schoolId});
-                const classAfterDelete = await Class.findOne({_id:id});
-                res.status(200).json({success:true, message:"Class Deleted.", data:classAfterDelete})
+                res.status(200).json({success:true, message:"Class deleted successfully."})
             }else{
-                res.status(500).json({success:false, message:"This class is already in use."})
+                let blockers = [];
+                if (classStudentCount > 0) blockers.push(`${classStudentCount} student(s)`);
+                if (classExamCount > 0) blockers.push(`${classExamCount} exam(s)`);
+                if (classPeriodCount > 0) blockers.push(`${classPeriodCount} period(s)`);
+
+                res.status(400).json({
+                    success:false,
+                    message:`Cannot delete class. It is associated with ${blockers.join(', ')}. Please remove or transfer them first.`,
+                    details: {
+                        students: classStudentCount,
+                        exams: classExamCount,
+                        periods: classPeriodCount
+                    }
+                })
             }
-          
+
         } catch (error) {
-            
-            console.log("Error in updateClassWithId", error);
+            console.log("Error in deleteClassWithId", error);
             res.status(500).json({success:false, message:"Server Error in Deleting Class. Try later"})
         }
 

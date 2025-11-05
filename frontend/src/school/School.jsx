@@ -44,6 +44,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import SmsIcon from '@mui/icons-material/Sms';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import EventNoteIcon from '@mui/icons-material/EventNote';
 
 const drawerWidth = 280;
 
@@ -277,20 +278,22 @@ export default function School() {
     const navArr = [
         {link:"/", component:"Home", icon:HomeIcon, category: "main"},
         { link: "/school", component: "Dashboard", icon: DashboardIcon, category: "main" },
+        { link: "/school/academic-year", component: "Academic Year", icon: EventNoteIcon, category: "academic" },
         { link: "/school/courses", component: "Courses", icon: SchoolIcon, category: "academic" },
         { link: "/school/class", component: "Classes", icon:FormatListNumberedIcon, category: "academic" },
         { link: "/school/subject", component: "Subjects", icon: MenuBookIcon, category: "academic" },
         { link: "/school/students", component: "Students", icon: GroupIcon, category: "people" },
         { link: "/school/teachers", component: "Teachers", icon: GroupIcon, category: "people" },
-        { link: "/school/student-records", component: "Student Records", icon: AssignmentIndIcon, category: "records" },
         { link: "/school/transport-fees", component: "Transport Fees", icon: DirectionsBusIcon, category: "financial" },
         { link: "/school/periods", component: "Schedule", icon: CalendarMonthIcon, category: "academic" },
         { link: "/school/attendance", component: "Attendance", icon: RecentActorsIcon, category: "records" },
         { link: "/school/attendance-report", component: "Attendance Reports", icon: AssessmentIcon, category: "records" },
         { link: "/school/examinations", component: "Examinations", icon: ExplicitIcon, category: "academic"},
         { link: "/school/marksheets", component: "Mark Sheet Generator", icon: GradingIcon, category: "academic"},
+        { link: "/school/final-marksheet", component: "Final Mark Sheet", icon: GradingIcon, category: "academic"},
         {link:"/school/notice", component:"Notices", icon:CircleNotificationsIcon, category: "communication"},
         {link:"/school/sms", component:"SMS Management", icon:SmsIcon, category: "communication"},
+        {link:"/school/sms-to-parents", component:"SMS to Parents", icon:SmsIcon, category: "communication"},
         {link:"/logout", component:"Log Out", icon:LogoutIcon, category: "system"}
     ]
     const navigate = useNavigate();

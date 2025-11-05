@@ -31,4 +31,13 @@ router.get('/fee-balance-students-list', smsController.getFeeBalanceStudentsList
 router.post('/gateway/settings', smsController.updateGatewaySettings);
 router.post('/gateway/test', smsController.testGatewayConnection);
 
+// Get classes with students for SMS
+router.get('/classes-with-students', smsController.getClassesWithStudents);
+
+// Get students by class for SMS
+router.get('/students-by-class', smsController.getStudentsByClass);
+
+// Send custom SMS to parents
+router.post('/send/custom-to-parents', smsController.sendCustomSmsToParents);
+
 module.exports = router;

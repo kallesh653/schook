@@ -10,6 +10,13 @@ const subjectSchema = new mongoose.Schema({
 });
 
 const marksheetSchema = new mongoose.Schema({
+    // School Information (ADDED)
+    school: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'School',
+        required: false // Making optional for backward compatibility
+    },
+
     // Student Information
     student_id: { type: String }, // Changed to String for flexibility
     student_name: { type: String, required: true },
@@ -71,9 +78,9 @@ const marksheetSchema = new mongoose.Schema({
 });
 
 // Index for better performance
-marksheetSchema.index({ student_name: 1, academic_year: 1, examination: 1 });
-marksheetSchema.index({ class: 1, section: 1 });
-marksheetSchema.index({ examination: 1, academic_year: 1 });
+marksheetSchema.index({ school: 1, student_name: 1, academic_year: 1, examination: 1 });
+marksheetSchema.index({ school: 1, class: 1, section: 1 });
+marksheetSchema.index({ school: 1, examination: 1, academic_year: 1 });
 
 // Virtual for full student info
 marksheetSchema.virtual('full_student_info').get(function() {

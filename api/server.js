@@ -18,11 +18,11 @@ const periodRoutes = require("./router/period.router");
 const noticeRoutes = require("./router/notice.router");
 // const feesRoutes = require("./router/fees.router"); // REMOVED - Fees management completely removed
 const transportFeesRouter = require('./routes/transportFees.routes');
-const studentRecordRouter = require('./router/studentRecord.router');
 const frontPageRouter = require('./router/frontPage.router');
 const publicHomePageRouter = require('./router/publicHomePage.router');
 const marksheetRouter = require('./router/marksheet.router');
 const smsRouter = require('./router/sms.router');
+const academicYearRouter = require('./router/academicYear.router');
 const authMiddleware = require("./auth/auth");
 const { authCheck } = require("./controller/auth.controller");
 
@@ -74,11 +74,11 @@ app.use('/api/period',  periodRoutes)
 app.use('/api/notices', noticeRoutes)
 // app.use('/api/fees', feesRoutes) // REMOVED - Fees management completely removed
 app.use('/api/transport-fees', transportFeesRouter)
-app.use("/api/student-records", studentRecordRouter);
 app.use("/api/front-page", frontPageRouter);
 app.use("/api/public-home", publicHomePageRouter);
 app.use("/api/marksheets", marksheetRouter);
 app.use("/api/sms", smsRouter);
+app.use("/api/academic-year", academicYearRouter);
 
 // Serve static files for uploads
 app.use('/uploads', express.static('uploads'));

@@ -166,30 +166,30 @@ const FeesManagement = () => {
         }
     };
 
-    // Fetch students from student records API
+    // Fetch students from API
     const fetchStudents = async () => {
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             const headers = token ? { Authorization: `Bearer ${token}` } : {};
-            
-            const response = await axios.get(`${baseUrl}/student-records`, { headers });
+
+            const response = await axios.get(`${baseUrl}/student/fetch-with-query`, { headers });
             const studentRecords = response.data.data || [];
-            
-            // Transform student records to match fees component format
+
+            // Transform students to match fees component format
             const transformedStudents = studentRecords.map(record => ({
                 id: record._id,
-                name: record.student_name,
-                class: record.class,
-                section: record.section,
+                name: record.name,
+                class: record.student_class?.class_text || record.class || '',
+                section: record.student_class?.section || record.section || '',
                 rollNumber: record.roll_number,
-                phone: record.phone_number,
+                phone: record.guardian_phone,
                 email: record.email,
                 fees: record.fees || {}
             }));
             
             setStudents(transformedStudents);
-            
-            // Generate fees from student records only if no saved fees exist
+
+            // Generate fees from students only if no saved fees exist
             const savedFees = localStorage.getItem('feesManagement_fees');
             if (!savedFees || JSON.parse(savedFees).length === 0) {
                 generateFeesFromStudents(transformedStudents);
@@ -205,20 +205,20 @@ const FeesManagement = () => {
         }
     };
 
-    // Update student record fees automatically
+    // Update student fees automatically
     const updateStudentRecordFees = async (studentId, feeAmount, action, feeType = null) => {
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-            // Get current student record
-            const studentRecord = students.find(s => s.id === studentId);
-            if (!studentRecord) {
-                throw new Error('Student record not found');
+            // Get current student
+            const student = students.find(s => s.id === studentId);
+            if (!student) {
+                throw new Error('Student not found');
             }
 
             // Calculate new fee values based on action
-            let updatedFees = { ...studentRecord.fees };
+            let updatedFees = { ...student.fees };
 
             if (action === 'add') {
                 updatedFees.total_fees = (updatedFees.total_fees || 0) + feeAmount;
@@ -241,8 +241,8 @@ const FeesManagement = () => {
             // Recalculate balance
             updatedFees.balance_fees = updatedFees.total_fees - updatedFees.paid_fees;
 
-            // Update student record in backend
-            await axios.put(`${baseUrl}/student-records/${studentId}`, {
+            // Update student in backend
+            await axios.patch(`${baseUrl}/student/update/${studentId}`, {
                 fees: updatedFees
             }, { headers });
 
@@ -253,21 +253,21 @@ const FeesManagement = () => {
                     : student
             ));
 
-            console.log('Student record fees updated successfully');
+            console.log('Student fees updated successfully');
         } catch (error) {
-            console.error('Error updating student record fees:', error);
+            console.error('Error updating student fees:', error);
             throw error;
         }
     };
 
-    // Generate fees from student records
+    // Generate fees from students
     const generateFeesFromStudents = (studentRecords) => {
         const generatedFees = [];
         let feeId = 1;
 
         studentRecords.forEach(student => {
             if (student.fees) {
-                // Generate fees based on student record fees
+                // Generate fees based on student fees
                 Object.entries(student.fees).forEach(([feeKey, amount]) => {
                     if (amount > 0 && !['paid_fees', 'total_fees', 'balance_fees'].includes(feeKey)) {
                         const feeTypeMap = {
@@ -333,7 +333,7 @@ const FeesManagement = () => {
         return () => window.removeEventListener('feesUpdated', handleFeesUpdate);
     }, []);
 
-    // Handle navigation from student records
+    // Handle navigation from students
     useEffect(() => {
         if (location.state?.searchStudent) {
             setSearchQuery(location.state.searchStudent);
@@ -476,9 +476,9 @@ const FeesManagement = () => {
                     fee.id === editingFee.id ? updatedFee : fee
                 ));
 
-                // Update student record fees automatically
+                // Update student fees automatically
                 await updateStudentRecordFees(formData.studentId, updatedFee.amount, 'update', updatedFee.feeType);
-                setSnackbar({ open: true, message: 'Fee updated and synced with student record!', severity: 'success' });
+                setSnackbar({ open: true, message: 'Fee updated and synced with student!', severity: 'success' });
             } else {
                 // Add new fee
                 const finalFeeType = formData.feeType || formData.customFeeType?.trim() || 'Custom Fee';
@@ -492,9 +492,9 @@ const FeesManagement = () => {
                 };
                 setFees(prev => [...prev, newFee]);
 
-                // Update student record fees automatically
+                // Update student fees automatically
                 await updateStudentRecordFees(formData.studentId, newFee.amount, 'add', newFee.feeType);
-                setSnackbar({ open: true, message: 'New fee added and synced with student record!', severity: 'success' });
+                setSnackbar({ open: true, message: 'New fee added and synced with student!', severity: 'success' });
             }
             handleCloseDialog();
 
@@ -513,14 +513,14 @@ const FeesManagement = () => {
             const fee = fees.find(f => f.id === feeId);
             if (!fee) return;
 
-            if (window.confirm('Are you sure you want to delete this fee? This will also update the student record.')) {
+            if (window.confirm('Are you sure you want to delete this fee? This will also update the student.')) {
                 // Remove fee from list
                 setFees(prev => prev.filter(f => f.id !== feeId));
 
-                // Update student record by reducing total fees
+                // Update student by reducing total fees
                 await updateStudentRecordFees(fee.studentId, fee.amount, 'remove', fee.feeType);
 
-                setSnackbar({ open: true, message: 'Fee deleted and student record updated!', severity: 'success' });
+                setSnackbar({ open: true, message: 'Fee deleted and student updated!', severity: 'success' });
 
                 // Refresh data to ensure consistency
                 setTimeout(() => {
@@ -545,9 +545,9 @@ const FeesManagement = () => {
                     : f
             ));
 
-            // Update student record with payment
+            // Update student with payment
             await updateStudentRecordFees(fee.studentId, fee.amount, 'pay', fee.feeType);
-            setSnackbar({ open: true, message: 'Fee marked as paid and synced with student record!', severity: 'success' });
+            setSnackbar({ open: true, message: 'Fee marked as paid and synced with student!', severity: 'success' });
 
             // Refresh data to ensure consistency
             setTimeout(() => {
@@ -745,7 +745,7 @@ const FeesManagement = () => {
                 // Add fee to local state
                 setFees(prev => [...prev, newFee]);
 
-                // Update student record with each fee amount
+                // Update student with each fee amount
                 await updateStudentRecordFees(multipleFeesStudentId, fee.amount, 'add', fee.feeType);
 
                 // Add small delay to prevent overwhelming the backend
@@ -754,7 +754,7 @@ const FeesManagement = () => {
 
             setSnackbar({
                 open: true,
-                message: `${selectedFees.length} fees added successfully and synced with student records!`,
+                message: `${selectedFees.length} fees added successfully and synced with students!`,
                 severity: 'success'
             });
 

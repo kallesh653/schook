@@ -44,14 +44,16 @@ import ScheduleStudent from "./student/components/schedule/ScheduleStudent";
 import NoticeSchool from "./school/components/notice/NoticeSchool";
 import NoticeTeacher from "./teacher/components/notice/Notice";
 import NoticeStudent from "./student/components/notice/NoticeStudent";
-import StudentRecords from "./school/components/student-records/StudentRecords";
 import PublicHomePage from "./client/components/public-home/PublicHomePage";
 import SimpleHome from "./client/components/home/SimpleHome";
 import AdvancedHome from "./client/components/home/AdvancedHome";
 import ProtectedWebsiteBuilder from "./website-builder/ProtectedWebsiteBuilder";
 import TransportFees from "./school/components/transport/TransportFees";
 import MarkSheetGenerator from "./school/components/marksheet/MarkSheetGenerator";
+import FinalMarkSheet from "./school/components/marksheet/FinalMarkSheet";
 import SmsManagement from "./school/components/sms/SmsManagement";
+import SmsToParents from "./school/components/sms/SmsToParents";
+import AcademicYear from "./school/components/academic-year/AcademicYear";
 import ProtectedRoute from "./guards/ProtectedRoute";
 import { AuthContext, AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "@emotion/react";
@@ -75,7 +77,6 @@ function App() {
               <Route path="subject" element={<Subject />} />
               <Route path="students" element={<Students />} />
               <Route path="teachers" element={<Teachers />} />
-              <Route path="student-records" element={<StudentRecords />} />
               <Route path="assign-period" element={<AssignPeriod2 />} />
               <Route path="periods" element={<Schedule />} />
               <Route path="attendance" element={<StudentAttendanceList />} />
@@ -84,8 +85,11 @@ function App() {
               <Route path="examinations" element={<Examinations />} />
               <Route path="transport-fees" element={<TransportFees />} />
               <Route path="marksheets" element={<MarkSheetGenerator />} />
+              <Route path="final-marksheet" element={<FinalMarkSheet />} />
               <Route path="sms" element={<SmsManagement />} />
+              <Route path="sms-to-parents" element={<SmsToParents />} />
               <Route path="notice" element={<NoticeSchool/>} />
+              <Route path="academic-year" element={<AcademicYear />} />
             </Route>
   
             <Route path="student"  element={<ProtectedRoute allowedRoles={['STUDENT']}><Student/></ProtectedRoute>}>

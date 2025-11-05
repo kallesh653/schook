@@ -33,6 +33,7 @@ import { baseUrl } from "../../../environment";
 import CustomizedSnackbars from "../../../basic utility components/CustomizedSnackbars";
 import { studentSchema } from "../../../yupSchema/studentSchema";
 import StudentCardAdmin from "../../utility components/student card/StudentCard";
+import StudentReport from "./StudentReport";
 import { styled } from '@mui/material/styles';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -57,6 +58,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DownloadIcon from '@mui/icons-material/Download';
 import DescriptionIcon from '@mui/icons-material/Description';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 
 // Styled components
 const StyledHeaderCard = styled(Card)(({ theme }) => ({
@@ -215,6 +217,19 @@ export default function Students() {
 
   const [message, setMessage] = useState("");
   const [type, setType] = useState("success");
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [selectedStudentForReport, setSelectedStudentForReport] = useState(null);
+
+  const handleOpenReport = (student) => {
+    setSelectedStudentForReport(student);
+    setReportDialogOpen(true);
+  };
+
+  const handleCloseReport = () => {
+    setReportDialogOpen(false);
+    setSelectedStudentForReport(null);
+  };
+
   const resetMessage = () => setMessage("");
 
   const initialValues = {
@@ -1224,7 +1239,7 @@ export default function Students() {
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Total Fees"
+                  label="Total Fees (Optional)"
                   variant="outlined"
                   name="total_fees"
                   type="number"
@@ -1232,14 +1247,15 @@ export default function Students() {
                   onChange={Formik.handleChange}
                   onBlur={Formik.handleBlur}
                   error={Formik.touched.total_fees && Boolean(Formik.errors.total_fees)}
-                  helperText={Formik.touched.total_fees && Formik.errors.total_fees}
+                  helperText={Formik.touched.total_fees && Formik.errors.total_fees || "Leave blank if not applicable"}
+                  placeholder="Enter total fees amount"
                 />
               </Grid>
 
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Advance Fees Paid"
+                  label="Advance Fees Paid (Optional)"
                   variant="outlined"
                   name="advance_fees"
                   type="number"
@@ -1247,7 +1263,8 @@ export default function Students() {
                   onChange={Formik.handleChange}
                   onBlur={Formik.handleBlur}
                   error={Formik.touched.advance_fees && Boolean(Formik.errors.advance_fees)}
-                  helperText={Formik.touched.advance_fees && Formik.errors.advance_fees}
+                  helperText={Formik.touched.advance_fees && Formik.errors.advance_fees || "Leave blank if not applicable"}
+                  placeholder="Enter advance fees paid"
                 />
               </Grid>
 
@@ -1485,6 +1502,14 @@ export default function Students() {
 
                     <TableCell align="center">
                       <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+                        <Tooltip title="Professional Report">
+                          <ActionButton
+                            sx={{ color: '#2980b9' }}
+                            onClick={() => handleOpenReport(student)}
+                          >
+                            <AssessmentIcon />
+                          </ActionButton>
+                        </Tooltip>
                         <Tooltip title="Download PDF Slip">
                           <ActionButton
                             sx={{ color: '#f093fb' }}
@@ -1547,6 +1572,15 @@ export default function Students() {
             </Grid>
           )}
         </Grid>
+      )}
+
+      {/* Professional Student Report Dialog */}
+      {selectedStudentForReport && (
+        <StudentReport
+          open={reportDialogOpen}
+          onClose={handleCloseReport}
+          student={selectedStudentForReport}
+        />
       )}
     </Container>
   );
