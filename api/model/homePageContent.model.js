@@ -133,6 +133,18 @@ const homePageContentSchema = new mongoose.Schema({
     unique: true
   },
 
+  // Alert/Announcement Banner
+  alertBanner: {
+    show: { type: Boolean, default: false },
+    message: { type: String, default: '' },
+    type: { type: String, enum: ['info', 'success', 'warning', 'error'], default: 'info' },
+    dismissible: { type: Boolean, default: true },
+    autoHide: { type: Boolean, default: false },
+    autoHideDelay: { type: Number, default: 5000 },
+    link: { type: String },
+    linkText: { type: String, default: 'Learn More' }
+  },
+
   // Header and Branding
   header: { type: headerSchema, required: true },
 

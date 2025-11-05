@@ -50,6 +50,7 @@ import { styled, keyframes } from '@mui/material/styles';
 import axios from 'axios';
 import { baseUrl } from '../../../environment';
 import { useNavigate } from 'react-router-dom';
+import AlertBanner from './AlertBanner';
 
 // Image URL helper
 const getImageUrl = (url) => {
@@ -723,13 +724,27 @@ const PublicHomePage = () => {
     );
   }
 
-  const { header, sliders = [], statistics = [], about, programs = [], gallery = [], testimonials, sectionVisibility } = content;
+  const { header, sliders = [], statistics = [], about, programs = [], gallery = [], testimonials, sectionVisibility, alertBanner } = content;
   const testimonialsArray = testimonials?.items || [];
 
   return (
     <Box sx={{ width: '100%', overflow: 'hidden', position: 'relative' }}>
       {/* Scroll Progress Bar */}
       <ProgressBar progress={scrollProgress} />
+
+      {/* Alert/Announcement Banner */}
+      {alertBanner?.show && alertBanner?.message && (
+        <AlertBanner
+          show={alertBanner.show}
+          message={alertBanner.message}
+          type={alertBanner.type || 'info'}
+          dismissible={alertBanner.dismissible !== false}
+          autoHide={alertBanner.autoHide || false}
+          autoHideDelay={alertBanner.autoHideDelay || 5000}
+          link={alertBanner.link}
+          linkText={alertBanner.linkText || 'Learn More'}
+        />
+      )}
 
       {/* Glass Morphism Top Bar */}
       {header && (
