@@ -21,7 +21,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useFormik } from "formik";
 import axios from "axios";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
@@ -32,8 +32,11 @@ import { baseUrl } from "../../../environment";
 import { examSchema } from "../../../yupSchema/examinationSchema";
 import { convertDate } from "../../../utilityFunctions";
 import CustomizedSnackbars from "../../../basic utility components/CustomizedSnackbars";
+import { AuthContext } from "../../../context/AuthContext";
 
 export default function Examinations() {
+  const { isSuperAdmin, hasPermission } = useContext(AuthContext);
+  const canDelete = isSuperAdmin() || hasPermission('can_delete_records');
   const [isEditExam, setEditExam] = useState(false);
   const [examForm, setExamForm] = useState(false);
   const [examEditId, setExamEditId] = useState(null);
@@ -355,15 +358,17 @@ setMessage(message)
                             justifyContent: "end",
                           }}
                         >
-                          <Button
-                            variant="contained"
-                            sx={{ background: "red", color: "#fff" }}
-                            onClick={() => {
-                              handleDeleteExam(examination._id);
-                            }}
-                          >
-                            Delete
-                          </Button>
+                          {canDelete && (
+                            <Button
+                              variant="contained"
+                              sx={{ background: "red", color: "#fff" }}
+                              onClick={() => {
+                                handleDeleteExam(examination._id);
+                              }}
+                            >
+                              Delete
+                            </Button>
+                          )}
                           <Button
                             variant="contained"
                             sx={{

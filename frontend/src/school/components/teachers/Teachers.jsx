@@ -30,12 +30,13 @@ import {
   } from "@mui/material";
 
   import { useFormik } from "formik";
-  import { useEffect, useRef, useState } from "react";
+  import { useEffect, useRef, useState, useContext } from "react";
   import axios from "axios";
   import { baseUrl } from "../../../environment";
   import CustomizedSnackbars from "../../../basic utility components/CustomizedSnackbars";
   import { teacherSchema } from "../../../yupSchema/teacherSchemal";
 import TeacherCardAdmin from "../../utility components/teacher card/TeacherCard";
+import { AuthContext } from "../../../context/AuthContext";
 import { styled } from '@mui/material/styles';
 import * as XLSX from 'xlsx';
 
@@ -107,6 +108,9 @@ const ActionButton = styled(IconButton)(({ theme, color }) => ({
 }));
 
   export default function Teachers() {
+    const { isSuperAdmin, hasPermission } = useContext(AuthContext);
+    const canDelete = isSuperAdmin() || hasPermission('can_delete_records');
+
     const [teacherClass, setteacherClass] = useState([]);
     const [teachers, setteachers] = useState([]);
     const [isEdit, setEdit] = useState(false);
@@ -911,14 +915,16 @@ const ActionButton = styled(IconButton)(({ theme, color }) => ({
                               <EditIcon />
                             </ActionButton>
                           </Tooltip>
-                          <Tooltip title="Delete Teacher">
-                            <ActionButton
-                              color="error"
-                              onClick={() => handleDelete(teacher._id)}
-                            >
-                              <DeleteIcon sx={{ color: '#f44336' }} />
-                            </ActionButton>
-                          </Tooltip>
+                          {canDelete && (
+                            <Tooltip title="Delete Teacher">
+                              <ActionButton
+                                color="error"
+                                onClick={() => handleDelete(teacher._id)}
+                              >
+                                <DeleteIcon sx={{ color: '#f44336' }} />
+                              </ActionButton>
+                            </Tooltip>
+                          )}
                         </Box>
                       </TableCell>
                     </StyledTableRow>
@@ -944,8 +950,9 @@ const ActionButton = styled(IconButton)(({ theme, color }) => ({
                   <TeacherCardAdmin
                     key={i}
                     handleEdit={handleEdit}
-                    handleDelete={handleDelete}
+                    handleDelete={canDelete ? handleDelete : null}
                     teacher={teacher}
+                    canDelete={canDelete}
                   />
                 );
               })}

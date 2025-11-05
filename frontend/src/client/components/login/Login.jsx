@@ -4,7 +4,7 @@ import { loginSchema } from "../../../yupSchema/loginSchema";
 import axios from "axios";
 import { baseUrl } from "../../../environment";
 import CustomizedSnackbars from "../../../basic utility components/CustomizedSnackbars";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Build as BuildIcon } from "@mui/icons-material";
 
@@ -14,12 +14,11 @@ import { AuthContext } from "../../../context/AuthContext";
 export default function Login() {
     const { authenticated, login } = useContext(AuthContext);
 
-    const [loginType, setLoginType] =useState("school_owner")
+    const [loginType, setLoginType] =useState("admin")
     const [message, setMessage] =  useState("");
     const [type, setType]= useState("succeess");
 
     const navigate = useNavigate()
-
 
     const resetMessage  =()=>{
         setMessage("")
@@ -51,20 +50,25 @@ export default function Login() {
 
             let url;
             let navUrl;
-            if(loginType=="school_owner"){
-             url = `${baseUrl}/school/login`;
-             navUrl='/school'
-            }else if(loginType=="teacher"){
+            let requestBody = {...values};
+
+            if(loginType === "admin"){
+                url = `${baseUrl}/admin/login`;
+                navUrl='/school'; // Admin goes to school dashboard
+            } else if(loginType=="school_owner"){
+                url = `${baseUrl}/school/login`;
+                navUrl='/school'
+            } else if(loginType=="teacher"){
                 url = `${baseUrl}/teacher/login`
                 navUrl='/teacher'
-            }else if(loginType=="student"){
+            } else if(loginType=="student"){
                 url = `${baseUrl}/student/login`
                 navUrl='/student'
             }
 
                 console.log("Full Login URL:", url)
 
-                axios.post(url, {...values}, { withCredentials: true }).then(resp=>{
+                axios.post(url, requestBody, { withCredentials: true }).then(resp=>{
                     console.log("✅ Login successful:", resp.data)
                     setMessage(resp.data.message)
                     setType("success")
@@ -124,7 +128,8 @@ export default function Login() {
                         value={loginType}
                         onChange={handleSelection}
                     >
-                         <MenuItem  value={'school_owner'}>Admin</MenuItem>
+                         <MenuItem  value={'admin'}>Admin Login</MenuItem>
+                         <MenuItem  value={'school_owner'}>School Owner (Legacy)</MenuItem>
                          <MenuItem  value={'teacher'}>Teacher</MenuItem>
                     </Select>
                 </FormControl>

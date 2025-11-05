@@ -45,6 +45,7 @@ import SmsIcon from '@mui/icons-material/Sms';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import EventNoteIcon from '@mui/icons-material/EventNote';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 
 const drawerWidth = 280;
 
@@ -275,27 +276,78 @@ export default function School() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const navArr = [
-        {link:"/", component:"Home", icon:HomeIcon, category: "main"},
-        { link: "/school", component: "Dashboard", icon: DashboardIcon, category: "main" },
-        { link: "/school/academic-year", component: "Academic Year", icon: EventNoteIcon, category: "academic" },
-        { link: "/school/courses", component: "Courses", icon: SchoolIcon, category: "academic" },
-        { link: "/school/class", component: "Classes", icon:FormatListNumberedIcon, category: "academic" },
-        { link: "/school/subject", component: "Subjects", icon: MenuBookIcon, category: "academic" },
-        { link: "/school/students", component: "Students", icon: GroupIcon, category: "people" },
-        { link: "/school/teachers", component: "Teachers", icon: GroupIcon, category: "people" },
-        { link: "/school/transport-fees", component: "Transport Fees", icon: DirectionsBusIcon, category: "financial" },
-        { link: "/school/periods", component: "Schedule", icon: CalendarMonthIcon, category: "academic" },
-        { link: "/school/attendance", component: "Attendance", icon: RecentActorsIcon, category: "records" },
-        { link: "/school/attendance-report", component: "Attendance Reports", icon: AssessmentIcon, category: "records" },
-        { link: "/school/examinations", component: "Examinations", icon: ExplicitIcon, category: "academic"},
-        { link: "/school/marksheets", component: "Mark Sheet Generator", icon: GradingIcon, category: "academic"},
-        { link: "/school/final-marksheet", component: "Final Mark Sheet", icon: GradingIcon, category: "academic"},
-        {link:"/school/notice", component:"Notices", icon:CircleNotificationsIcon, category: "communication"},
-        {link:"/school/sms", component:"SMS Management", icon:SmsIcon, category: "communication"},
-        {link:"/school/sms-to-parents", component:"SMS to Parents", icon:SmsIcon, category: "communication"},
-        {link:"/logout", component:"Log Out", icon:LogoutIcon, category: "system"}
-    ]
+    // Get current user from token and localStorage
+    const [currentUser, setCurrentUser] = React.useState(null);
+
+    React.useEffect(() => {
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
+        if (token && userData) {
+            try {
+                // Use the full user object from localStorage which includes permissions
+                const user = JSON.parse(userData);
+                setCurrentUser(user);
+            } catch (error) {
+                console.error('Error parsing user data:', error);
+                // Fallback to token parsing
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    setCurrentUser(payload);
+                } catch (err) {
+                    console.error('Error parsing token:', err);
+                }
+            }
+        }
+    }, []);
+
+    const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
+    const isAnyAdmin = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN';
+
+    // Helper function to check permissions
+    const hasPermission = (permission) => {
+        if (isSuperAdmin) return true; // SUPER_ADMIN has all permissions
+        return currentUser?.permissions?.[permission] === true;
+    };
+
+    // Filter navigation based on permissions
+    const getFilteredNavigation = () => {
+        const baseNav = [
+            {link:"/", component:"Home", icon:HomeIcon, category: "main", permission: null},
+            { link: "/school", component: "Dashboard", icon: DashboardIcon, category: "main", permission: null },
+            { link: "/school/academic-year", component: "Academic Year", icon: EventNoteIcon, category: "academic", permission: null },
+            { link: "/school/courses", component: "Courses", icon: SchoolIcon, category: "academic", permission: null },
+            { link: "/school/class", component: "Classes", icon:FormatListNumberedIcon, category: "academic", permission: null },
+            { link: "/school/subject", component: "Subjects", icon: MenuBookIcon, category: "academic", permission: null },
+            { link: "/school/students", component: "Students", icon: GroupIcon, category: "people", permission: 'can_manage_students' },
+            { link: "/school/teachers", component: "Teachers", icon: GroupIcon, category: "people", permission: 'can_manage_teachers' },
+            { link: "/school/transport-fees", component: "Transport Fees", icon: DirectionsBusIcon, category: "financial", permission: 'can_manage_fees' },
+            { link: "/school/periods", component: "Schedule", icon: CalendarMonthIcon, category: "academic", permission: null },
+            { link: "/school/attendance", component: "Attendance", icon: RecentActorsIcon, category: "records", permission: 'can_manage_attendance' },
+            { link: "/school/attendance-report", component: "Attendance Reports", icon: AssessmentIcon, category: "records", permission: 'can_view_reports' },
+            { link: "/school/examinations", component: "Examinations", icon: ExplicitIcon, category: "academic", permission: null},
+            { link: "/school/marksheets", component: "Mark Sheet Generator", icon: GradingIcon, category: "academic", permission: null},
+            { link: "/school/final-marksheet", component: "Final Mark Sheet", icon: GradingIcon, category: "academic", permission: null},
+            {link:"/school/notice", component:"Notices", icon:CircleNotificationsIcon, category: "communication", permission: null},
+            {link:"/school/sms", component:"SMS Management", icon:SmsIcon, category: "communication", permission: null},
+            {link:"/school/sms-to-parents", component:"SMS to Parents", icon:SmsIcon, category: "communication", permission: null},
+        ];
+
+        // Add admin management for super admin and admins
+        if (isAnyAdmin) {
+            baseNav.push({ link: "/school/admin-management", component: "Admin Management", icon: AdminPanelSettingsIcon, category: "system", permission: 'can_manage_admins' });
+        }
+
+        // Add logout
+        baseNav.push({link:"/logout", component:"Log Out", icon:LogoutIcon, category: "system", permission: null});
+
+        // Filter based on permissions
+        return baseNav.filter(item => {
+            if (!item.permission) return true; // No permission required
+            return hasPermission(item.permission);
+        });
+    };
+
+    const navArr = getFilteredNavigation();
     const navigate = useNavigate();
     const handleNavigation = (link) => {
         setActiveRoute(link);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import {
   Box, Button, MenuItem, Paper, Select, TextField, Typography, IconButton,
   Card, CardContent, CardActions, Chip, Grid, Container, Divider,
@@ -17,6 +17,7 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import MessageIcon from '@mui/icons-material/Message';
 import axios from "axios";
 import { baseUrl } from "../../../environment";
+import { AuthContext } from "../../../context/AuthContext";
 
 // Styled Components
 const StyledHeaderCard = styled(Card)(({ theme }) => ({
@@ -66,6 +67,8 @@ const StyledFab = styled(Fab)(({ theme }) => ({
 }));
 
 const NoticeSchool = () => {
+  const { isSuperAdmin, hasPermission } = useContext(AuthContext);
+  const canDelete = isSuperAdmin() || hasPermission('can_delete_records');
   const [formData, setFormData] = useState({ title: "", message: "", audience: "" });
   const [notices, setNotices] = useState([]);
   const [audience, setAudience] = useState("all");
@@ -304,17 +307,19 @@ const NoticeSchool = () => {
                         <EditIcon />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Delete Notice">
-                      <IconButton
-                        onClick={() => handleDelete(notice._id)}
-                        sx={{
-                          color: '#e74c3c',
-                          '&:hover': { bgcolor: '#ffeaea' }
-                        }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
+                    {canDelete && (
+                      <Tooltip title="Delete Notice">
+                        <IconButton
+                          onClick={() => handleDelete(notice._id)}
+                          sx={{
+                            color: '#e74c3c',
+                            '&:hover': { bgcolor: '#ffeaea' }
+                          }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                   </Box>
                 </CardActions>
               </StyledNoticeCard>

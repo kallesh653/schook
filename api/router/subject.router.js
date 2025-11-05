@@ -3,10 +3,10 @@ const router = express.Router();
 const authMiddleware = require('../auth/auth');
 const { createSubject, getAllSubjects, getSubjectWithId, updateSubjectWithId, deleteSubjectWithId } = require("../controller/subject.controller");
 
-router.post("/create",authMiddleware(['SCHOOL']), createSubject);
-router.get("/fetch-all",authMiddleware(['SCHOOL']),getAllSubjects);
-router.get("/fetch-single/:id",authMiddleware(['SCHOOL']),  getSubjectWithId);
-router.patch("/update/:id",authMiddleware(['SCHOOL']), updateSubjectWithId);
-router.delete("/delete/:id",authMiddleware(['SCHOOL']), deleteSubjectWithId);
+router.post("/create",authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']), createSubject);
+router.get("/fetch-all",authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']),getAllSubjects);
+router.get("/fetch-single/:id",authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']),  getSubjectWithId);
+router.patch("/update/:id",authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']), updateSubjectWithId);
+router.delete("/delete/:id",authMiddleware(['SCHOOL', 'SUPER_ADMIN']), deleteSubjectWithId);
 
 module.exports = router;

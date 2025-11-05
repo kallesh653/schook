@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Box,
   Paper,
@@ -36,6 +36,7 @@ import {
 import { styled } from '@mui/material/styles';
 import axios from 'axios';
 import { baseUrl } from '../../../environment';
+import { AuthContext } from '../../../context/AuthContext';
 import SliderDialog from './SliderDialog';
 
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -92,6 +93,9 @@ function TabPanel({ children, value, index, ...other }) {
 }
 
 const FrontPageManagement = () => {
+  const { isSuperAdmin, hasPermission } = useContext(AuthContext);
+  const canDelete = isSuperAdmin() || hasPermission('can_delete_records');
+
   const [tabValue, setTabValue] = useState(0);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [loading, setLoading] = useState(true);
@@ -798,13 +802,15 @@ const FrontPageManagement = () => {
                       >
                         <EditIcon fontSize="small" />
                       </IconButton>
-                      <IconButton
-                        size="small"
-                        sx={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
-                        onClick={() => handleDeleteSlide(slide.id)}
-                      >
-                        <DeleteIcon fontSize="small" color="error" />
-                      </IconButton>
+                      {canDelete && (
+                        <IconButton
+                          size="small"
+                          sx={{ backgroundColor: 'rgba(255,255,255,0.9)' }}
+                          onClick={() => handleDeleteSlide(slide.id)}
+                        >
+                          <DeleteIcon fontSize="small" color="error" />
+                        </IconButton>
+                      )}
                     </Box>
                     <Chip
                       label={`#${index + 1}`}

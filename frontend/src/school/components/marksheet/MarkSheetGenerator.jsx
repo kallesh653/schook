@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
     Box,
     Paper,
@@ -54,6 +54,7 @@ import {
 import axios from 'axios';
 import { baseUrl } from '../../../environment';
 import { useDashboard } from '../../../context/DashboardContext';
+import { AuthContext } from "../../../context/AuthContext";
 
 // Animation keyframes
 const fadeInUp = keyframes`
@@ -123,6 +124,8 @@ const HeaderSection = styled(Box)(({ theme }) => ({
 }));
 
 const MarkSheetGenerator = () => {
+    const { isSuperAdmin, hasPermission } = useContext(AuthContext);
+    const canDelete = isSuperAdmin() || hasPermission('can_delete_records');
     const { triggerDashboardRefresh } = useDashboard();
     const [markSheets, setMarkSheets] = useState([]);
     const [students, setStudents] = useState([]);
@@ -905,15 +908,17 @@ const MarkSheetGenerator = () => {
                                                             <DownloadIcon fontSize="small" />
                                                         </IconButton>
                                                     </Tooltip>
-                                                    <Tooltip title="Delete">
-                                                        <IconButton
-                                                            onClick={() => handleDelete(markSheet._id)}
-                                                            size="small"
-                                                            sx={{ color: 'error.main' }}
-                                                        >
-                                                            <DeleteIcon fontSize="small" />
-                                                        </IconButton>
-                                                    </Tooltip>
+                                                    {canDelete && (
+                                                        <Tooltip title="Delete">
+                                                            <IconButton
+                                                                onClick={() => handleDelete(markSheet._id)}
+                                                                size="small"
+                                                                sx={{ color: 'error.main' }}
+                                                            >
+                                                                <DeleteIcon fontSize="small" />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    )}
                                                 </Box>
                                             </TableCell>
                                         </TableRow>

@@ -54,6 +54,7 @@ import FinalMarkSheet from "./school/components/marksheet/FinalMarkSheet";
 import SmsManagement from "./school/components/sms/SmsManagement";
 import SmsToParents from "./school/components/sms/SmsToParents";
 import AcademicYear from "./school/components/academic-year/AcademicYear";
+import AdminManagement from "./school/components/admin-management/AdminManagement";
 import ProtectedRoute from "./guards/ProtectedRoute";
 import { AuthContext, AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "@emotion/react";
@@ -69,7 +70,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             
-          <Route path="school"  element={<ProtectedRoute allowedRoles={['SCHOOL']}><School/></ProtectedRoute>}>
+          <Route path="school"  element={<ProtectedRoute allowedRoles={['SCHOOL', 'SUPER_ADMIN', 'ADMIN']}><School/></ProtectedRoute>}>
               <Route index element={<SchoolDashboard />} />
               <Route path="courses" element={<Courses />} />
               <Route path="class" element={<Class />} />
@@ -90,6 +91,7 @@ function App() {
               <Route path="sms-to-parents" element={<SmsToParents />} />
               <Route path="notice" element={<NoticeSchool/>} />
               <Route path="academic-year" element={<AcademicYear />} />
+              <Route path="admin-management" element={<AdminManagement />} />
             </Route>
   
             <Route path="student"  element={<ProtectedRoute allowedRoles={['STUDENT']}><Student/></ProtectedRoute>}>

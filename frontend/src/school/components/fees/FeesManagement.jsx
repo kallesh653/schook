@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
     Box,
     Paper,
@@ -46,10 +46,13 @@ import {
 import axios from 'axios';
 import { baseUrl } from '../../../environment';
 import { useLocation } from 'react-router-dom';
+import { AuthContext } from "../../../context/AuthContext";
 
 const FeesManagement = () => {
     console.log('FeesManagement component is loading...');
 
+    const { isSuperAdmin, hasPermission } = useContext(AuthContext);
+    const canDelete = isSuperAdmin() || hasPermission('can_delete_records');
     const location = useLocation();
     const [fees, setFees] = useState(() => {
         // Load fees from localStorage on component mount
@@ -1109,13 +1112,15 @@ const FeesManagement = () => {
                                             >
                                                 <EditIcon />
                                             </IconButton>
-                                            <IconButton
-                                                size="small"
-                                                onClick={() => handleDelete(fee.id)}
-                                                color="error"
-                                            >
-                                                <DeleteIcon />
-                                            </IconButton>
+                                            {canDelete && (
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => handleDelete(fee.id)}
+                                                    color="error"
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            )}
                                         </Box>
                                     </TableCell>
                                 </TableRow>
@@ -1931,13 +1936,15 @@ const FeesManagement = () => {
                                             </TableCell>
                                             <TableCell>
                                                 <Box sx={{ display: 'flex', gap: 1 }}>
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={() => handleDelete(fee.id)}
-                                                        color="error"
-                                                    >
-                                                        <DeleteIcon fontSize="small" />
-                                                    </IconButton>
+                                                    {canDelete && (
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => handleDelete(fee.id)}
+                                                            color="error"
+                                                        >
+                                                            <DeleteIcon fontSize="small" />
+                                                        </IconButton>
+                                                    )}
                                                 </Box>
                                             </TableCell>
                                         </TableRow>
@@ -2095,15 +2102,17 @@ const FeesManagement = () => {
                                                                             <EditIcon fontSize="small" />
                                                                         </IconButton>
                                                                     </Tooltip>
-                                                                    <Tooltip title="Delete Fee">
-                                                                        <IconButton
-                                                                            size="small"
-                                                                            color="error"
-                                                                            onClick={() => handleDelete(fee.id)}
-                                                                        >
-                                                                            <DeleteIcon fontSize="small" />
-                                                                        </IconButton>
-                                                                    </Tooltip>
+                                                                    {canDelete && (
+                                                                        <Tooltip title="Delete Fee">
+                                                                            <IconButton
+                                                                                size="small"
+                                                                                color="error"
+                                                                                onClick={() => handleDelete(fee.id)}
+                                                                            >
+                                                                                <DeleteIcon fontSize="small" />
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                    )}
                                                                 </Box>
                                                             </TableCell>
                                                         </TableRow>

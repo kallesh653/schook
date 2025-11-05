@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken');
 const jwtSecret = process.env.JWT_SECRET;
 
 const School = require("../model/school.model");
+const AdminUser = require("../model/adminUser.model");
 module.exports = {
 
     getAllSchools: async(req,res)=>{
@@ -50,11 +51,67 @@ module.exports = {
                             school_image: originalFileName
                         })
 
-                        newSchool.save().then(savedData => {
-                            console.log("Date saved", savedData);
-                            res.status(200).json({ success: true, data: savedData, message:"School is Registered Successfully." })
+                        newSchool.save().then(async savedData => {
+                            console.log("School saved", savedData);
+
+                            // Create primary SUPER_ADMIN user
+                            try {
+                                const primaryAdmin = new AdminUser({
+                                    school: savedData._id,
+                                    full_name: fields.owner_name[0],
+                                    email: fields.email[0],
+                                    password: hashPassword, // Use the same hashed password
+                                    role: 'SUPER_ADMIN',
+                                    phone: fields.phone ? fields.phone[0] : '',
+                                    permissions: {
+                                        can_manage_students: true,
+                                        can_manage_teachers: true,
+                                        can_manage_classes: true,
+                                        can_manage_fees: true,
+                                        can_manage_exams: true,
+                                        can_manage_attendance: true,
+                                        can_view_reports: true,
+                                        can_manage_admins: true,
+                                        can_delete_records: true,
+                                        can_modify_school_settings: true
+                                    },
+                                    profile_image: originalFileName,
+                                    is_active: true
+                                });
+
+                                const savedAdmin = await primaryAdmin.save();
+
+                                // Update school with primary_admin reference
+                                savedData.primary_admin = savedAdmin._id;
+                                await savedData.save();
+
+                                console.log("Primary admin created", savedAdmin);
+
+                                res.status(200).json({
+                                    success: true,
+                                    data: {
+                                        school: savedData,
+                                        primaryAdmin: {
+                                            id: savedAdmin._id,
+                                            full_name: savedAdmin.full_name,
+                                            email: savedAdmin.email,
+                                            role: savedAdmin.role
+                                        }
+                                    },
+                                    message: "School is Registered Successfully. Primary admin account created."
+                                });
+                            } catch (adminError) {
+                                console.log("Error creating primary admin:", adminError);
+                                // School is created, but admin creation failed
+                                res.status(200).json({
+                                    success: true,
+                                    data: savedData,
+                                    message: "School registered but admin creation failed. Please contact support.",
+                                    warning: "Primary admin not created"
+                                });
+                            }
                         }).catch(e => {
-                            console.log("ERRORO in Register", e)
+                            console.log("ERROR in Register", e)
                             res.status(500).json({ success: false, message: "Failed Registration." })
                         })
 
@@ -70,10 +127,23 @@ module.exports = {
 
     },
     loginSchool: async (req, res) => {
-        School.find({ email: req.body.email }).then(resp => {
+        School.find({ email: req.body.email }).populate('primary_admin').then(resp => {
             if (resp.length > 0) {
+                // Always check if school has a primary admin and redirect to admin login
+                // This applies to school owner login only, not admin login
+                if (resp[0].primary_admin) {
+                    return res.status(200).json({
+                        success: false,
+                        message: "This school uses Admin login. Please use the Admin Login with your credentials.",
+                        loginType: 'ADMIN_REQUIRED',
+                        schoolId: resp[0]._id,
+                        redirectToAdminLogin: true
+                    });
+                }
+
+                // Legacy school login for backward compatibility (only if no primary_admin exists)
                 const isAuth = bcrypt.compareSync(req.body.password, resp[0].password);
-                if (isAuth) {   
+                if (isAuth) {
                     const token = jwt.sign(
                         {
                             id: resp[0]._id,
@@ -89,6 +159,7 @@ module.exports = {
                     success: true,
                     message: "Success Login",
                     token: token,
+                    loginType: 'SCHOOL',
                     user: {
                          id: resp[0]._id,
                          owner_name:resp[0].owner_name,

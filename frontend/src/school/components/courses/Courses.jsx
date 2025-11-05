@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
     Box, Paper, Typography, Button, TextField, Dialog, DialogTitle,
     DialogContent, DialogActions, Table, TableBody, TableCell, TableContainer,
@@ -12,8 +12,12 @@ import {
 import axios from 'axios';
 import { baseUrl } from '../../../environment';
 import CustomizedSnackbars from '../../../basic utility components/CustomizedSnackbars';
+import { AuthContext } from "../../../context/AuthContext";
 
 const Courses = () => {
+    const { isSuperAdmin, hasPermission } = useContext(AuthContext);
+    const canDelete = isSuperAdmin() || hasPermission('can_delete_records');
+
     const [courses, setCourses] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [editMode, setEditMode] = useState(false);
@@ -287,13 +291,15 @@ const Courses = () => {
                                         >
                                             <EditIcon />
                                         </IconButton>
-                                        <IconButton
-                                            color="error"
-                                            onClick={() => handleDelete(course._id)}
-                                            size="small"
-                                        >
-                                            <DeleteIcon />
-                                        </IconButton>
+                                        {canDelete && (
+                                            <IconButton
+                                                color="error"
+                                                onClick={() => handleDelete(course._id)}
+                                                size="small"
+                                            >
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))

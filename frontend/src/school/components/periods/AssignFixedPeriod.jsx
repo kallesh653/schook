@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   FormControl,
   InputLabel,
@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import { baseUrl } from '../../../environment';
+import { AuthContext } from '../../../context/AuthContext';
 
 const PERIODS = [
   { num: 1, label: 'Period 1 (7:00 AM - 8:00 AM)', startTime: '07:00', endTime: '08:00' },
@@ -31,6 +32,9 @@ const PERIODS = [
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 const AssignFixedPeriod = ({ classId, dayOfWeek, periodNumber, isEdit, existingPeriod, onClose }) => {
+  const { isSuperAdmin, hasPermission } = useContext(AuthContext);
+  const canDelete = isSuperAdmin() || hasPermission('can_delete_records');
+
   const [teachers, setTeachers] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [teacher, setTeacher] = useState('');
@@ -216,14 +220,16 @@ const AssignFixedPeriod = ({ classId, dayOfWeek, periodNumber, isEdit, existingP
         <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
           {isEdit ? (
             <>
-              <Button
-                onClick={handleDelete}
-                color="error"
-                variant="outlined"
-                disabled={loading}
-              >
-                Delete
-              </Button>
+              {canDelete && (
+                <Button
+                  onClick={handleDelete}
+                  color="error"
+                  variant="outlined"
+                  disabled={loading}
+                >
+                  Delete
+                </Button>
+              )}
               <Button
                 onClick={handleUpdate}
                 color="primary"

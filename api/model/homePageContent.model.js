@@ -106,6 +106,14 @@ const headerSchema = new mongoose.Schema({
     instagram: { type: String },
     youtube: { type: String },
     linkedin: { type: String }
+  },
+  mapLocation: {
+    showMap: { type: Boolean, default: false },
+    latitude: { type: Number, default: 0 },
+    longitude: { type: Number, default: 0 },
+    zoom: { type: Number, default: 15 },
+    mapUrl: { type: String },
+    embedUrl: { type: String }
   }
 });
 

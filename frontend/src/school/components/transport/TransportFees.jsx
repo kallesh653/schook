@@ -26,10 +26,11 @@ import {
 } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { useFormik } from "formik";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { baseUrl } from "../../../environment";
 import CustomizedSnackbars from "../../../basic utility components/CustomizedSnackbars";
+import { AuthContext } from "../../../context/AuthContext";
 import * as yup from 'yup';
 
 // Icons
@@ -106,6 +107,9 @@ const transportFeesSchema = yup.object({
 });
 
 export default function TransportFees() {
+  const { isSuperAdmin, hasPermission } = useContext(AuthContext);
+  const canDelete = isSuperAdmin() || hasPermission('can_delete_records');
+
   const [transportFees, setTransportFees] = useState([]);
   const [isEdit, setEdit] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -439,14 +443,16 @@ export default function TransportFees() {
                           <EditIcon />
                         </ActionButton>
                       </Tooltip>
-                      <Tooltip title="Delete Location">
-                        <ActionButton
-                          color="error"
-                          onClick={() => handleDelete(location._id)}
-                        >
-                          <DeleteIcon sx={{ color: '#f44336' }} />
-                        </ActionButton>
-                      </Tooltip>
+                      {canDelete && (
+                        <Tooltip title="Delete Location">
+                          <ActionButton
+                            color="error"
+                            onClick={() => handleDelete(location._id)}
+                          >
+                            <DeleteIcon sx={{ color: '#f44336' }} />
+                          </ActionButton>
+                        </Tooltip>
+                      )}
                     </Box>
                   </TableCell>
                 </StyledTableRow>

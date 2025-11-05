@@ -13,7 +13,11 @@ import {
   CircularProgress,
   Chip,
   Paper,
-  useScrollTrigger
+  useScrollTrigger,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import {
   School,
@@ -38,7 +42,9 @@ import {
   Science,
   SportsBasketball,
   Palette,
-  Psychology
+  Psychology,
+  Close as CloseIcon,
+  Map as MapIcon
 } from '@mui/icons-material';
 import { styled, keyframes } from '@mui/material/styles';
 import axios from 'axios';
@@ -542,6 +548,7 @@ const PublicHomePage = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [visibleSections, setVisibleSections] = useState({});
+  const [mapDialogOpen, setMapDialogOpen] = useState(false);
   const observerRef = useRef(null);
 
   // Scroll trigger for navbar
@@ -1642,6 +1649,26 @@ const PublicHomePage = () => {
                 >
                   <LocationOn sx={{ fontSize: 24 }} />
                   <Typography variant="body1" fontSize="1.05rem">{header.address}</Typography>
+                  {header?.mapLocation?.showMap && (
+                    <IconButton
+                      onClick={() => setMapDialogOpen(true)}
+                      sx={{
+                        color: 'white',
+                        bgcolor: 'rgba(255, 255, 255, 0.15)',
+                        backdropFilter: 'blur(10px)',
+                        width: 40,
+                        height: 40,
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          bgcolor: 'rgba(255, 255, 255, 0.25)',
+                          transform: 'scale(1.1)',
+                          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)'
+                        }
+                      }}
+                    >
+                      <MapIcon fontSize="small" />
+                    </IconButton>
+                  )}
                 </Box>
               )}
             </Grid>
@@ -1745,6 +1772,119 @@ const PublicHomePage = () => {
       <BackToTop show={showBackToTop} onClick={scrollToTop}>
         <KeyboardArrowUp sx={{ fontSize: '2rem' }} />
       </BackToTop>
+
+      {/* MAP DIALOG */}
+      <Dialog
+        open={mapDialogOpen}
+        onClose={() => setMapDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 1) 100%)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
+          }
+        }}
+      >
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 2 }}>
+          <Box display="flex" alignItems="center" gap={1.5}>
+            <LocationOn sx={{ fontSize: 32, color: header?.primaryColor || '#667eea' }} />
+            <Typography variant="h5" fontWeight="bold">
+              Our Location
+            </Typography>
+          </Box>
+          <IconButton onClick={() => setMapDialogOpen(false)} sx={{ color: 'text.secondary' }}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, minHeight: '450px' }}>
+          {header?.mapLocation?.embedUrl ? (
+            <iframe
+              src={header.mapLocation.embedUrl}
+              width="100%"
+              height="450"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="School Location Map"
+            />
+          ) : header?.mapLocation?.mapUrl ? (
+            <Box
+              sx={{
+                width: '100%',
+                height: '450px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: '#f5f5f5'
+              }}
+            >
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<MapIcon />}
+                onClick={() => window.open(header.mapLocation.mapUrl, '_blank')}
+                sx={{
+                  background: `linear-gradient(135deg, ${header?.primaryColor || '#667eea'} 0%, #7c3aed 100%)`,
+                  color: 'white',
+                  px: 4,
+                  py: 2,
+                  fontSize: '1.1rem',
+                  fontWeight: 'bold',
+                  borderRadius: '12px',
+                  boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
+                  '&:hover': {
+                    background: `linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%)`,
+                    transform: 'translateY(-3px)',
+                    boxShadow: '0 12px 35px rgba(124, 58, 237, 0.5)'
+                  }
+                }}
+              >
+                Open in Google Maps
+              </Button>
+            </Box>
+          ) : header?.mapLocation?.latitude && header?.mapLocation?.longitude ? (
+            <iframe
+              src={`https://www.google.com/maps?q=${header.mapLocation.latitude},${header.mapLocation.longitude}&z=${header.mapLocation.zoom || 15}&output=embed`}
+              width="100%"
+              height="450"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="School Location Map"
+            />
+          ) : (
+            <Box
+              sx={{
+                width: '100%',
+                height: '450px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: '#f5f5f5'
+              }}
+            >
+              <Typography variant="h6" color="text.secondary">
+                Map location not configured
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 3, justifyContent: 'center' }}>
+          {header?.address && (
+            <Box textAlign="center" width="100%">
+              <Typography variant="body1" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                <LocationOn fontSize="small" />
+                {header.address}
+              </Typography>
+            </Box>
+          )}
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

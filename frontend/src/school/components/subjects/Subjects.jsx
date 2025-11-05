@@ -14,13 +14,17 @@ import {
   } from "@mui/material";
   import dayjs from "dayjs";
   import { useFormik } from "formik";
-  import { useEffect, useState } from "react";
+  import { useEffect, useState, useContext } from "react";
   import axios from "axios";
   import { baseUrl } from "../../../environment";
   import CustomizedSnackbars from "../../../basic utility components/CustomizedSnackbars";
   import { subjectSchema } from "../../../yupSchema/subjectSchema";
+  import { AuthContext } from "../../../context/AuthContext";
   
   export default function Subject() {
+    const { isSuperAdmin, hasPermission } = useContext(AuthContext);
+    const canDelete = isSuperAdmin() || hasPermission('can_delete_records');
+
     const [studentSubject, setStudentSubject] = useState([]);
     const [isEdit, setEdit] = useState(false);
     const [editId, setEditId] = useState(null);
@@ -468,8 +472,8 @@ import {
                       </TableCell>
                       <TableCell align="right">
                         <Box sx={{ display: 'flex', justifyContent: 'end', gap: 1 }}>
-                          <Button 
-                            variant='contained' 
+                          <Button
+                            variant='contained'
                             size="small"
                             sx={{
                               background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
@@ -485,23 +489,25 @@ import {
                           >
                             ✏️ Edit
                           </Button>
-                          <Button 
-                            variant='contained' 
-                            size="small"
-                            sx={{
-                              background: 'linear-gradient(45deg, #ff6b6b 30%, #ee5a52 90%)',
-                              borderRadius: '8px',
-                              textTransform: 'none',
-                              fontWeight: 600,
-                              '&:hover': {
-                                background: 'linear-gradient(45deg, #ff5252 30%, #d32f2f 90%)',
-                                transform: 'scale(1.05)',
-                              }
-                            }}
-                            onClick={() => handleDelete(value._id)}
-                          >
-                            🗑️ Delete
-                          </Button>
+                          {canDelete && (
+                            <Button
+                              variant='contained'
+                              size="small"
+                              sx={{
+                                background: 'linear-gradient(45deg, #ff6b6b 30%, #ee5a52 90%)',
+                                borderRadius: '8px',
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                '&:hover': {
+                                  background: 'linear-gradient(45deg, #ff5252 30%, #d32f2f 90%)',
+                                  transform: 'scale(1.05)',
+                                }
+                              }}
+                              onClick={() => handleDelete(value._id)}
+                            >
+                              🗑️ Delete
+                            </Button>
+                          )}
                         </Box>
                       </TableCell>
                     </TableRow>

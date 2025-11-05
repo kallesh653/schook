@@ -23,6 +23,7 @@ const publicHomePageRouter = require('./router/publicHomePage.router');
 const marksheetRouter = require('./router/marksheet.router');
 const smsRouter = require('./router/sms.router');
 const academicYearRouter = require('./router/academicYear.router');
+const adminUserRouter = require("./router/adminUser.router");
 const authMiddleware = require("./auth/auth");
 const { authCheck } = require("./controller/auth.controller");
 
@@ -79,6 +80,7 @@ app.use("/api/public-home", publicHomePageRouter);
 app.use("/api/marksheets", marksheetRouter);
 app.use("/api/sms", smsRouter);
 app.use("/api/academic-year", academicYearRouter);
+app.use("/api/admin", adminUserRouter);
 
 // Serve static files for uploads
 app.use('/uploads', express.static('uploads'));

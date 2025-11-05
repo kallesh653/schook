@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import {
   Box,
   Button,
@@ -34,6 +34,7 @@ import CustomizedSnackbars from "../../../basic utility components/CustomizedSna
 import { studentSchema } from "../../../yupSchema/studentSchema";
 import StudentCardAdmin from "../../utility components/student card/StudentCard";
 import StudentReport from "./StudentReport";
+import { AuthContext } from "../../../context/AuthContext";
 import { styled } from '@mui/material/styles';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -130,6 +131,9 @@ const ActionButton = styled(IconButton)(({ theme, color }) => ({
 }));
 
 export default function Students() {
+  const { isSuperAdmin, hasPermission } = useContext(AuthContext);
+  const canDelete = isSuperAdmin() || hasPermission('can_delete_records');
+
   const [studentClass, setStudentClass] = useState([]);
   const [courses, setCourses] = useState([]);
   const [students, setStudents] = useState([]);
@@ -1526,14 +1530,16 @@ export default function Students() {
                             <EditIcon />
                           </ActionButton>
                         </Tooltip>
-                        <Tooltip title="Delete Student">
-                          <ActionButton
-                            color="error"
-                            onClick={() => handleDelete(student._id)}
-                          >
-                            <DeleteIcon sx={{ color: '#f44336' }} />
-                          </ActionButton>
-                        </Tooltip>
+                        {canDelete && (
+                          <Tooltip title="Delete Student">
+                            <ActionButton
+                              color="error"
+                              onClick={() => handleDelete(student._id)}
+                            >
+                              <DeleteIcon sx={{ color: '#f44336' }} />
+                            </ActionButton>
+                          </Tooltip>
+                        )}
                       </Box>
                     </TableCell>
                   </StyledTableRow>
@@ -1557,8 +1563,9 @@ export default function Students() {
               <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
                 <StudentCardAdmin
                   student={value}
-                  handleDelete={handleDelete}
+                  handleDelete={canDelete ? handleDelete : null}
                   handleEdit={handleEdit}
+                  canDelete={canDelete}
                 />
               </Grid>
             ))

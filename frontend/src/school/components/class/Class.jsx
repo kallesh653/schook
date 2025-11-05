@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import { useFormik } from "formik";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { baseUrl } from "../../../environment";
 import CustomizedSnackbars from "../../../basic utility components/CustomizedSnackbars";
@@ -28,19 +28,23 @@ import { studentSchema } from "../../../yupSchema/studentSchema";
 import StudentCardAdmin from "../../utility components/student card/StudentCard";
 import { classSchema } from "../../../yupSchema/classSchema";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../../../context/AuthContext";
 
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function Class() {
+  const { isSuperAdmin, hasPermission } = useContext(AuthContext);
+  const canDelete = isSuperAdmin() || hasPermission('can_delete_records');
+
   const [studentClass, setStudentClass] = useState([]);
   const [isEdit, setEdit] = useState(false);
   const [editId, setEditId] = useState(null);
 
 
- 
 
-  
+
+
 
   const handleDelete = (id) => {
     if (confirm("Are you sure you want to delete?")) {
@@ -435,8 +439,8 @@ export default function Class() {
                   gap: 2,
                   marginTop: 2
                 }}>
-                  <IconButton 
-                    onClick={() => handleEdit(value._id)} 
+                  <IconButton
+                    onClick={() => handleEdit(value._id)}
                     sx={{
                       background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
                       color: 'white',
@@ -450,21 +454,23 @@ export default function Class() {
                   >
                     <EditIcon />
                   </IconButton>
-                  <IconButton 
-                    onClick={() => handleDelete(value._id)} 
-                    sx={{
-                      background: 'linear-gradient(45deg, #ff6b6b 30%, #ee5a52 90%)',
-                      color: 'white',
-                      borderRadius: '12px',
-                      padding: '12px',
-                      '&:hover': {
-                        background: 'linear-gradient(45deg, #ff5252 30%, #d32f2f 90%)',
-                        transform: 'scale(1.1)',
-                      }
-                    }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
+                  {canDelete && (
+                    <IconButton
+                      onClick={() => handleDelete(value._id)}
+                      sx={{
+                        background: 'linear-gradient(45deg, #ff6b6b 30%, #ee5a52 90%)',
+                        color: 'white',
+                        borderRadius: '12px',
+                        padding: '12px',
+                        '&:hover': {
+                          background: 'linear-gradient(45deg, #ff5252 30%, #d32f2f 90%)',
+                          transform: 'scale(1.1)',
+                        }
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  )}
                 </Box>
               </Paper>
             ))}

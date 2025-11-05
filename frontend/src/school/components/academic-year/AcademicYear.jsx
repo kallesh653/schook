@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
     Box,
     Button,
@@ -61,6 +61,7 @@ import axios from 'axios';
 import { baseUrl } from '../../../environment';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
+import { AuthContext } from "../../../context/AuthContext";
 
 // Styled components
 const StyledHeaderCard = styled(Card)(({ theme }) => ({
@@ -96,6 +97,8 @@ const validationSchema = yup.object({
 });
 
 const AcademicYearImproved = () => {
+    const { isSuperAdmin, hasPermission } = useContext(AuthContext);
+    const canDelete = isSuperAdmin() || hasPermission('can_delete_records');
     const [academicYears, setAcademicYears] = useState([]);
     const [students, setStudents] = useState([]);
     const [allStudents, setAllStudents] = useState([]); // For single student promotion
@@ -513,15 +516,17 @@ const AcademicYearImproved = () => {
                                                             <EditIcon />
                                                         </ActionButton>
                                                     </Tooltip>
-                                                    <Tooltip title="Delete">
-                                                        <ActionButton
-                                                            size="small"
-                                                            color="error"
-                                                            onClick={() => handleDelete(year._id)}
-                                                        >
-                                                            <DeleteIcon />
-                                                        </ActionButton>
-                                                    </Tooltip>
+                                                    {canDelete && (
+                                                        <Tooltip title="Delete">
+                                                            <ActionButton
+                                                                size="small"
+                                                                color="error"
+                                                                onClick={() => handleDelete(year._id)}
+                                                            >
+                                                                <DeleteIcon />
+                                                            </ActionButton>
+                                                        </Tooltip>
+                                                    )}
                                                 </Box>
                                             </TableCell>
                                         </TableRow>

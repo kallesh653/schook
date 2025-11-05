@@ -7,7 +7,13 @@ const schoolSchema = new mongoose.Schema({
     school_image:{type:String,  required:true},
     createdAt:{type:Date, default: new Date()},
 
-    password:{type:String, required:true}
+    password:{type:String, required:true},
+
+    // Primary Super Admin (created during school registration)
+    primary_admin:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'AdminUser'
+    }
 
 })
 

@@ -40,9 +40,58 @@ export const AuthProvider = ({ children }) => {
     setAuthenticated(false)
   };
 
+  // Helper function to check if user is SUPER_ADMIN
+  const isSuperAdmin = () => {
+    return user?.role === 'SUPER_ADMIN';
+  };
+
+  // Helper function to check if user is ADMIN (regular admin)
+  const isAdmin = () => {
+    return user?.role === 'ADMIN';
+  };
+
+  // Helper function to check if user has any admin role
+  const isAnyAdmin = () => {
+    return user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN';
+  };
+
+  // Helper function to check if user has a specific permission
+  const hasPermission = (permission) => {
+    // SUPER_ADMIN has all permissions
+    if (user?.role === 'SUPER_ADMIN') {
+      return true;
+    }
+
+    // Check if user has the permission in their permissions object
+    return user?.permissions?.[permission] === true;
+  };
+
+  // Helper function to get user role
+  const getRole = () => {
+    return user?.role || null;
+  };
+
+  // Helper function to get all permissions
+  const getPermissions = () => {
+    return user?.permissions || {};
+  };
 
   return (
-    <AuthContext.Provider value={{authenticated, user, login, logout, loading }}>
+    <AuthContext.Provider value={{
+      authenticated,
+      user,
+      login,
+      logout,
+      loading,
+      role: user?.role,
+      permissions: user?.permissions,
+      isSuperAdmin,
+      isAdmin,
+      isAnyAdmin,
+      hasPermission,
+      getRole,
+      getPermissions
+    }}>
       {children}
     </AuthContext.Provider>
   );
