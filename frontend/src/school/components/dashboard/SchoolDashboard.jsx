@@ -301,16 +301,133 @@ const SchoolDashboard = () => {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  // Data for Classes and Subjects Chart
+  // Professional gradient colors for modern charts
+  const gradientColors = {
+    purple: ['rgba(102, 126, 234, 0.8)', 'rgba(118, 75, 162, 0.8)'],
+    blue: ['rgba(79, 172, 254, 0.8)', 'rgba(0, 242, 254, 0.8)'],
+    pink: ['rgba(240, 147, 251, 0.8)', 'rgba(245, 87, 108, 0.8)'],
+    green: ['rgba(163, 230, 53, 0.8)', 'rgba(0, 216, 153, 0.8)'],
+    orange: ['rgba(251, 200, 212, 0.8)', 'rgba(255, 154, 158, 0.8)']
+  };
+
+  // Modern chart options with animations
+  const modernBarOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+        labels: {
+          font: {
+            size: 14,
+            weight: 'bold',
+            family: "'Roboto', sans-serif"
+          },
+          padding: 20,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
+      tooltip: {
+        enabled: true,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFont: { size: 14, weight: 'bold' },
+        bodyFont: { size: 13 },
+        padding: 12,
+        cornerRadius: 8,
+        displayColors: true
+      }
+    },
+    scales: {
+      x: {
+        grid: {
+          display: false
+        },
+        ticks: {
+          font: {
+            size: 12,
+            weight: '500'
+          }
+        }
+      },
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)',
+          lineWidth: 1
+        },
+        ticks: {
+          font: {
+            size: 12,
+            weight: '500'
+          },
+          stepSize: 1
+        }
+      }
+    },
+    animation: {
+      duration: 1500,
+      easing: 'easeInOutQuart'
+    }
+  };
+
+  const modernDoughnutOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '70%', // Creates a modern donut effect
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          font: {
+            size: 14,
+            weight: 'bold',
+            family: "'Roboto', sans-serif"
+          },
+          padding: 20,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
+      tooltip: {
+        enabled: true,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFont: { size: 14, weight: 'bold' },
+        bodyFont: { size: 13 },
+        padding: 12,
+        cornerRadius: 8,
+        callbacks: {
+          label: function(context) {
+            const label = context.label || '';
+            const value = context.parsed || 0;
+            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+            return `${label}: ${value} (${percentage}%)`;
+          }
+        }
+      }
+    },
+    animation: {
+      animateRotate: true,
+      animateScale: true,
+      duration: 1500,
+      easing: 'easeInOutQuart'
+    }
+  };
+
+  // Data for Classes and Subjects Chart with professional gradients
   const classesData = {
     labels: classes.map((classObj) => classObj.class_text),
     datasets: [
       {
-        label: "Classes",
+        label: "Number of Classes",
         data: classes.map(() => 1),
-        backgroundColor: "rgba(54, 162, 235, 0.6)",
-        borderColor: "rgba(54, 162, 235, 1)",
-        borderWidth: 1,
+        backgroundColor: gradientColors.purple,
+        borderColor: 'rgba(102, 126, 234, 1)',
+        borderWidth: 2,
+        borderRadius: 8,
+        barThickness: 40
       },
     ],
   };
@@ -319,11 +436,13 @@ const SchoolDashboard = () => {
     labels: subjects.map((subject) => subject.subject_name),
     datasets: [
       {
-        label: "Subjects",
+        label: "Number of Subjects",
         data: subjects.map(() => 1),
-        backgroundColor: "rgba(255, 99, 132, 0.6)",
-        borderColor: "rgba(255, 99, 132, 1)",
-        borderWidth: 1,
+        backgroundColor: gradientColors.pink,
+        borderColor: 'rgba(240, 147, 251, 1)',
+        borderWidth: 2,
+        borderRadius: 8,
+        barThickness: 40
       },
     ],
   };
@@ -666,30 +785,38 @@ const SchoolDashboard = () => {
           </Card>
         </Grid2>
 
-        {/* Charts Row */}
+        {/* Charts Row - Modern Professional Design */}
         <Grid2 size={{ xs: 12, md: 6 }}>
-          <Card sx={{ height: '400px' }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Attendance Overview</Typography>
-              <Box sx={{ height: '300px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <Doughnut 
+          <Card sx={{
+            height: '450px',
+            background: 'linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            borderRadius: '16px'
+          }}>
+            <CardContent sx={{ height: '100%' }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: '#667eea', mb: 2 }}>
+                Today's Attendance Overview
+              </Typography>
+              <Box sx={{ height: 'calc(100% - 50px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <Doughnut
                   data={{
                     labels: ['Present', 'Absent'],
                     datasets: [{
                       data: [attendanceStats.presentToday, attendanceStats.absentToday],
-                      backgroundColor: ['#4CAF50', '#f44336'],
-                      borderWidth: 0
+                      backgroundColor: [
+                        'rgba(76, 175, 80, 0.9)',
+                        'rgba(244, 67, 54, 0.9)'
+                      ],
+                      borderColor: [
+                        'rgba(76, 175, 80, 1)',
+                        'rgba(244, 67, 54, 1)'
+                      ],
+                      borderWidth: 3,
+                      hoverOffset: 15,
+                      spacing: 3
                     }]
                   }}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        position: 'bottom'
-                      }
-                    }
-                  }}
+                  options={modernDoughnutOptions}
                 />
               </Box>
             </CardContent>
@@ -697,49 +824,75 @@ const SchoolDashboard = () => {
         </Grid2>
 
         <Grid2 size={{ xs: 12, md: 6 }}>
-          <Card sx={{ height: '400px' }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Fees Collection Status</Typography>
-              <Box sx={{ height: '300px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <Doughnut 
+          <Card sx={{
+            height: '450px',
+            background: 'linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            borderRadius: '16px'
+          }}>
+            <CardContent sx={{ height: '100%' }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: '#667eea', mb: 2 }}>
+                Fees Collection Status
+              </Typography>
+              <Box sx={{ height: 'calc(100% - 50px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <Doughnut
                   data={{
                     labels: ['Collected', 'Balance'],
                     datasets: [{
                       data: [feesStats.collectedFees, feesStats.balanceFees],
-                      backgroundColor: ['#2196F3', '#FF9800'],
-                      borderWidth: 0
+                      backgroundColor: [
+                        'rgba(33, 150, 243, 0.9)',
+                        'rgba(255, 152, 0, 0.9)'
+                      ],
+                      borderColor: [
+                        'rgba(33, 150, 243, 1)',
+                        'rgba(255, 152, 0, 1)'
+                      ],
+                      borderWidth: 3,
+                      hoverOffset: 15,
+                      spacing: 3
                     }]
                   }}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        position: 'bottom'
-                      }
-                    }
-                  }}
+                  options={modernDoughnutOptions}
                 />
               </Box>
             </CardContent>
           </Card>
         </Grid2>
 
-        {/* Classes and Subjects Charts */}
+        {/* Classes and Subjects Charts - Professional Bar Charts */}
         <Grid2 size={{ xs: 12, md: 6 }}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Classes Overview</Typography>
-              <Bar data={classesData} options={{ responsive: true }} />
+          <Card sx={{
+            minHeight: '450px',
+            background: 'linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            borderRadius: '16px'
+          }}>
+            <CardContent sx={{ height: '100%' }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: '#667eea', mb: 3 }}>
+                Classes Distribution
+              </Typography>
+              <Box sx={{ height: '350px' }}>
+                <Bar data={classesData} options={modernBarOptions} />
+              </Box>
             </CardContent>
           </Card>
         </Grid2>
 
         <Grid2 size={{ xs: 12, md: 6 }}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Subjects Overview</Typography>
-              <Bar data={subjectsData} options={{ responsive: true }} />
+          <Card sx={{
+            minHeight: '450px',
+            background: 'linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            borderRadius: '16px'
+          }}>
+            <CardContent sx={{ height: '100%' }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: '#667eea', mb: 3 }}>
+                Subjects Distribution
+              </Typography>
+              <Box sx={{ height: '350px' }}>
+                <Bar data={subjectsData} options={modernBarOptions} />
+              </Box>
             </CardContent>
           </Card>
         </Grid2>
