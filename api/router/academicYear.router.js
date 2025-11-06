@@ -7,7 +7,7 @@ const authMiddleware = require('../auth/auth');
 router.post('/', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']), academicYearController.createAcademicYear);
 router.get('/', authMiddleware(['SCHOOL', 'TEACHER', 'SUPER_ADMIN', 'ADMIN']), academicYearController.getAllAcademicYears);
 router.get('/current', authMiddleware(['SCHOOL', 'TEACHER', 'STUDENT']), academicYearController.getCurrentAcademicYear);
-router.get('/stats/:year', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']), academicYearController.getAcademicYearStats);
+router.get('/stats/:year', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN', 'TEACHER']), academicYearController.getAcademicYearStats);
 router.get('/:id', authMiddleware(['SCHOOL', 'TEACHER', 'SUPER_ADMIN', 'ADMIN']), academicYearController.getAcademicYearById);
 router.put('/:id', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']), academicYearController.updateAcademicYear);
 router.put('/:id/set-current', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']), academicYearController.setCurrentAcademicYear);

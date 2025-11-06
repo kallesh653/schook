@@ -164,8 +164,13 @@ marksheetSchema.statics.getClassPerformance = function(className, section, exami
 };
 
 // Static method to get student academic history
-marksheetSchema.statics.getStudentHistory = function(studentId) {
-    return this.find({ student_id: studentId })
+marksheetSchema.statics.getStudentHistory = function(studentId, schoolId = null) {
+    const filter = { student_id: studentId };
+    // If schoolId is provided, add it to the filter for security
+    if (schoolId) {
+        filter.school = schoolId;
+    }
+    return this.find(filter)
                .sort({ academic_year: -1, issue_date: -1 });
 };
 

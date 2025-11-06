@@ -6,7 +6,9 @@ const PDFDocument = require('pdfkit');
 module.exports = {
     markAttendance: async (req, res) => {
         const { studentId, date, status, classId } = req.body;
-        const schoolId = req.user.schoolId;
+        // Use schoolId for ADMIN/SUPER_ADMIN/TEACHER, or id for SCHOOL role
+        const schoolId = req.user.schoolId || req.user.id;
+        console.log('markAttendance - User:', req.user.role, '- School ID:', schoolId);
         try {
           const attendance = new Attendance({ student: studentId, date, status,class:classId, school:schoolId});
           await attendance.save();
@@ -54,7 +56,8 @@ module.exports = {
       ,
     // Get attendance report - fetch all attendance data with filtering options
     getAttendanceReport: async (req, res) => {
-        const schoolId = req.user.schoolId;
+        // Use schoolId for ADMIN/SUPER_ADMIN/TEACHER, or id for SCHOOL role
+        const schoolId = req.user.schoolId || req.user.id;
         const { classId, dateFrom, dateTo, studentId, status } = req.query;
 
         try {
@@ -105,7 +108,8 @@ module.exports = {
 
     // Get attendance summary statistics
     getAttendanceSummary: async (req, res) => {
-        const schoolId = req.user.schoolId;
+        // Use schoolId for ADMIN/SUPER_ADMIN/TEACHER, or id for SCHOOL role
+        const schoolId = req.user.schoolId || req.user.id;
         const { classId, dateFrom, dateTo } = req.query;
 
         try {
@@ -211,7 +215,8 @@ module.exports = {
 
     // Export attendance report to Excel
     exportAttendanceExcel: async (req, res) => {
-        const schoolId = req.user.schoolId;
+        // Use schoolId for ADMIN/SUPER_ADMIN/TEACHER, or id for SCHOOL role
+        const schoolId = req.user.schoolId || req.user.id;
         const { classId, dateFrom, dateTo, studentId, status } = req.query;
 
         try {
@@ -337,7 +342,8 @@ module.exports = {
 
     // Export attendance report to PDF
     exportAttendancePDF: async (req, res) => {
-        const schoolId = req.user.schoolId;
+        // Use schoolId for ADMIN/SUPER_ADMIN/TEACHER, or id for SCHOOL role
+        const schoolId = req.user.schoolId || req.user.id;
         const { classId, dateFrom, dateTo, studentId, status } = req.query;
 
         try {

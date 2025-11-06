@@ -66,17 +66,33 @@ const ProtectedWebsiteBuilder = () => {
     setError('');
 
     try {
-      const response = await axios.post(`${baseUrl}/school/login`, {
+      // Try admin login first (for multi-admin system)
+      const response = await axios.post(`${baseUrl}/admin/login`, {
         email: credentials.email,
         password: credentials.password
       });
 
-      if (response.data.success) {
+      if (response.data.success && response.data.token) {
         localStorage.setItem('token', response.data.token);
         setIsAuthenticated(true);
       }
-    } catch (error) {
-      setError(error.response?.data?.message || 'Login failed. Please check your credentials.');
+    } catch (adminError) {
+      // If admin login fails, try school login (legacy support)
+      try {
+        const response = await axios.post(`${baseUrl}/school/login`, {
+          email: credentials.email,
+          password: credentials.password
+        });
+
+        if (response.data.success && response.data.token) {
+          localStorage.setItem('token', response.data.token);
+          setIsAuthenticated(true);
+        } else if (response.data.redirectToAdminLogin) {
+          setError('This school uses Admin login. Please use your admin credentials.');
+        }
+      } catch (schoolError) {
+        setError(schoolError.response?.data?.message || adminError.response?.data?.message || 'Login failed. Please check your credentials.');
+      }
     }
   };
 

@@ -13,11 +13,12 @@ module.exports = {
 
    
     getStudentWithQuery: async(req, res)=>{
-      
+
         try {
             const filterQuery = {};
-            const schoolId = req.user.schoolId;
-            console.log(schoolId,"schoolId")
+            // Use schoolId for ADMIN/SUPER_ADMIN/TEACHER, or id for SCHOOL role
+            const schoolId = req.user.schoolId || req.user.id;
+            console.log('getStudentWithQuery - User:', req.user.role, '- School ID:', schoolId);
             filterQuery['school'] = schoolId;
             if(req.query.hasOwnProperty('search')){
                 filterQuery['name'] = {$regex: req.query.search, $options:'i'}
@@ -96,6 +97,10 @@ module.exports = {
                             dateOfBirth.setFullYear(dateOfBirth.getFullYear() - age);
                         }
 
+                        // Use schoolId for ADMIN/SUPER_ADMIN, or id for SCHOOL role
+                        const schoolId = req.user.schoolId || req.user.id;
+                        console.log('Creating student - User role:', req.user.role, '- School ID:', schoolId);
+
                         const studentData = {
                             email: fields.email[0],
                             name: fields.name[0],
@@ -108,7 +113,7 @@ module.exports = {
                             date_of_admission: fields.date_of_admission && fields.date_of_admission[0] ? new Date(fields.date_of_admission[0]) : new Date(),
                             student_image: imageName,
                             password: hashPassword,
-                            school: req.user.id
+                            school: schoolId
                         };
 
                         // Only add optional fields if they exist

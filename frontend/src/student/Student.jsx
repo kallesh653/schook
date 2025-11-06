@@ -354,10 +354,10 @@ export default function Student() {
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
                             textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                            fontSize: { xs: '1.2rem', md: '1.5rem' }
+                            fontSize: { xs: '1rem', sm: '1.2rem', md: '1.5rem' }
                         }}
                     >
-                        📚 Student Portal
+                        🏫 Shrigannada - Student Portal
                     </Typography>
                 </Toolbar>
             </AppBar>
@@ -376,21 +376,21 @@ export default function Student() {
                             sx={{
                                 width: 56,
                                 height: 56,
-                                background: 'linear-gradient(45deg, #ffffff 30%, #f8f9fa 90%)',
+                                background: 'linear-gradient(45deg, #FFD700 30%, #FFA500 90%)',
                                 fontSize: '1.8rem',
                                 animation: `${pulse} 2s infinite`,
                                 boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
                                 border: '2px solid rgba(255,255,255,0.3)'
                             }}
                         >
-                            📚
+                            🏫
                         </Avatar>
                         <Box>
-                            <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700, fontSize: '1.1rem' }}>
-                                Student Portal
+                            <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700, fontSize: '1rem', lineHeight: 1.2 }}>
+                                Shrigannada Higher Primary School
                             </Typography>
-                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
-                                Learning Excellence
+                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem' }}>
+                                Student Portal
                             </Typography>
                         </Box>
                     </StudentBrand>
@@ -508,21 +508,21 @@ export default function Student() {
                         sx={{
                             width: 56,
                             height: 56,
-                            background: 'linear-gradient(45deg, #ffffff 30%, #f8f9fa 90%)',
+                            background: 'linear-gradient(45deg, #FFD700 30%, #FFA500 90%)',
                             fontSize: '1.8rem',
                             animation: `${pulse} 2s infinite`,
                             boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
                             border: '2px solid rgba(255,255,255,0.3)'
                         }}
                     >
-                        📚
+                        🏫
                     </Avatar>
                     <Box>
-                        <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700, fontSize: '1.1rem' }}>
-                            Student Portal
+                        <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700, fontSize: '1rem', lineHeight: 1.2 }}>
+                            Shrigannada Higher Primary School
                         </Typography>
-                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
-                            Learning Excellence
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem' }}>
+                            Student Portal
                         </Typography>
                     </Box>
                 </StudentBrand>

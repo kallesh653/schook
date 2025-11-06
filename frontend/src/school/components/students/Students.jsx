@@ -378,16 +378,17 @@ export default function Students() {
   };
 
   const fetchCourses = () => {
-    const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
-    if (userStr) {
+    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+    if (token) {
       try {
-        const user = JSON.parse(userStr);
-        const schoolId = user.id; // School admin's ID is the schoolId
-
-        console.log('Fetching courses for school:', schoolId);
+        console.log('Fetching courses...');
 
         axios
-          .get(`${baseUrl}/course/school/${schoolId}`)
+          .get(`${baseUrl}/course/all`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          })
           .then((resp) => {
             console.log('Courses fetched:', resp.data);
             setCourses(resp.data.courses || []);

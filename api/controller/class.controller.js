@@ -18,7 +18,9 @@ module.exports = {
 
     },
     createClass: (req, res) => {
-       const schoolId = req.user.id;
+       // Use schoolId for ADMIN/SUPER_ADMIN, or id for SCHOOL role
+       const schoolId = req.user.schoolId || req.user.id;
+       console.log('createClass - User:', req.user.role, 'School ID:', schoolId);
        const newClass = new Class({...req.body,school:schoolId});
        newClass.save().then(savedData => {
            console.log("Date saved", savedData);

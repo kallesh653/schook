@@ -232,14 +232,23 @@ const MarkSheetGenerator = () => {
         }
     };
 
-    // Fetch examinations
-    const fetchExaminations = async () => {
+    // Fetch examinations - now supports filtering by class
+    const fetchExaminations = async (classId = null) => {
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             const headers = token ? { Authorization: token } : {};
 
-            const response = await axios.get(`${baseUrl}/examination/all`, { headers });
-            setExaminations(response.data.data || []);
+            // If classId provided, fetch only exams for that class, otherwise fetch all
+            const url = classId
+                ? `${baseUrl}/examination/fetch-class/${classId}`
+                : `${baseUrl}/examination/all`;
+
+            console.log('Fetching examinations for class:', classId || 'all');
+            const response = await axios.get(url, { headers });
+            const exams = response.data.data || [];
+            console.log(`Found ${exams.length} examinations`);
+
+            setExaminations(exams);
         } catch (error) {
             console.error('Error fetching examinations:', error);
             setSnackbar({
@@ -247,6 +256,7 @@ const MarkSheetGenerator = () => {
                 message: 'Error fetching examinations: ' + (error.response?.data?.message || error.message),
                 severity: 'error'
             });
+            setExaminations([]);
         }
     };
 
@@ -317,6 +327,9 @@ const MarkSheetGenerator = () => {
             setSelectedClass(classDisplay);
             setSelectedClassId(classObj._id);
 
+            // Fetch examinations for this class
+            fetchExaminations(classObj._id);
+
             // Fetch students for this specific class from Student collection
             try {
                 const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -374,7 +387,23 @@ const MarkSheetGenerator = () => {
                 section: classObj.class_text || '',
                 student_id: '',
                 student_name: '',
-                roll_number: ''
+                roll_number: '',
+                examination: '' // Clear examination when class changes
+            }));
+        } else {
+            // Clear everything when no class selected
+            setSelectedClass('');
+            setSelectedClassId('');
+            setStudents([]);
+            setExaminations([]);
+            setFormData(prev => ({
+                ...prev,
+                class: '',
+                section: '',
+                student_id: '',
+                student_name: '',
+                roll_number: '',
+                examination: ''
             }));
         }
     };

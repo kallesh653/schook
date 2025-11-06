@@ -95,20 +95,22 @@ const StudentResults = () => {
     try {
       setLoading(true);
 
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
       // First get student info
       const studentResp = await axios.get(`${baseUrl}/student/fetch-own`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
 
       const studentData = studentResp.data.data;
       setStudentInfo(studentData);
 
-      // Then fetch marksheets for this student
-      const marksResp = await axios.get(`${baseUrl}/marksheet/student-history/${studentData._id}`, {
+      // Fetch marksheets using the secure endpoint that automatically filters by logged-in student
+      const marksResp = await axios.get(`${baseUrl}/marksheets/my-marksheets`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
 

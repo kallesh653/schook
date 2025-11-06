@@ -176,15 +176,20 @@ module.exports = {
         })
     },
     getSchoolOwnData: async(req, res)=>{
-        const id = req.user.id;
+        // Use schoolId for ADMIN/SUPER_ADMIN, or id for SCHOOL role
+        const id = req.user.schoolId || req.user.id;
+        console.log('getSchoolOwnData - User:', req.user.role, 'Fetching school ID:', id);
+
         School.findById(id).then(resp=>{
             if(resp){
+                console.log('✅ School data found:', resp.school_name);
                 res.status(200).json({success:true, data:resp})
             }else {
+                console.log('❌ School not found with ID:', id);
                 res.status(500).json({ success: false, message: "School data not Available" })
             }
         }).catch(e=>{
-            console.log("Error in getSchoolWithId", e)
+            console.log("❌ Error in getSchoolWithId", e)
             res.status(500).json({ success: false, message: "Error in getting  School Data" })
         })
     },
@@ -198,7 +203,9 @@ module.exports = {
             return res.status(400).json({ message: "Error parsing the form data." });
           }
           try {
-            const id  = req.user.id;
+            // Use schoolId for ADMIN/SUPER_ADMIN, or id for SCHOOL role
+            const id  = req.user.schoolId || req.user.id;
+            console.log('updateSchoolWithId - User:', req.user.role, 'Updating school ID:', id);
             const school = await School.findById(id);
       
             if (!school) {

@@ -58,13 +58,11 @@ const Courses = () => {
             setPageLoading(true);
             const schoolId = getSchoolId();
 
-            if (!schoolId) {
-                showSnackbar('School ID not found. Please login again.', 'error');
-                setPageLoading(false);
-                return;
-            }
-
-            const response = await axios.get(`${baseUrl}/course/school/${schoolId}`);
+            const response = await axios.get(`${baseUrl}/course/all`, {
+                headers: {
+                    Authorization: `Bearer ${sessionStorage.getItem('token') || localStorage.getItem('token')}`
+                }
+            });
             if (response.data.success) {
                 setCourses(response.data.courses);
             }

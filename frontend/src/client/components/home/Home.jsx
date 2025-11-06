@@ -107,44 +107,34 @@ const wiggle = keyframes`
 
 // ============= STYLED COMPONENTS =============
 
-// Header Navigation
+// Header Navigation with Enhanced Design
 const HeaderBar = styled(AppBar)({
-  background: 'linear-gradient(135deg, #8B8B8D 0%, #6B6B6D 100%)',
-  boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+  background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
+  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+  borderBottom: '3px solid #DC143C',
+  position: 'relative'
 });
 
-// Beautiful Alert Banner
+// Simple and Beautiful Alert Banner
 const AlertBanner = styled(Box)({
-  background: 'linear-gradient(135deg, #DC143C 0%, #B22222 50%, #DC143C 100%)',
-  backgroundSize: '200% auto',
-  animation: `${shimmer} 3s linear infinite`,
+  background: 'linear-gradient(135deg, #DC143C 0%, #B22222 100%)',
   color: 'white',
-  padding: '16px 0',
+  padding: '12px 0',
   overflow: 'hidden',
   position: 'relative',
-  boxShadow: '0 6px 25px rgba(220, 20, 60, 0.5)',
-  borderBottom: '3px solid #FFD700',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'url("data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Cpath d="M0 0h20v20H0V0zm10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/%3E%3C/g%3E%3C/svg%3E")',
-    opacity: 0.2
-  }
+  boxShadow: '0 4px 12px rgba(220, 20, 60, 0.4)',
+  borderBottom: '2px solid #FFD700'
 });
 
 const AlertContent = styled(Box)({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '20px',
-  animation: `${scrollNews} 20s linear infinite`,
+  gap: '40px',
+  animation: `${scrollNews} 30s linear infinite`,
   whiteSpace: 'nowrap',
-  fontSize: '18px',
-  fontWeight: 'bold',
+  fontSize: '16px',
+  fontWeight: 600,
   position: 'relative',
   zIndex: 1
 });
@@ -385,30 +375,71 @@ const HomeBeautiful = () => {
 
   return (
     <Box sx={{ overflow: 'hidden' }}>
-      {/* ============= HEADER NAVIGATION ============= */}
-      <HeaderBar position="sticky" elevation={4}>
-        <Toolbar>
-          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-            <SchoolIcon sx={{ fontSize: 40, mr: 2, color: '#DC143C' }} />
-            <Typography
-              variant="h5"
-              sx={{
-                fontWeight: 'bold',
-                color: '#DC143C',
-                textShadow: '1px 1px 2px rgba(0,0,0,0.2)'
-              }}
-            >
-              GenTime School
-            </Typography>
+      {/* ============= BEAUTIFUL ENHANCED HEADER ============= */}
+      <HeaderBar position="sticky" elevation={8}>
+        <Toolbar sx={{ py: 1, position: 'relative', zIndex: 1 }}>
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            flexGrow: 1,
+            animation: `${fadeInUp} 1s ease-out`
+          }}>
+            <Box sx={{
+              position: 'relative',
+              animation: `${pulse} 2s ease-in-out infinite`
+            }}>
+              <SchoolIcon sx={{
+                fontSize: 50,
+                mr: 2,
+                color: '#FFD700',
+                filter: 'drop-shadow(0 0 10px rgba(220, 20, 60, 0.8))',
+                animation: `${wiggle} 3s ease-in-out infinite`
+              }} />
+            </Box>
+            <Box>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 'bold',
+                  color: '#ffffff',
+                  fontSize: { xs: '1.3rem', sm: '1.8rem', md: '2.2rem' },
+                  textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                  letterSpacing: '1px'
+                }}
+              >
+                Shrigannada Higher Primary School
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: '#FFD700',
+                  fontWeight: 500,
+                  fontSize: { xs: '10px', sm: '11px', md: '12px' },
+                  letterSpacing: '1px',
+                  display: 'block',
+                  mt: 0.5
+                }}
+              >
+                Excellence in Education Since 2014
+              </Typography>
+            </Box>
           </Box>
 
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, mr: 2 }}>
             <Button
               startIcon={<HomeIcon />}
               sx={{
                 color: 'white',
                 fontWeight: 'bold',
-                '&:hover': { color: '#DC143C', backgroundColor: 'rgba(220, 20, 60, 0.1)' }
+                fontSize: '14px',
+                px: 2,
+                py: 1,
+                borderRadius: '8px',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  backgroundColor: 'rgba(220, 20, 60, 0.2)',
+                  transform: 'translateY(-2px)'
+                }
               }}
             >
               Home
@@ -418,17 +449,33 @@ const HomeBeautiful = () => {
               sx={{
                 color: 'white',
                 fontWeight: 'bold',
-                '&:hover': { color: '#DC143C', backgroundColor: 'rgba(220, 20, 60, 0.1)' }
+                fontSize: '14px',
+                px: 2,
+                py: 1,
+                borderRadius: '8px',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  backgroundColor: 'rgba(220, 20, 60, 0.2)',
+                  transform: 'translateY(-2px)'
+                }
               }}
             >
-              About Us
+              About
             </Button>
             <Button
               startIcon={<BookIcon />}
               sx={{
                 color: 'white',
                 fontWeight: 'bold',
-                '&:hover': { color: '#DC143C', backgroundColor: 'rgba(220, 20, 60, 0.1)' }
+                fontSize: '14px',
+                px: 2,
+                py: 1,
+                borderRadius: '8px',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  backgroundColor: 'rgba(220, 20, 60, 0.2)',
+                  transform: 'translateY(-2px)'
+                }
               }}
             >
               Academics
@@ -438,7 +485,15 @@ const HomeBeautiful = () => {
               sx={{
                 color: 'white',
                 fontWeight: 'bold',
-                '&:hover': { color: '#DC143C', backgroundColor: 'rgba(220, 20, 60, 0.1)' }
+                fontSize: '14px',
+                px: 2,
+                py: 1,
+                borderRadius: '8px',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  backgroundColor: 'rgba(220, 20, 60, 0.2)',
+                  transform: 'translateY(-2px)'
+                }
               }}
             >
               Contact
@@ -450,13 +505,19 @@ const HomeBeautiful = () => {
             startIcon={<LoginIcon />}
             onClick={() => navigate('/login')}
             sx={{
-              ml: 2,
-              backgroundColor: '#DC143C',
+              background: '#DC143C',
               color: 'white',
               fontWeight: 'bold',
+              fontSize: '15px',
+              px: 3,
+              py: 1,
+              borderRadius: '8px',
+              boxShadow: '0 2px 8px rgba(220, 20, 60, 0.4)',
+              transition: 'all 0.3s ease',
               '&:hover': {
-                backgroundColor: '#B22222',
-                transform: 'scale(1.05)'
+                background: '#B22222',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 12px rgba(220, 20, 60, 0.6)'
               }
             }}
           >
@@ -465,25 +526,25 @@ const HomeBeautiful = () => {
         </Toolbar>
       </HeaderBar>
 
-      {/* ============= BEAUTIFUL ALERT BANNER ============= */}
+      {/* ============= SIMPLE BEAUTIFUL ALERT BANNER ============= */}
       <AlertBanner>
         <Box sx={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
           <AlertContent>
-            <NotificationsIcon sx={{ fontSize: 30, animation: `${wiggle} 2s ease-in-out infinite` }} />
+            <NotificationsIcon sx={{ fontSize: 24, mr: 2 }} />
             {alertMessages.map((msg, idx) => (
               <React.Fragment key={idx}>
-                <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
+                <Typography sx={{ fontSize: '16px', fontWeight: 600 }}>
                   {msg}
                 </Typography>
-                <Box sx={{ fontSize: '24px' }}>⚡</Box>
+                <Box component="span" sx={{ fontSize: '20px', mx: 1 }}>•</Box>
               </React.Fragment>
             ))}
             {alertMessages.map((msg, idx) => (
               <React.Fragment key={`duplicate-${idx}`}>
-                <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
+                <Typography sx={{ fontSize: '16px', fontWeight: 600 }}>
                   {msg}
                 </Typography>
-                <Box sx={{ fontSize: '24px' }}>⚡</Box>
+                <Box component="span" sx={{ fontSize: '20px', mx: 1 }}>•</Box>
               </React.Fragment>
             ))}
           </AlertContent>

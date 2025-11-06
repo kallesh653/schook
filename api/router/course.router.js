@@ -11,8 +11,8 @@ const authMiddleware = require('../auth/auth');
 
 // All routes require SCHOOL or ADMIN authentication
 router.post('/create', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']), createCourse);
-router.get('/school/:schoolId', getCourses);
-router.get('/:courseId', getCourseById);
+router.get('/all', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN', 'TEACHER']), getCourses);
+router.get('/:courseId', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN', 'TEACHER']), getCourseById);
 router.put('/:courseId', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']), updateCourse);
 router.delete('/:courseId', authMiddleware(['SCHOOL', 'SUPER_ADMIN']), deleteCourse);
 

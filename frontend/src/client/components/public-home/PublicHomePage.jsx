@@ -225,14 +225,16 @@ const HeroMedia = styled('img')(({ active }) => ({
   objectFit: 'cover',
   animation: active ? `${kenBurns} 20s ease-out forwards` : 'none',
   transform: 'scale(1)',
-  transformOrigin: 'center center'
+  transformOrigin: 'center center',
+  willChange: active ? 'transform' : 'auto' // Performance optimization
 }));
 
 const HeroVideo = styled('video')({
   width: '100%',
   height: '100%',
   objectFit: 'cover',
-  transform: 'scale(1.1)'
+  transform: 'scale(1.1)',
+  willChange: 'transform' // Performance optimization
 });
 
 // Beautiful gradient overlay at BOTTOM only
@@ -768,6 +770,28 @@ const PublicHomePage = () => {
                   <Box display="flex" alignItems="center" gap={1} sx={{ transition: 'all 0.3s ease', '&:hover': { transform: 'translateY(-2px)' } }}>
                     <LocationOn fontSize="small" sx={{ animation: `${pulse} 2s ease-in-out infinite` }} />
                     <Typography variant="body2" fontWeight={500}>{header.address}</Typography>
+                    {header?.mapLocation?.showMap && (
+                      <IconButton
+                        onClick={() => setMapDialogOpen(true)}
+                        size="small"
+                        sx={{
+                          color: 'white',
+                          ml: 0.5,
+                          background: 'rgba(255, 255, 255, 0.15)',
+                          backdropFilter: 'blur(10px)',
+                          width: 24,
+                          height: 24,
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            background: 'rgba(255, 255, 255, 0.25)',
+                            transform: 'scale(1.15)',
+                            boxShadow: '0 4px 15px rgba(255, 255, 255, 0.3)'
+                          }
+                        }}
+                      >
+                        <MapIcon sx={{ fontSize: 14 }} />
+                      </IconButton>
+                    )}
                   </Box>
                 )}
               </Box>
@@ -809,6 +833,7 @@ const PublicHomePage = () => {
                   <Avatar
                     src={getImageUrl(header.logo)}
                     alt={header.schoolName}
+                    imgProps={{ loading: 'eager', decoding: 'async' }}
                     sx={{
                       width: 75,
                       height: 75,
@@ -901,12 +926,22 @@ const PublicHomePage = () => {
           {sliders.map((slide, index) => (
             <HeroSlide key={index} active={currentSlide === index}>
               {slide.mediaType === 'video' ? (
-                <HeroVideo src={getImageUrl(slide.mediaUrl)} autoPlay loop muted playsInline />
+                <HeroVideo
+                  src={getImageUrl(slide.mediaUrl)}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload={index === 0 ? "auto" : "none"}
+                  loading={index === 0 ? "eager" : "lazy"}
+                />
               ) : (
                 <HeroMedia
                   src={getImageUrl(slide.mediaUrl)}
                   alt={slide.title}
                   active={currentSlide === index}
+                  loading={index === 0 ? "eager" : "lazy"}
+                  decoding="async"
                 />
               )}
               {/* Only show overlay and content if title/description exist */}
@@ -1265,11 +1300,14 @@ const PublicHomePage = () => {
                             <img
                               src={getImageUrl(image)}
                               alt={`About ${index + 1}`}
+                              loading="lazy"
+                              decoding="async"
                               style={{
                                 width: '100%',
                                 height: '100%',
                                 objectFit: 'cover',
-                                transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+                                transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                                willChange: 'transform'
                               }}
                             />
                           </Box>
@@ -1329,7 +1367,11 @@ const PublicHomePage = () => {
                           height="250"
                           image={getImageUrl(program.image)}
                           alt={program.title}
-                          sx={{ transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                          loading="lazy"
+                          sx={{
+                            transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                            willChange: 'transform'
+                          }}
                         />
                       )}
                       <CardContent sx={{ p: 4 }} className="card-content">
@@ -1407,11 +1449,14 @@ const PublicHomePage = () => {
                       <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
                         <video
                           src={getImageUrl(item.url)}
+                          preload="none"
+                          loading="lazy"
                           style={{
                             width: '100%',
                             height: '100%',
                             objectFit: 'cover',
-                            transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
+                            transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                            willChange: 'transform'
                           }}
                         />
                         <Box
@@ -1444,11 +1489,14 @@ const PublicHomePage = () => {
                       <img
                         src={getImageUrl(item.url)}
                         alt={item.title || `Gallery ${index + 1}`}
+                        loading="lazy"
+                        decoding="async"
                         style={{
                           width: '100%',
                           height: '100%',
                           objectFit: 'cover',
-                          transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
+                          transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                          willChange: 'transform'
                         }}
                       />
                     )}
@@ -1592,6 +1640,7 @@ const PublicHomePage = () => {
                 {header?.logo && (
                   <Avatar
                     src={getImageUrl(header.logo)}
+                    imgProps={{ loading: 'lazy', decoding: 'async' }}
                     sx={{
                       width: 70,
                       height: 70,

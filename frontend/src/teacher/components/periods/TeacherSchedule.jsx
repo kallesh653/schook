@@ -5,12 +5,10 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import axios from 'axios';
 import {
-  FormControl,
-  MenuItem,
   Paper,
   Container,
   Typography,
-  Select,
+  Alert,
 } from '@mui/material';
 import { baseUrl } from '../../../environment';
 
@@ -18,7 +16,7 @@ const localizer = momentLocalizer(moment);
 
 const eventStyleGetter = (event) => {
   const style = {
-    backgroundColor: event.bgColor || '#3174ad',
+    backgroundColor: event.bgColor || '#4CAF50',
     color: 'white',
     borderRadius: '4px',
     padding: '5px',
@@ -31,87 +29,117 @@ const eventStyleGetter = (event) => {
 
 const Schedule = () => {
   const [events, setEvents] = useState([]);
-  const [allClasses, setAllClasses] = useState([]);
-  const [selectedClass, setSelectedClass] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Fetch all classes
-  const fetchAllClasses = () => {
-    axios
-      .get(`${baseUrl}/class/fetch-all`)
-      .then((resp) => {
-        setAllClasses(resp.data.data);
-        setSelectedClass(resp.data.data[0]._id);
-      })
-      .catch((e) => {
-        console.error('Error in fetching all Classes');
-      });
-  };
-
+  // Fetch teacher's own periods
   useEffect(() => {
-    fetchAllClasses();
-  }, []);
-
-  // Fetch periods for the selected class
-  useEffect(() => {
-    const fetchClassPeriods = async () => {
-      if (!selectedClass) return;
+    const fetchTeacherPeriods = async () => {
       try {
-        const response = await axios.get(`${baseUrl}/period/class/${selectedClass}`);
-        const periods = response.data.periods;
-        const eventsData = periods.map((period) => ({
-          id: period._id,
-          title: `${period.subject.subject_name} By ${period.teacher.name}`,
-          start: new Date(period.startTime),
-          end: new Date(period.endTime),
-        }));
+        setLoading(true);
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+        if (!token) {
+          setError('Please login again');
+          setLoading(false);
+          return;
+        }
+
+        const headers = { Authorization: token };
+        const response = await axios.get(`${baseUrl}/period/fetch-own`, { headers });
+        const periods = response.data.data || [];
+
+        if (periods.length === 0) {
+          setError('No periods assigned yet');
+          setLoading(false);
+          return;
+        }
+
+        // Convert periods to calendar events
+        const eventsData = periods.map((period) => {
+          const today = moment();
+          const startOfWeek = today.clone().startOf('week');
+          const periodDate = startOfWeek.clone().add(period.dayOfWeek, 'days');
+
+          const parseTime = (timeStr) => {
+            const cleaned = (timeStr || '').replace(/[^0-9:]/g, '');
+            const parts = cleaned.split(':');
+            return { hour: parseInt(parts[0] || 0), minute: parseInt(parts[1] || 0) };
+          };
+
+          const startParsed = parseTime(period.startTime);
+          const endParsed = parseTime(period.endTime);
+
+          const start = periodDate.clone().set({ hour: startParsed.hour, minute: startParsed.minute, second: 0 }).toDate();
+          const end = periodDate.clone().set({ hour: endParsed.hour, minute: endParsed.minute, second: 0 }).toDate();
+
+          const subjectName = period.subject?.subject_name || 'No Subject';
+          const className = period.class?.class_text || 'No Class';
+
+          return {
+            id: period._id,
+            title: `${subjectName} - ${className}`,
+            start,
+            end,
+            resource: period
+          };
+        });
+
         setEvents(eventsData);
+        setError(null);
       } catch (error) {
         console.error('Error fetching periods:', error);
+        if (error.response?.status === 403 || error.response?.status === 401) {
+          setError('Authentication error. Please login again.');
+        } else {
+          setError(`Error: ${error.response?.data?.message || error.message}`);
+        }
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchClassPeriods();
-  }, [selectedClass]);
+    fetchTeacherPeriods();
+  }, []);
 
-  const handleClassChange = (e) => {
-    setSelectedClass(e.target.value);
-  };
+  if (loading) {
+    return (
+      <Container>
+        <Paper sx={{ margin: '10px', padding: '20px', textAlign: 'center' }}>
+          <Typography>Loading schedule...</Typography>
+        </Paper>
+      </Container>
+    );
+  }
 
   return (
     <Container>
-      <h2>Weekly Schedule</h2>
+      <Typography variant="h4" gutterBottom>My Weekly Schedule</Typography>
 
-      <Paper sx={{ margin: '10px', padding: '10px' }}>
-        <FormControl sx={{ minWidth: '220px', marginTop: '10px' }}>
-          <Typography>Change Class</Typography>
-          <Select value={selectedClass} onChange={handleClassChange}>
-            {allClasses &&
-              allClasses.map((value) => (
-                <MenuItem key={value._id} value={value._id}>
-                  {value.class_text}
-                </MenuItem>
-              ))}
-          </Select>
-        </FormControl>
+      {error && <Alert severity="warning" sx={{ mb: 2 }}>{error}</Alert>}
+      {!error && events.length > 0 && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Showing {events.length} period(s) assigned to you
+        </Alert>
+      )}
+
+      <Paper sx={{ padding: '20px', minHeight: '600px' }}>
+        <Calendar
+          localizer={localizer}
+          events={events}
+          defaultView="week"
+          views={['week', 'day']}
+          step={30}
+          timeslots={1}
+          min={new Date(1970, 1, 1, 7, 0, 0)}
+          max={new Date(1970, 1, 1, 18, 0, 0)}
+          defaultDate={new Date()}
+          showMultiDayTimes
+          style={{ height: '600px', width: '100%' }}
+          formats={{ timeGutterFormat: 'hh:mm A' }}
+          eventPropGetter={eventStyleGetter}
+        />
       </Paper>
-
-      <Calendar
-        localizer={localizer}
-        events={events}
-        defaultView="week"
-        views={['week']}
-        step={30}
-        timeslots={1}
-        min={new Date(1970, 1, 1, 10, 0, 0)}
-        startAccessor="start"
-        endAccessor="end"
-        max={new Date(1970, 1, 1, 17, 0, 0)}
-        defaultDate={new Date()}
-        showMultiDayTimes
-        style={{ height: '100%', width: '100%' }}
-        formats={{ timeGutterFormat: 'hh:mm A' }}
-        eventPropGetter={eventStyleGetter}
-      />
     </Container>
   );
 };

@@ -3,8 +3,8 @@ const router = express.Router();
 const smsController = require('../controller/sms.controller');
 const authMiddleware = require('../auth/auth');
 
-// Apply authentication middleware to all routes - only SCHOOL users can access
-router.use(authMiddleware(['SCHOOL']));
+// Apply authentication middleware to all routes - SCHOOL, SUPER_ADMIN, and ADMIN users can access
+router.use(authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']));
 
 // SMS Template routes
 router.post('/templates', smsController.createTemplate);

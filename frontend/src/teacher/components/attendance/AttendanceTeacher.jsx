@@ -18,37 +18,56 @@ const AttendanceTeacher = () => {
   useEffect(() => {
     const fetchStudentsAndCheckAttendance = async () => {
       try {
-        // NEW: Get classes from schedule instead of attendee field
-        const scheduleClasses = await axios.get(`${baseUrl}/period/teacher-classes-schedule`);
-        console.log("Classes from schedule:", scheduleClasses)
-         setAttendeeClass(scheduleClasses.data);
+        console.log('=== Starting teacher attendance fetch ===');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        console.log('Token found:', token ? 'Yes' : 'No');
 
-         if(attendeeClass.length>0 && selectedClass){
+        if (!token) {
+          console.error('❌ No authentication token found!');
+          alert('Please login again. No authentication token found.');
+          setLoading(false);
+          return;
+        }
+
+        const headers = { Authorization: token };
+
+        // NEW: Get classes from schedule instead of attendee field
+        console.log('Fetching teacher classes from schedule...');
+        const scheduleClasses = await axios.get(`${baseUrl}/period/teacher-classes-schedule`, { headers });
+        console.log("✅ Classes from schedule:", scheduleClasses.data);
+        setAttendeeClass(scheduleClasses.data);
+
+        if(attendeeClass.length>0 && selectedClass){
+            console.log('Checking attendance for class:', selectedClass.id);
             // Check if attendance is already taken for today
-            const attendanceResponse = await axios.get(`${baseUrl}/attendance/check/${selectedClass.id}`);
+            const attendanceResponse = await axios.get(`${baseUrl}/attendance/check/${selectedClass.id}`, { headers });
 
             setAttendanceTaken(attendanceResponse.data.attendanceTaken);
-              // Fetch students if attendance has not been taken yet
-        if (!attendanceResponse.data.attendanceTaken) {
-            const studentsResponse = await axios.get(`${baseUrl}/student/fetch-with-query`, { params: { student_class: selectedClass.id} }); // Fetch based on class
-            setStudents(studentsResponse.data.data);
+            console.log('Attendance already taken?', attendanceResponse.data.attendanceTaken);
 
-            // Initialize attendance status for each student
-            const initialStatus = {};
-            studentsResponse.data.data.forEach((student) => {
-              initialStatus[student._id] = 'Present'; // default value
-            });
-            setAttendanceStatus(initialStatus);
-          }
-         }
+            // Fetch students if attendance has not been taken yet
+            if (!attendanceResponse.data.attendanceTaken) {
+                console.log('Fetching students for class:', selectedClass.id);
+                const studentsResponse = await axios.get(`${baseUrl}/student/fetch-with-query`, { params: { student_class: selectedClass.id}, headers }); // Fetch based on class
+                console.log('✅ Students fetched:', studentsResponse.data.data.length);
+                setStudents(studentsResponse.data.data);
 
+                // Initialize attendance status for each student
+                const initialStatus = {};
+                studentsResponse.data.data.forEach((student) => {
+                  initialStatus[student._id] = 'Present'; // default value
+                });
+                setAttendanceStatus(initialStatus);
+            }
+        }
 
-
-
-
+        console.log('✅ Teacher attendance fetch completed successfully');
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching students or checking attendance:', error);
+        console.error('❌ Error fetching students or checking attendance:', error);
+        console.error('Error details:', error.response?.data || error.message);
+        alert(`Error: ${error.response?.data?.message || error.message}`);
+        setLoading(false);
       }
     };
 
@@ -73,16 +92,19 @@ const AttendanceTeacher = () => {
   // Submit attendance for all students
   const submitAttendance = async () => {
     try {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const headers = token ? { Authorization: token } : {};
+
       const attendanceRecords = students.map((student) => ({
         studentId: student._id,
         date: todayDate,
         status: attendanceStatus[student._id],
         classId: selectedClass.id, // Include the class
       }));
-      
+
       // Send attendance records to backend
       await Promise.all(attendanceRecords.map((record) =>
-        axios.post(`${baseUrl}/attendance/mark`, record)
+        axios.post(`${baseUrl}/attendance/mark`, record, { headers })
       ));
 
       alert('Attendance submitted successfully');

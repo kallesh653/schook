@@ -8,6 +8,7 @@ router.post('/', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN', 'TEACHER']), 
 router.get('/', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN', 'TEACHER']), marksheetController.getAllMarksheets);
 router.get('/stats', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']), marksheetController.getMarksheetStats);
 router.get('/class-performance', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN', 'TEACHER']), marksheetController.getClassPerformance);
+router.get('/my-marksheets', authMiddleware(['STUDENT']), marksheetController.getStudentOwnMarksheets);
 router.get('/student-history/:studentId', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN', 'TEACHER', 'STUDENT']), marksheetController.getStudentHistory);
 router.get('/:id', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN', 'TEACHER', 'STUDENT']), marksheetController.getMarksheetById);
 router.get('/:id/pdf', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN', 'TEACHER', 'STUDENT']), marksheetController.getMarksheetPDF);

@@ -73,6 +73,28 @@ const glow = keyframes`
   100% { box-shadow: 0 0 5px rgba(102, 126, 234, 0.3); }
 `;
 
+const scrollNews = keyframes`
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+`;
+
+const wiggle = keyframes`
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  50% { transform: rotate(10deg); }
+  75% { transform: rotate(-10deg); }
+`;
+
+const shimmer = keyframes`
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+`;
+
+const bounce = keyframes`
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+`;
+
 const openedMixin = (theme) => ({
     width: drawerWidth,
     transition: theme.transitions.create('width', {
@@ -188,13 +210,38 @@ const StyledListItemText = styled(ListItemText)(({ theme }) => ({
     }
 }));
 
+// Beautiful Alert Banner styled component
+const AlertBanner = styled(Box)({
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    padding: '10px 0',
+    overflow: 'hidden',
+    position: 'relative',
+    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
+    borderBottom: '2px solid rgba(255, 255, 255, 0.3)'
+});
+
+const AlertContent = styled(Box)({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: '40px',
+    animation: `${scrollNews} 35s linear infinite`,
+    whiteSpace: 'nowrap',
+    fontSize: '15px',
+    fontWeight: 600,
+    position: 'relative',
+    zIndex: 1
+});
+
 const AppBar = styled(MuiAppBar, {
     shouldForwardProp: (prop) => prop !== 'open',
 })(({ theme }) => ({
     zIndex: theme.zIndex.drawer + 1,
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
+    boxShadow: '0 8px 32px rgba(102, 126, 234, 0.4)',
     backdropFilter: 'blur(15px)',
+    borderBottom: '3px solid rgba(255, 255, 255, 0.2)',
     transition: theme.transitions.create(['width', 'margin'], {
         easing: theme.transitions.easing.sharp,
         duration: theme.transitions.duration.leavingScreen,
@@ -405,7 +452,23 @@ export default function School() {
           <Box sx={{ display: 'flex' }}>
             <CssBaseline />
             <AppBar position="fixed" open={open}>
-                <Toolbar sx={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
+                <Toolbar sx={{
+                    background: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(10px)',
+                    py: 1.5,
+                    position: 'relative'
+                }}>
+                    <Box sx={{
+                        position: 'absolute',
+                        top: -5,
+                        left: 0,
+                        right: 0,
+                        height: '4px',
+                        background: 'linear-gradient(90deg, #FFD700, #FFA500, #FFD700)',
+                        animation: `${shimmer} 3s linear infinite`,
+                        backgroundSize: '200% auto'
+                    }} />
+
                     <IconButton
                         color="inherit"
                         aria-label="toggle drawer"
@@ -417,6 +480,8 @@ export default function School() {
                             borderRadius: '12px',
                             padding: '12px',
                             transition: 'all 0.3s ease',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.2)',
                             '&:hover': {
                                 background: 'rgba(255,255,255,0.2)',
                                 transform: 'scale(1.1) rotate(90deg)',
@@ -428,22 +493,208 @@ export default function School() {
                     >
                         <MenuIcon sx={{ fontSize: '1.5rem' }} />
                     </IconButton>
-                    <Typography 
-                        variant="h5" 
-                        noWrap 
-                        component="div"
-                        sx={{
-                            fontWeight: 600,
-                            background: 'linear-gradient(45deg, #fff 30%, #f0f0f0 90%)',
-                            backgroundClip: 'text',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            textShadow: '0 2px 4px rgba(0,0,0,0.3)'
-                        }}
-                    >
-                        🎓 School Management System
-                    </Typography>
+
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        flexGrow: 1,
+                        gap: 2
+                    }}>
+                        <Box sx={{
+                            animation: `${pulse} 2s ease-in-out infinite`
+                        }}>
+                            <SchoolIcon sx={{
+                                fontSize: 45,
+                                color: '#FFD700',
+                                filter: 'drop-shadow(0 0 10px rgba(255, 215, 0, 0.8))',
+                                animation: `${wiggle} 3s ease-in-out infinite`
+                            }} />
+                        </Box>
+
+                        <Box>
+                            <Typography
+                                variant="h5"
+                                noWrap
+                                component="div"
+                                sx={{
+                                    fontWeight: 700,
+                                    color: '#ffffff',
+                                    textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+                                    fontSize: { xs: '1.1rem', sm: '1.4rem', md: '1.7rem' },
+                                    letterSpacing: '0.5px'
+                                }}
+                            >
+                                Shrigannada Higher Primary School
+                            </Typography>
+                            <Typography
+                                variant="caption"
+                                sx={{
+                                    color: '#FFD700',
+                                    fontWeight: 600,
+                                    fontSize: { xs: '9px', sm: '10px', md: '11px' },
+                                    letterSpacing: '1px',
+                                    display: 'block',
+                                    textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
+                                }}
+                            >
+                                Excellence in Education • Admin Portal
+                            </Typography>
+                        </Box>
+                    </Box>
+
+                    <Box sx={{
+                        display: 'flex',
+                        gap: 1,
+                        alignItems: 'center',
+                        pr: 1
+                    }}>
+                        <Tooltip title="Notifications">
+                            <IconButton
+                                sx={{
+                                    color: 'rgba(255,255,255,0.95)',
+                                    background: 'rgba(255,255,255,0.1)',
+                                    border: '1px solid rgba(255,255,255,0.2)',
+                                    '&:hover': {
+                                        background: 'rgba(255,255,255,0.2)',
+                                        transform: 'scale(1.1)'
+                                    }
+                                }}
+                            >
+                                <Badge badgeContent={5} color="error">
+                                    <CircleNotificationsIcon />
+                                </Badge>
+                            </IconButton>
+                        </Tooltip>
+
+                        <Tooltip title="Admin Profile">
+                            <Avatar
+                                sx={{
+                                    width: 40,
+                                    height: 40,
+                                    background: 'linear-gradient(45deg, #FFD700 30%, #FFA500 90%)',
+                                    cursor: 'pointer',
+                                    border: '2px solid rgba(255,255,255,0.3)',
+                                    '&:hover': {
+                                        transform: 'scale(1.1)',
+                                        boxShadow: '0 4px 12px rgba(255,255,255,0.3)'
+                                    },
+                                    transition: 'all 0.3s ease'
+                                }}
+                            >
+                                <AdminPanelSettingsIcon />
+                            </Avatar>
+                        </Tooltip>
+                    </Box>
                 </Toolbar>
+
+                {/* Beautiful Alert Message Banner */}
+                <AlertBanner>
+                    <Box sx={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
+                        <AlertContent>
+                            <Box sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                padding: '6px 18px',
+                                borderRadius: '20px',
+                                border: '1px solid rgba(255, 255, 255, 0.3)',
+                                backdropFilter: 'blur(10px)'
+                            }}>
+                                <CircleNotificationsIcon sx={{
+                                    fontSize: 22,
+                                    color: '#FFD700',
+                                    animation: `${wiggle} 2s ease-in-out infinite`
+                                }} />
+                                <Typography sx={{
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    color: '#FFD700',
+                                    letterSpacing: '1px'
+                                }}>
+                                    ANNOUNCEMENTS
+                                </Typography>
+                            </Box>
+
+                            {[
+                                '📢 Welcome to the new academic year 2024-2025!',
+                                '🎓 Staff meeting scheduled for tomorrow at 10:00 AM',
+                                '📊 Monthly attendance reports are now available',
+                                '✨ New features added to the system - Check them out!',
+                                '🏆 Congratulations on achieving 95% attendance rate!',
+                                '📝 Grade submission deadline: End of this week',
+                                '👨‍🏫 Teacher training workshop on Friday'
+                            ].map((msg, idx) => (
+                                <React.Fragment key={idx}>
+                                    <Box sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                        padding: '6px 18px',
+                                        borderRadius: '20px',
+                                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                                        backdropFilter: 'blur(10px)'
+                                    }}>
+                                        <Typography sx={{
+                                            fontSize: '14px',
+                                            fontWeight: 600,
+                                            color: 'white'
+                                        }}>
+                                            {msg}
+                                        </Typography>
+                                    </Box>
+                                    <Box sx={{
+                                        fontSize: '20px',
+                                        animation: `${bounce} 1.5s ease-in-out infinite`,
+                                        animationDelay: `${idx * 0.2}s`
+                                    }}>
+                                        ⭐
+                                    </Box>
+                                </React.Fragment>
+                            ))}
+
+                            {/* Duplicate for seamless loop */}
+                            {[
+                                '📢 Welcome to the new academic year 2024-2025!',
+                                '🎓 Staff meeting scheduled for tomorrow at 10:00 AM',
+                                '📊 Monthly attendance reports are now available',
+                                '✨ New features added to the system - Check them out!',
+                                '🏆 Congratulations on achieving 95% attendance rate!',
+                                '📝 Grade submission deadline: End of this week',
+                                '👨‍🏫 Teacher training workshop on Friday'
+                            ].map((msg, idx) => (
+                                <React.Fragment key={`dup-${idx}`}>
+                                    <Box sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                        padding: '6px 18px',
+                                        borderRadius: '20px',
+                                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                                        backdropFilter: 'blur(10px)'
+                                    }}>
+                                        <Typography sx={{
+                                            fontSize: '14px',
+                                            fontWeight: 600,
+                                            color: 'white'
+                                        }}>
+                                            {msg}
+                                        </Typography>
+                                    </Box>
+                                    <Box sx={{
+                                        fontSize: '20px',
+                                        animation: `${bounce} 1.5s ease-in-out infinite`,
+                                        animationDelay: `${idx * 0.2}s`
+                                    }}>
+                                        ⭐
+                                    </Box>
+                                </React.Fragment>
+                            ))}
+                        </AlertContent>
+                    </Box>
+                </AlertBanner>
             </AppBar>
             
             {/* Desktop Drawer */}
@@ -456,24 +707,24 @@ export default function School() {
             >
                 {open && (
                     <SchoolBrand>
-                        <Avatar 
-                            sx={{ 
-                                width: 56, 
-                                height: 56, 
-                                background: 'linear-gradient(45deg, #ffffff 30%, #f8f9fa 90%)',
+                        <Avatar
+                            sx={{
+                                width: 56,
+                                height: 56,
+                                background: 'linear-gradient(45deg, #FFD700 30%, #FFA500 90%)',
                                 fontSize: '1.8rem',
                                 animation: `${pulse} 2s infinite`,
                                 boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
                                 border: '2px solid rgba(255,255,255,0.3)'
                             }}
                         >
-                            🎓
+                            🏫
                         </Avatar>
                         <Box>
-                            <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700, fontSize: '1.1rem' }}>
-                                EduManage Pro
+                            <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700, fontSize: '1rem', lineHeight: 1.2 }}>
+                                Shrigannada Higher Primary School
                             </Typography>
-                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
+                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem' }}>
                                 Excellence in Education
                             </Typography>
                         </Box>
@@ -592,20 +843,20 @@ export default function School() {
                         sx={{
                             width: 56,
                             height: 56,
-                            background: 'linear-gradient(45deg, #ffffff 30%, #f8f9fa 90%)',
+                            background: 'linear-gradient(45deg, #FFD700 30%, #FFA500 90%)',
                             fontSize: '1.8rem',
                             animation: `${pulse} 2s infinite`,
                             boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
                             border: '2px solid rgba(255,255,255,0.3)'
                         }}
                     >
-                        🎓
+                        🏫
                     </Avatar>
                     <Box>
-                        <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700, fontSize: '1.1rem' }}>
-                            EduManage Pro
+                        <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700, fontSize: '1rem', lineHeight: 1.2 }}>
+                            Shrigannada Higher Primary School
                         </Typography>
-                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem' }}>
                             Excellence in Education
                         </Typography>
                     </Box>

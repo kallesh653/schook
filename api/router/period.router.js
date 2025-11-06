@@ -14,28 +14,26 @@ const {
   getFreeTeachers,
   getTodaySchedule,
   getTeacherClassesFromSchedule,
-  canTeacherTakeAttendance
+  canTeacherTakeAttendance,
+  getTeacherOwnPeriods
 } = require('../controller/period.controller');
 
 // Create and manage fixed periods
-router.post('/create', authMiddleware(['SCHOOL']), createPeriod);
-router.put('/update/:id', authMiddleware(['SCHOOL']), updatePeriod);
-router.delete('/delete/:id', authMiddleware(['SCHOOL']), deletePeriod);
+router.post('/create', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']), createPeriod);
+router.put('/update/:id', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']), updatePeriod);
+router.delete('/delete/:id', authMiddleware(['SCHOOL', 'SUPER_ADMIN']), deletePeriod);
 
-// Get periods
-router.get('/all', authMiddleware(['SCHOOL']), getPeriods);
-router.get('/:id', authMiddleware(['SCHOOL']), getPeriodsWithId);
-router.get('/teacher/:teacherId', authMiddleware(['SCHOOL','TEACHER']), getTeacherPeriods);
-router.get('/class/:classId', authMiddleware(['SCHOOL','STUDENT','TEACHER']), getClassPeriods);
-
-// New endpoints for fixed schedule
-router.get('/schedule/today', authMiddleware(['SCHOOL','TEACHER']), getTodaySchedule);
-router.get('/schedule/day/:dayOfWeek/class/:classId', authMiddleware(['SCHOOL','STUDENT','TEACHER']), getScheduleByDay);
-router.get('/schedule/week/:classId', authMiddleware(['SCHOOL','STUDENT','TEACHER']), getWeeklyScheduleByClass);
-router.get('/free-teachers/:dayOfWeek/:periodNumber', authMiddleware(['SCHOOL']), getFreeTeachers);
-
-// Attendance-related endpoints (automatically allow teachers based on schedule)
-router.get('/teacher-classes-schedule', authMiddleware(['TEACHER']), getTeacherClassesFromSchedule);
-router.get('/can-take-attendance/:classId', authMiddleware(['TEACHER']), canTeacherTakeAttendance);
+// Get periods - SPECIFIC ROUTES MUST COME BEFORE PARAMETERIZED ROUTES
+router.get('/all', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']), getPeriods);
+router.get('/fetch-own', authMiddleware(['TEACHER']), getTeacherOwnPeriods);
+router.get('/teacher-classes-schedule', authMiddleware(['TEACHER', 'SUPER_ADMIN', 'ADMIN']), getTeacherClassesFromSchedule);
+router.get('/can-take-attendance/:classId', authMiddleware(['TEACHER', 'SUPER_ADMIN', 'ADMIN']), canTeacherTakeAttendance);
+router.get('/schedule/today', authMiddleware(['SCHOOL','TEACHER', 'SUPER_ADMIN', 'ADMIN']), getTodaySchedule);
+router.get('/schedule/day/:dayOfWeek/class/:classId', authMiddleware(['SCHOOL','STUDENT','TEACHER', 'SUPER_ADMIN', 'ADMIN']), getScheduleByDay);
+router.get('/schedule/week/:classId', authMiddleware(['SCHOOL','STUDENT','TEACHER', 'SUPER_ADMIN', 'ADMIN']), getWeeklyScheduleByClass);
+router.get('/free-teachers/:dayOfWeek/:periodNumber', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']), getFreeTeachers);
+router.get('/teacher/:teacherId', authMiddleware(['SCHOOL','TEACHER', 'SUPER_ADMIN', 'ADMIN']), getTeacherPeriods);
+router.get('/class/:classId', authMiddleware(['SCHOOL','STUDENT','TEACHER', 'SUPER_ADMIN', 'ADMIN']), getClassPeriods);
+router.get('/:id', authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']), getPeriodsWithId);
 
 module.exports = router;

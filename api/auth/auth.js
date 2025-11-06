@@ -19,12 +19,13 @@ const authMiddleware =(roles=[])=>{return (req, res, next) => {
       req.user = decoded; // Attach the decoded token to the request object
       // Check if the user's role is allowed to access the route
       if (roles.length && !roles.includes(req.user.role)) {
-        return res.status(403).json({ message: 'Access denied' });
+        console.log(`❌ Access denied - Route: ${req.method} ${req.path} - User role: ${req.user.role}, Required roles: ${roles.join(', ')}`);
+        return res.status(403).json({ message: `Access denied. Your role (${req.user.role}) is not authorized for this endpoint.` });
       }
 
       next(); // Call the next middleware or route handler
     } catch (error) {
-        console.log("Error", error)
+        console.log("❌ Token verification error:", error.message)
       res.status(401).json({ message: 'Token is not valid' });
     }
   };

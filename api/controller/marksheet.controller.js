@@ -95,11 +95,10 @@ const getAllMarksheets = async (req, res) => {
         // Get school ID from authenticated user
         const schoolId = req.user?.schoolId || req.user?.id;
 
+        // ONLY get marksheets for this school - removed backward compatibility filter
+        // that was causing cross-school data leakage
         const filter = {
-            $or: [
-                { school: schoolId },
-                { school: { $exists: false } } // For backward compatibility with old marksheets
-            ]
+            school: schoolId
         };
 
         // Add filters
@@ -599,7 +598,13 @@ const getStudentHistory = async (req, res) => {
     try {
         const { studentId } = req.params;
 
-        const history = await Marksheet.getStudentHistory(studentId);
+        // Get schoolId from authenticated user for security
+        const schoolId = req.user?.schoolId || req.user?.id;
+        console.log('getStudentHistory - User role:', req.user?.role, '- School ID:', schoolId, '- Student ID:', studentId);
+
+        const history = await Marksheet.getStudentHistory(studentId, schoolId);
+
+        console.log(`✅ Found ${history.length} marksheets for student ${studentId} in school ${schoolId}`);
 
         res.json({
             success: true,
@@ -631,10 +636,16 @@ const getStudentOwnMarksheets = async (req, res) => {
             });
         }
 
-        // Find marksheets by student name (since marksheet model uses student_name, not student_id)
+        // Find marksheets by student name AND school for security
+        const schoolId = student.school; // Get school from student record
+        console.log('getStudentOwnMarksheets - Student:', student.name, '- School:', schoolId);
+
         const marksheets = await Marksheet.find({
-            student_name: student.name
+            student_name: student.name,
+            school: schoolId
         }).sort({ academic_year: -1, issue_date: -1 });
+
+        console.log(`✅ Found ${marksheets.length} marksheets for student ${student.name} in school ${schoolId}`);
 
         // Transform the data to match frontend expectations
         const transformedData = marksheets.map(marksheet => ({

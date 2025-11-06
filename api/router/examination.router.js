@@ -7,7 +7,7 @@ const { newExamination,  getExaminationByClass, updateExaminaitonWithId, deleteE
 router.post("/new", authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']),newExamination);
 router.get("/all", authMiddleware(['SCHOOL','TEACHER', 'SUPER_ADMIN', 'ADMIN']), getAllExaminations);
 router.get("/fetch-class/:classId",authMiddleware(['SCHOOL','STUDENT','TEACHER', 'SUPER_ADMIN', 'ADMIN']),  getExaminationByClass);
-router.get('/single/:id',authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']), getExaminationById );
+router.get('/single/:id',authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN', 'TEACHER']), getExaminationById );
 router.patch("/update/:id",authMiddleware(['SCHOOL', 'SUPER_ADMIN', 'ADMIN']), updateExaminaitonWithId);
 router.delete("/delete/:id",authMiddleware(['SCHOOL', 'SUPER_ADMIN']),  deleteExaminationById);
 

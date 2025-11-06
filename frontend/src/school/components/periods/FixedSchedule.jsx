@@ -93,8 +93,11 @@ const FixedSchedule = () => {
 
   // Fetch all classes
   useEffect(() => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const headers = token ? { Authorization: token } : {};
+
     axios
-      .get(`${baseUrl}/class/fetch-all`)
+      .get(`${baseUrl}/class/fetch-all`, { headers })
       .then((resp) => {
         setAllClasses(resp.data.data);
         if (resp.data.data.length > 0) {
@@ -103,6 +106,9 @@ const FixedSchedule = () => {
       })
       .catch((e) => {
         console.error('Error fetching classes:', e);
+        if (e.response?.status === 403 || e.response?.status === 401) {
+          alert('Authentication error. Please login again.');
+        }
       });
   }, []);
 
@@ -110,13 +116,19 @@ const FixedSchedule = () => {
   useEffect(() => {
     if (!selectedClass) return;
 
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const headers = token ? { Authorization: token } : {};
+
     axios
-      .get(`${baseUrl}/period/schedule/week/${selectedClass}`)
+      .get(`${baseUrl}/period/schedule/week/${selectedClass}`, { headers })
       .then((resp) => {
         setSchedule(resp.data.schedule);
       })
       .catch((e) => {
         console.error('Error fetching schedule:', e);
+        if (e.response?.status === 403 || e.response?.status === 401) {
+          alert('Authentication error. Please login again.');
+        }
       });
   }, [selectedClass, openDialog]);
 

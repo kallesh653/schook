@@ -182,17 +182,21 @@ const SchoolDashboard = () => {
 
         // Get students data
         const students = studentsRes.data.data || [];
-        console.log('🔍 Students from Students collection:', students.length);
+        console.log('✅ Dashboard Data Loaded:');
+        console.log('  - Students:', students.length);
+        console.log('  - Teachers:', teacherRes.data.data?.length || 0);
+        console.log('  - Classes:', classesRes.data.data?.length || 0);
+        console.log('  - Subjects:', subjectsRes.data.data?.length || 0);
 
         // Set basic counts from Students collection
         setTotalStudents(students.length);
-        setTotalTeachers(teacherRes.data.data.length);
+        setTotalTeachers(teacherRes.data.data?.length || 0);
         setClasses(classesRes.data.data || dummyData.classes);
         setSubjects(subjectsRes.data.data || dummyData.subjects);
 
         // Calculate fees from Students collection
         const calculatedStats = calculateFeesFromStudents(students);
-        console.log('💰 Calculated Fee Stats from Students:', calculatedStats);
+        console.log('  - Fee Stats:', calculatedStats);
 
         setFeesStats(calculatedStats);
 
@@ -231,15 +235,14 @@ const SchoolDashboard = () => {
           attendancePercentage: attendancePercentage
         });
 
-        console.log('📊 Attendance Stats:', {
-          totalStudents: students.length,
-          presentToday,
-          absentToday,
-          attendancePercentage
-        });
-
       } catch (error) {
-        console.log('Dashboard fetch error:', error);
+        console.error('❌ Dashboard fetch error:', error);
+        console.error('Error details:', error.response?.data);
+
+        // Show error message to user
+        setMessage(`Error loading dashboard: ${error.response?.data?.message || error.message}`);
+        setType('error');
+
         // Fallback to dummy data
         setTotalStudents(dummyData.totalStudents);
         setTotalTeachers(dummyData.totalTeachers);
@@ -273,7 +276,6 @@ const SchoolDashboard = () => {
   // useEffect to refresh data when dashboard refresh is triggered
   useEffect(() => {
     if (refreshTrigger > 0) {
-      console.log('🔔 Dashboard refreshing due to external trigger...');
       fetchData();
     }
   }, [refreshTrigger]);
@@ -281,7 +283,6 @@ const SchoolDashboard = () => {
   // Auto-refresh fees data every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      console.log('🔄 Auto-refreshing dashboard fees data...');
       fetchData();
     }, 30000); // Refresh every 30 seconds
 
@@ -292,7 +293,6 @@ const SchoolDashboard = () => {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        console.log('📱 Window became visible, refreshing dashboard data...');
         fetchData();
       }
     };

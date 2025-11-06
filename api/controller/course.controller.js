@@ -8,7 +8,9 @@ const createCourse = async (req, res) => {
         console.log('req.user:', req.user);
         console.log('req.body:', req.body);
 
-        const schoolId = req.user.id;
+        // Use schoolId for ADMIN/SUPER_ADMIN, or id for SCHOOL role
+        const schoolId = req.user.schoolId || req.user.id;
+        console.log('User role:', req.user.role, '- Using school ID:', schoolId);
 
         if (!schoolId) {
             console.error('❌ No school ID found');
@@ -61,14 +63,15 @@ const createCourse = async (req, res) => {
 const getCourses = async (req, res) => {
     try {
         console.log('=== GET COURSES ===');
-        const schoolId = req.params.schoolId;
-        console.log('School ID from params:', schoolId);
+        // Use schoolId for ADMIN/SUPER_ADMIN, or id for SCHOOL role
+        const schoolId = req.user.schoolId || req.user.id;
+        console.log('User role:', req.user.role, '- Fetching courses for school ID:', schoolId);
 
         if (!schoolId) {
-            console.error('❌ No school ID provided');
-            return res.status(400).json({
+            console.error('❌ No school ID found');
+            return res.status(401).json({
                 success: false,
-                message: "School ID is required"
+                message: "School ID not found. Please login again."
             });
         }
 
