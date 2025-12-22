@@ -117,12 +117,12 @@ const HeaderBar = styled(AppBar)({
 
 // Simple and Beautiful Alert Banner
 const AlertBanner = styled(Box)({
-  background: 'linear-gradient(135deg, #DC143C 0%, #B22222 100%)',
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
   color: 'white',
   padding: '12px 0',
   overflow: 'hidden',
   position: 'relative',
-  boxShadow: '0 4px 12px rgba(220, 20, 60, 0.4)',
+  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
   borderBottom: '2px solid #FFD700'
 });
 
