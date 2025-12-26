@@ -47,7 +47,9 @@ import {
   Map as MapIcon,
   Person as PersonIcon,
   Login as LoginIcon,
-  WhatsApp
+  WhatsApp,
+  CloudUpload,
+  HowToReg
 } from '@mui/icons-material';
 import { styled, keyframes } from '@mui/material/styles';
 import axios from 'axios';
@@ -777,20 +779,20 @@ const PublicHomePage = () => {
                   }}
                 />
               )}
-              <Box sx={{ minWidth: 0 }}>
+              <Box sx={{ minWidth: 0, flex: 1 }}>
                 <Typography
                   variant="h6"
                   sx={{
                     fontWeight: 800,
-                    fontSize: { xs: '0.9rem', sm: '1.1rem', md: '1.3rem' },
+                    fontSize: { xs: '0.85rem', sm: '1.1rem', md: '1.3rem' },
                     color: header?.primaryColor || '#1e3a8a',
-                    lineHeight: 1.2,
+                    lineHeight: { xs: 1.3, sm: 1.2 },
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
-                    whiteSpace: { xs: 'normal', sm: 'nowrap' },
-                    display: '-webkit-box',
+                    display: { xs: '-webkit-box', sm: 'block' },
                     WebkitLineClamp: { xs: 2, sm: 'unset' },
-                    WebkitBoxOrient: 'vertical'
+                    WebkitBoxOrient: { xs: 'vertical', sm: 'unset' },
+                    whiteSpace: { xs: 'normal', sm: 'nowrap' }
                   }}
                 >
                   {header?.siteName || 'School Management System'}
@@ -801,7 +803,10 @@ const PublicHomePage = () => {
                     sx={{
                       color: 'text.secondary',
                       fontSize: { xs: '0.65rem', sm: '0.75rem' },
-                      display: { xs: 'none', sm: 'block' }
+                      display: { xs: 'none', sm: 'block' },
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
                     }}
                   >
                     {header.tagline}
@@ -833,14 +838,14 @@ const PublicHomePage = () => {
                   }
                 }}
               >
-                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Login</Box>
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Student Login</Box>
                 <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>Login</Box>
               </Button>
               <Button
                 variant="contained"
                 size="small"
-                startIcon={<LoginIcon sx={{ fontSize: { xs: '1rem', md: '1.2rem' } }} />}
-                onClick={() => navigate('/register')}
+                startIcon={<CloudUpload sx={{ fontSize: { xs: '1rem', md: '1.2rem' } }} />}
+                onClick={() => window.open('https://schoolm.gentime.in', '_blank')}
                 sx={{
                   background: `linear-gradient(135deg, ${header?.primaryColor || '#1e3a8a'} 0%, ${header?.secondaryColor || '#0284c7'} 100%)`,
                   color: 'white',
@@ -858,8 +863,8 @@ const PublicHomePage = () => {
                   }
                 }}
               >
-                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Register</Box>
-                <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>Join</Box>
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Download</Box>
+                <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>App</Box>
               </Button>
             </Box>
           </Box>
@@ -2359,21 +2364,141 @@ const PublicHomePage = () => {
         </Box>
       )}
 
-      {/* TINY FOOTER */}
+      {/* FOOTER WITH LOGIN & REGISTRATION */}
       <Box
         component="footer"
         sx={{
-          background: '#1e3a8a',
+          background: `linear-gradient(135deg, ${header?.primaryColor || '#1e3a8a'} 0%, ${header?.secondaryColor || '#0284c7'} 100%)`,
           color: 'white',
-          py: 0.5,
-          mt: 3,
-          textAlign: 'center'
+          py: { xs: 3, md: 4 },
+          mt: 3
         }}
       >
-        <Typography variant="caption" sx={{ fontSize: '0.7rem', opacity: 0.6 }}>
-          © {new Date().getFullYear()} {header?.siteName || 'School'}
-        </Typography>
+        <Container maxWidth="lg">
+          <Grid container spacing={3} alignItems="center" justifyContent="space-between">
+            {/* Left: School Info */}
+            <Grid item xs={12} md={6}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                {header?.logo && (
+                  <Avatar
+                    src={getImageUrl(header.logo)}
+                    alt={header?.siteName}
+                    sx={{
+                      width: { xs: 50, md: 60 },
+                      height: { xs: 50, md: 60 },
+                      border: '2px solid rgba(255,255,255,0.3)'
+                    }}
+                  />
+                )}
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: '1rem', md: '1.2rem' } }}>
+                    {header?.siteName || 'School Management System'}
+                  </Typography>
+                  {header?.tagline && (
+                    <Typography variant="caption" sx={{ opacity: 0.9, fontSize: '0.8rem' }}>
+                      {header.tagline}
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+              <Typography variant="caption" sx={{ opacity: 0.8, fontSize: '0.75rem' }}>
+                © {new Date().getFullYear()} {header?.siteName || 'School'}. All rights reserved.
+              </Typography>
+            </Grid>
+
+            {/* Right: Login & Registration Buttons */}
+            <Grid item xs={12} md={6}>
+              <Box sx={{
+                display: 'flex',
+                gap: 2,
+                justifyContent: { xs: 'center', md: 'flex-end' },
+                flexWrap: 'wrap'
+              }}>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  startIcon={<LoginIcon />}
+                  onClick={() => navigate('/login')}
+                  sx={{
+                    borderColor: 'rgba(255,255,255,0.5)',
+                    color: 'white',
+                    fontWeight: 600,
+                    px: 3,
+                    py: 1.2,
+                    borderRadius: '10px',
+                    textTransform: 'none',
+                    fontSize: { xs: '0.9rem', md: '1rem' },
+                    '&:hover': {
+                      borderColor: 'white',
+                      background: 'rgba(255,255,255,0.15)',
+                      transform: 'translateY(-2px)'
+                    }
+                  }}
+                >
+                  Login
+                </Button>
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<HowToReg />}
+                  onClick={() => navigate('/register')}
+                  sx={{
+                    background: 'white',
+                    color: header?.primaryColor || '#1e3a8a',
+                    fontWeight: 700,
+                    px: 3,
+                    py: 1.2,
+                    borderRadius: '10px',
+                    textTransform: 'none',
+                    fontSize: { xs: '0.9rem', md: '1rem' },
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+                    '&:hover': {
+                      background: '#f0f0f0',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
+                    }
+                  }}
+                >
+                  Registration
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
       </Box>
+
+      {/* Floating WhatsApp Button */}
+      {header?.whatsappNumber && (
+        <Box
+          component="a"
+          href={`https://wa.me/${header.whatsappNumber}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          sx={{
+            position: 'fixed',
+            bottom: { xs: 20, md: 30 },
+            right: { xs: 20, md: 30 },
+            width: { xs: 56, md: 64 },
+            height: { xs: 56, md: 64 },
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
+            boxShadow: '0 8px 24px rgba(37, 211, 102, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            zIndex: 1000,
+            transition: 'all 0.3s ease',
+            animation: `${pulse} 2s infinite`,
+            '&:hover': {
+              transform: 'scale(1.1)',
+              boxShadow: '0 12px 32px rgba(37, 211, 102, 0.6)'
+            }
+          }}
+        >
+          <WhatsApp sx={{ color: 'white', fontSize: { xs: 32, md: 36 } }} />
+        </Box>
+      )}
     </Box>
   );
 };

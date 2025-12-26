@@ -116,6 +116,7 @@ const WebsiteBuilder = () => {
   const [heroTitle, setHeroTitle] = useState('');
   const [heroSubtitle, setHeroSubtitle] = useState('');
   const [heroDescription, setHeroDescription] = useState('');
+  const [whatsappNumber, setWhatsappNumber] = useState('');
   const [slides, setSlides] = useState([]);
   const [statistics, setStatistics] = useState([]);
   const [features, setFeatures] = useState([]);
@@ -140,6 +141,7 @@ const WebsiteBuilder = () => {
         const data = response.data.data;
         setLogo(data.header?.logo || null);
         setSiteName(data.header?.siteName || '');
+        setWhatsappNumber(data.header?.whatsappNumber || '');
         setHeroTitle(data.heroSection?.title || '');
         setHeroSubtitle(data.heroSection?.subtitle || '');
         setHeroDescription(data.heroSection?.description || '');
@@ -176,7 +178,8 @@ const WebsiteBuilder = () => {
 
           await axios.patch(`${baseUrl}/public-home/header`, {
             logo: base64Logo,
-            siteName: siteName
+            siteName: siteName,
+            whatsappNumber: whatsappNumber
           }, { headers: { Authorization: `Bearer ${token}` } });
 
           setSnackbar({ open: true, message: 'Logo uploaded successfully!', severity: 'success' });
@@ -214,7 +217,8 @@ const WebsiteBuilder = () => {
 
       await axios.patch(`${baseUrl}/public-home/header`, {
         logo: logo,
-        siteName: siteName
+        siteName: siteName,
+        whatsappNumber: whatsappNumber
       }, { headers: { Authorization: `Bearer ${token}` } });
 
       setSnackbar({ open: true, message: 'Hero section saved successfully!', severity: 'success' });
@@ -422,7 +426,16 @@ const WebsiteBuilder = () => {
                     label="Hero Description"
                     value={heroDescription}
                     onChange={(e) => setHeroDescription(e.target.value)}
+                    sx={{ mb: 3 }}
                     helperText="Brief description of your institution"
+                  />
+                  <TextField
+                    fullWidth
+                    label="WhatsApp Number"
+                    value={whatsappNumber}
+                    onChange={(e) => setWhatsappNumber(e.target.value)}
+                    placeholder="1234567890"
+                    helperText="Enter WhatsApp number (with country code, e.g., 911234567890)"
                   />
                 </Card>
               </Grid>
