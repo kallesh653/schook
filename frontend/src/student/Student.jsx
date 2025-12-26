@@ -1,629 +1,412 @@
 import * as React from 'react';
 import { styled, useTheme, keyframes } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
-import List from '@mui/material/List';
-import CssBaseline from '@mui/material/CssBaseline';
 import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import Avatar from '@mui/material/Avatar';
+import Badge from '@mui/material/Badge';
+import BottomNavigation from '@mui/material/BottomNavigation';
+import BottomNavigationAction from '@mui/material/BottomNavigationAction';
+import Paper from '@mui/material/Paper';
+import Fab from '@mui/material/Fab';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import Drawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import Avatar from '@mui/material/Avatar';
-import Badge from '@mui/material/Badge';
-import Tooltip from '@mui/material/Tooltip';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { Outlet, useNavigate } from "react-router-dom";
+import Divider from '@mui/material/Divider';
 
 // ICONS
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import GroupIcon from '@mui/icons-material/Group';
-import TheatersIcon from '@mui/icons-material/Theaters';
-import GradingIcon from '@mui/icons-material/Grading';
-import HomeIcon from '@mui/icons-material/Home';
-import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import GradingIcon from '@mui/icons-material/Grading';
+import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
 import ExplicitIcon from '@mui/icons-material/Explicit';
 import LogoutIcon from '@mui/icons-material/Logout';
-import SchoolIcon from '@mui/icons-material/School';
 import AssessmentIcon from '@mui/icons-material/Assessment';
-const drawerWidth = 280;
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import SchoolIcon from '@mui/icons-material/School';
 
 // Animation keyframes
-const slideIn = keyframes`
+const slideUp = keyframes`
   from {
-    transform: translateX(-20px);
+    transform: translateY(100%);
     opacity: 0;
   }
   to {
-    transform: translateX(0);
+    transform: translateY(0);
     opacity: 1;
   }
 `;
 
-const pulse = keyframes`
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+const fadeIn = keyframes`
+  from { opacity: 0; }
+  to { opacity: 1; }
 `;
 
-const openedMixin = (theme) => ({
-    width: drawerWidth,
-    transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
-    }),
-    overflowX: 'hidden',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: '#ffffff',
-    boxShadow: '0 8px 32px rgba(102, 126, 234, 0.4)',
-    border: 'none',
-    backdropFilter: 'blur(20px)',
-    borderRight: '1px solid rgba(255, 255, 255, 0.1)',
-    // Mobile optimization
-    [theme.breakpoints.down('md')]: {
-        width: '100vw',
-        position: 'fixed',
-        height: '100vh',
-        zIndex: theme.zIndex.drawer + 2,
-    }
-});
+const pulse = keyframes`
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+`;
 
-const closedMixin = (theme) => ({
-    transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-    }),
-    overflowX: 'hidden',
-    width: `calc(${theme.spacing(7)} + 1px)`,
-    [theme.breakpoints.up('sm')]: {
-        width: `calc(${theme.spacing(8)} + 1px)`,
-    },
-    [theme.breakpoints.down('md')]: {
-        width: 0,
-        display: 'none',
-    },
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: '#ffffff',
-    boxShadow: '0 8px 32px rgba(102, 126, 234, 0.4)',
-    border: 'none',
-    backdropFilter: 'blur(20px)',
-    borderRight: '1px solid rgba(255, 255, 255, 0.1)'
-});
-
-const DrawerHeader = styled('div')(({ theme }) => ({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: theme.spacing(2, 3),
-    background: 'rgba(255, 255, 255, 0.1)',
-    backdropFilter: 'blur(15px)',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-    ...theme.mixins.toolbar,
+// Mobile App Bar
+const AppBar = styled(MuiAppBar)(({ theme }) => ({
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  boxShadow: '0 4px 20px rgba(102, 126, 234, 0.3)',
+  backdropFilter: 'blur(20px)',
+  [theme.breakpoints.up('md')]: {
+    marginLeft: 280,
+    width: 'calc(100% - 280px)',
+  },
 }));
 
-// Student Brand Section
-const StudentBrand = styled(Box)(({ theme }) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(2),
-    padding: theme.spacing(3),
-    background: 'rgba(255, 255, 255, 0.15)',
-    backdropFilter: 'blur(15px)',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-    animation: `${slideIn} 0.6s ease-out`,
-    borderRadius: '0 0 20px 20px',
-    margin: theme.spacing(0, 1, 2, 1),
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
-}));
-
-// Enhanced List Item Button
-const StyledListItemButton = styled(ListItemButton)(({ theme, active }) => ({
-    margin: theme.spacing(0.5, 1.5),
-    borderRadius: '15px',
-    minHeight: '52px',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    position: 'relative',
-    overflow: 'hidden',
-    background: active ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
-    backdropFilter: active ? 'blur(10px)' : 'none',
-    border: active ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid transparent',
-    '&:hover': {
-        background: 'rgba(255, 255, 255, 0.15)',
-        transform: 'translateX(5px)',
-        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.2)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255, 255, 255, 0.2)'
+// Mobile Bottom Navigation
+const MobileBottomNav = styled(BottomNavigation)(({ theme }) => ({
+  position: 'fixed',
+  bottom: 0,
+  left: 0,
+  right: 0,
+  zIndex: 1200,
+  height: 70,
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  boxShadow: '0 -4px 20px rgba(102, 126, 234, 0.3)',
+  borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+  '& .MuiBottomNavigationAction-root': {
+    color: 'rgba(255, 255, 255, 0.6)',
+    minWidth: 'auto',
+    padding: '6px 12px',
+    '&.Mui-selected': {
+      color: '#ffffff',
+      transform: 'translateY(-4px)',
+      '& .MuiSvgIcon-root': {
+        fontSize: '1.8rem',
+      }
     },
-    '&:active': {
-        transform: 'translateX(3px) scale(0.98)'
-    }
-}));
-
-// Enhanced List Item Icon
-const StyledListItemIcon = styled(ListItemIcon)(({ theme }) => ({
-    minWidth: 0,
-    marginRight: theme.spacing(2),
-    color: 'rgba(255, 255, 255, 0.9)',
-    transition: 'all 0.3s ease',
     '& .MuiSvgIcon-root': {
-        fontSize: '1.4rem',
-        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
-    }
-}));
-
-// Enhanced List Item Text
-const StyledListItemText = styled(ListItemText)(({ theme }) => ({
-    '& .MuiTypography-root': {
-        fontWeight: 500,
-        fontSize: '0.95rem',
-        color: 'rgba(255, 255, 255, 0.95)',
-        textShadow: '0 1px 3px rgba(0,0,0,0.3)'
-    }
-}));
-
-const AppBar = styled(MuiAppBar, {
-    shouldForwardProp: (prop) => prop !== 'open',
-})(({ theme }) => ({
-    zIndex: theme.zIndex.drawer + 1,
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
-    backdropFilter: 'blur(15px)',
-    transition: theme.transitions.create(['width', 'margin'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-    }),
-    // Mobile responsiveness
-    [theme.breakpoints.down('md')]: {
-        marginLeft: 0,
-        width: '100%',
+      fontSize: '1.5rem',
+      transition: 'all 0.3s ease',
     },
-    variants: [
-        {
-            props: ({ open }) => open,
-            style: {
-                [theme.breakpoints.up('md')]: {
-                    marginLeft: drawerWidth,
-                    width: `calc(100% - ${drawerWidth}px)`,
-                },
-                [theme.breakpoints.down('md')]: {
-                    marginLeft: 0,
-                    width: '100%',
-                },
-                transition: theme.transitions.create(['width', 'margin'], {
-                    easing: theme.transitions.easing.sharp,
-                    duration: theme.transitions.duration.enteringScreen,
-                }),
-            },
-        },
-    ],
+    '& .MuiBottomNavigationAction-label': {
+      fontSize: '0.7rem',
+      fontWeight: 600,
+      marginTop: '4px',
+      opacity: 0.9,
+      '&.Mui-selected': {
+        fontSize: '0.75rem',
+        opacity: 1,
+      }
+    }
+  },
+  animation: `${slideUp} 0.5s ease-out`,
 }));
 
-const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
-    ({ theme }) => ({
-        width: drawerWidth,
-        flexShrink: 0,
-        whiteSpace: 'nowrap',
-        boxSizing: 'border-box',
-        variants: [
-            {
-                props: ({ open }) => open,
-                style: {
-                    ...openedMixin(theme),
-                    '& .MuiDrawer-paper': openedMixin(theme),
-                },
-            },
-            {
-                props: ({ open }) => !open,
-                style: {
-                    ...closedMixin(theme),
-                    '& .MuiDrawer-paper': closedMixin(theme),
-                },
-            },
-        ],
-    }),
-);
+// Desktop Sidebar
+const DesktopDrawer = styled(Drawer)(({ theme }) => ({
+  width: 280,
+  flexShrink: 0,
+  '& .MuiDrawer-paper': {
+    width: 280,
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: '#ffffff',
+    boxShadow: '4px 0 20px rgba(102, 126, 234, 0.3)',
+    border: 'none',
+  },
+}));
+
+// Profile Header
+const ProfileHeader = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(3),
+  background: 'rgba(255, 255, 255, 0.15)',
+  backdropFilter: 'blur(15px)',
+  borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+  animation: `${fadeIn} 0.6s ease-out`,
+  textAlign: 'center',
+}));
+
+// Styled List Item Button
+const StyledListItemButton = styled(ListItemButton)(({ theme, active }) => ({
+  margin: theme.spacing(0.5, 1.5),
+  borderRadius: '15px',
+  minHeight: '52px',
+  transition: 'all 0.3s ease',
+  background: active ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+  border: active ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid transparent',
+  '&:hover': {
+    background: 'rgba(255, 255, 255, 0.15)',
+    transform: 'translateX(5px)',
+    boxShadow: '0 8px 25px rgba(0, 0, 0, 0.2)',
+  }
+}));
 
 export default function Student() {
-    const theme = useTheme();
-    const [open, setOpen] = React.useState(true); // Start open on desktop
-    const [activeRoute, setActiveRoute] = React.useState(window.location.pathname);
-    const [mobileOpen, setMobileOpen] = React.useState(false);
-    const [isMobile, setIsMobile] = React.useState(window.innerWidth < 900);
+  const theme = useTheme();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [mobileDrawerOpen, setMobileDrawerOpen] = React.useState(false);
+  const [bottomNavValue, setBottomNavValue] = React.useState(0);
 
-    // Handle window resize for responsive behavior
-    React.useEffect(() => {
-        const handleResize = () => {
-            const mobile = window.innerWidth < 900; // Match MUI md breakpoint
-            setIsMobile(mobile);
-            if (mobile) {
-                setOpen(false); // Close desktop drawer on mobile
-            } else {
-                setOpen(true); // Open desktop drawer on desktop
-                setMobileOpen(false); // Close mobile drawer on desktop
-            }
-        };
+  const navItems = [
+    { link: "/student/student-details", label: "Dashboard", icon: <DashboardIcon />, index: 0 },
+    { link: "/student/periods", label: "Schedule", icon: <CalendarMonthIcon />, index: 1 },
+    { link: "/student/attendance", label: "Attendance", icon: <GradingIcon />, index: 2 },
+    { link: "/student/examinations", label: "Exams", icon: <ExplicitIcon />, index: 3 },
+    { link: "/student/results", label: "Results", icon: <AssessmentIcon />, index: 4 },
+  ];
 
-        window.addEventListener('resize', handleResize);
-        handleResize(); // Call once on mount
+  const extraItems = [
+    { link: "/student/notice", label: "Notices", icon: <CircleNotificationsIcon /> },
+    { link: "/logout", label: "Logout", icon: <LogoutIcon /> },
+  ];
 
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    const navArr = [
-        { link: "/student/student-details", component: "Dashboard", icon: DashboardIcon, category: "main" },
-        { link: "/student/periods", component: "My Schedule", icon: CalendarMonthIcon, category: "academic" },
-        { link: "/student/attendance", component: "My Attendance", icon: GradingIcon, category: "academic" },
-        { link: "/student/examinations", component: "My Examinations", icon: ExplicitIcon, category: "academic" },
-        { link: "/student/results", component: "My Results", icon: AssessmentIcon, category: "academic" },
-        { link: "/student/notice", component: "Notices", icon: CircleNotificationsIcon, category: "communication" },
-        { link: "/logout", component: "Log Out", icon: LogoutIcon, category: "system" }
-    ]
-   
-    const navigate = useNavigate();
-    const handleNavigation = (link) => {
-        setActiveRoute(link);
-        navigate(link);
+  // Update bottom nav value based on current route
+  React.useEffect(() => {
+    const currentPath = location.pathname;
+    const currentItem = navItems.find(item => item.link === currentPath);
+    if (currentItem) {
+      setBottomNavValue(currentItem.index);
     }
-    const handleDrawerOpen = () => {
-        if (isMobile) {
-            setMobileOpen(true);
-        } else {
-            setOpen(true);
-        }
-    };
+  }, [location.pathname]);
 
-    const handleDrawerClose = () => {
-        if (isMobile) {
-            setMobileOpen(false);
-        } else {
-            setOpen(false);
-        }
-    };
+  const handleNavigation = (link) => {
+    navigate(link);
+    if (isMobile) {
+      setMobileDrawerOpen(false);
+    }
+  };
 
-    const handleMobileDrawerToggle = () => {
-        setMobileOpen(!mobileOpen);
-    };
+  const handleBottomNavChange = (event, newValue) => {
+    setBottomNavValue(newValue);
+    const item = navItems.find(item => item.index === newValue);
+    if (item) {
+      navigate(item.link);
+    }
+  };
 
-    const handleMenuClick = () => {
-        if (isMobile) {
-            handleMobileDrawerToggle();
-        } else {
-            handleDrawerOpen();
-        }
-    };
+  // Drawer content for mobile menu
+  const drawerContent = (
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <ProfileHeader>
+        <Avatar
+          sx={{
+            width: 80,
+            height: 80,
+            margin: '0 auto',
+            mb: 2,
+            background: 'linear-gradient(45deg, #FFD700 30%, #FFA500 90%)',
+            fontSize: '2rem',
+            animation: `${pulse} 2s infinite`,
+            border: '3px solid rgba(255,255,255,0.3)'
+          }}
+        >
+          🎓
+        </Avatar>
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+          Student Portal
+        </Typography>
+        <Typography variant="caption" sx={{ opacity: 0.8 }}>
+          Shrigannada School
+        </Typography>
+      </ProfileHeader>
 
-    // Group navigation items by category
-    const groupedNavItems = navArr.reduce((acc, item) => {
-        if (!acc[item.category]) {
-            acc[item.category] = [];
-        }
-        acc[item.category].push(item);
-        return acc;
-    }, {});
-
-    const categoryLabels = {
-        main: "Dashboard",
-        academic: "Academic",
-        communication: "Communication",
-        system: "System"
-    };
-
-    return (
-        <Box sx={{ display: 'flex' }}>
-            <CssBaseline />
-            <AppBar position="fixed" open={open}>
-                <Toolbar sx={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
-                    <IconButton
-                        color="inherit"
-                        aria-label="toggle drawer"
-                        onClick={handleMenuClick}
-                        edge="start"
-                        sx={{
-                            marginRight: 2,
-                            color: 'rgba(255,255,255,0.95)',
-                            borderRadius: '12px',
-                            padding: '12px',
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                                background: 'rgba(255,255,255,0.2)',
-                                transform: 'scale(1.1) rotate(90deg)',
-                                boxShadow: '0 4px 15px rgba(255,255,255,0.3)'
-                            },
-                            // Always show on mobile, hide on desktop when drawer is open
-                            display: { xs: 'inline-flex', md: open ? 'none' : 'inline-flex' },
-                        }}
-                    >
-                        <MenuIcon sx={{ fontSize: '1.5rem' }} />
-                    </IconButton>
-                    <Typography
-                        variant="h5"
-                        noWrap
-                        component="div"
-                        sx={{
-                            fontWeight: 600,
-                            background: 'linear-gradient(45deg, #fff 30%, #f0f0f0 90%)',
-                            backgroundClip: 'text',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                            fontSize: { xs: '1rem', sm: '1.2rem', md: '1.5rem' }
-                        }}
-                    >
-                        🏫 Shrigannada - Student Portal
-                    </Typography>
-                </Toolbar>
-            </AppBar>
-
-            {/* Desktop Drawer */}
-            <Drawer
-                variant="permanent"
-                open={open}
-                sx={{
-                    display: { xs: 'none', md: 'block' },
-                }}
+      <List sx={{ flexGrow: 1, padding: 2 }}>
+        {navItems.map((item) => (
+          <ListItem key={item.link} disablePadding>
+            <StyledListItemButton
+              active={location.pathname === item.link}
+              onClick={() => handleNavigation(item.link)}
             >
-                {open && (
-                    <StudentBrand>
-                        <Avatar
-                            sx={{
-                                width: 56,
-                                height: 56,
-                                background: 'linear-gradient(45deg, #FFD700 30%, #FFA500 90%)',
-                                fontSize: '1.8rem',
-                                animation: `${pulse} 2s infinite`,
-                                boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-                                border: '2px solid rgba(255,255,255,0.3)'
-                            }}
-                        >
-                            🏫
-                        </Avatar>
-                        <Box>
-                            <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700, fontSize: '1rem', lineHeight: 1.2 }}>
-                                Shrigannada Higher Primary School
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem' }}>
-                                Student Portal
-                            </Typography>
-                        </Box>
-                    </StudentBrand>
-                )}
-
-                <DrawerHeader>
-                    {open && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Badge badgeContent={2} color="error">
-                                <CircleNotificationsIcon sx={{ color: 'rgba(255,255,255,0.8)' }} />
-                            </Badge>
-                        </Box>
-                    )}
-                    <Tooltip title={open ? "Collapse Menu" : "Expand Menu"}>
-                        <IconButton
-                            onClick={handleDrawerClose}
-                            sx={{
-                                color: 'rgba(255,255,255,0.95)',
-                                '&:hover': {
-                                    background: 'rgba(255,255,255,0.1)',
-                                    transform: 'rotate(180deg)'
-                                },
-                                transition: 'all 0.3s ease'
-                            }}
-                        >
-                            {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-                        </IconButton>
-                    </Tooltip>
-                </DrawerHeader>
-
-                <List sx={{ height: "100%", padding: theme.spacing(1, 0) }}>
-                    {Object.entries(groupedNavItems).map(([category, items]) => (
-                        <React.Fragment key={category}>
-                            {open && (
-                                <Typography
-                                    variant="overline"
-                                    sx={{
-                                        color: 'rgba(255,255,255,0.7)',
-                                        fontSize: '0.75rem',
-                                        fontWeight: 700,
-                                        padding: theme.spacing(2, 3, 1, 3),
-                                        letterSpacing: '1px',
-                                        textTransform: 'uppercase'
-                                    }}
-                                >
-                                    {categoryLabels[category]}
-                                </Typography>
-                            )}
-                            {items.map((navItem, index) => (
-                                <ListItem key={`${category}-${index}`} disablePadding>
-                                    <Tooltip title={!open ? navItem.component : ""} placement="right">
-                                        <StyledListItemButton
-                                            active={activeRoute === navItem.link}
-                                            onClick={() => handleNavigation(navItem.link)}
-                                            sx={{
-                                                justifyContent: open ? 'initial' : 'center',
-                                                px: open ? 2.5 : 1.5,
-                                            }}
-                                        >
-                                            <StyledListItemIcon
-                                                sx={{
-                                                    mr: open ? 2 : 0,
-                                                    justifyContent: 'center',
-                                                }}
-                                            >
-                                                <navItem.icon />
-                                            </StyledListItemIcon>
-                                            <StyledListItemText
-                                                primary={navItem.component}
-                                                sx={{
-                                                    opacity: open ? 1 : 0,
-                                                    transition: 'opacity 0.3s ease'
-                                                }}
-                                            />
-                                        </StyledListItemButton>
-                                    </Tooltip>
-                                </ListItem>
-                            ))}
-                            {category !== 'system' && (
-                                <Divider sx={{
-                                    margin: theme.spacing(1.5, 2),
-                                    borderColor: 'rgba(255,255,255,0.2)',
-                                    '&::before, &::after': {
-                                        borderColor: 'rgba(255,255,255,0.2)'
-                                    }
-                                }} />
-                            )}
-                        </React.Fragment>
-                    ))}
-                </List>
-            </Drawer>
-
-            {/* Mobile Drawer */}
-            <Drawer
-                variant="temporary"
-                open={mobileOpen}
-                onClose={handleMobileDrawerToggle}
-                ModalProps={{
-                    keepMounted: true, // Better open performance on mobile.
+              <ListItemIcon sx={{ color: 'rgba(255,255,255,0.9)', minWidth: 40 }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText
+                primary={item.label}
+                primaryTypographyProps={{
+                  fontWeight: 600,
+                  fontSize: '0.95rem',
                 }}
-                sx={{
-                    display: { xs: 'block', md: 'none' },
-                    '& .MuiDrawer-paper': {
-                        width: drawerWidth,
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        color: '#ffffff',
-                        boxShadow: '0 8px 32px rgba(102, 126, 234, 0.4)',
-                        border: 'none',
-                        backdropFilter: 'blur(20px)',
-                    },
-                }}
+              />
+            </StyledListItemButton>
+          </ListItem>
+        ))}
+
+        <Divider sx={{ my: 2, borderColor: 'rgba(255,255,255,0.2)' }} />
+
+        {extraItems.map((item) => (
+          <ListItem key={item.link} disablePadding>
+            <StyledListItemButton
+              active={location.pathname === item.link}
+              onClick={() => handleNavigation(item.link)}
             >
-                <StudentBrand>
-                    <Avatar
-                        sx={{
-                            width: 56,
-                            height: 56,
-                            background: 'linear-gradient(45deg, #FFD700 30%, #FFA500 90%)',
-                            fontSize: '1.8rem',
-                            animation: `${pulse} 2s infinite`,
-                            boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-                            border: '2px solid rgba(255,255,255,0.3)'
-                        }}
-                    >
-                        🏫
-                    </Avatar>
-                    <Box>
-                        <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700, fontSize: '1rem', lineHeight: 1.2 }}>
-                            Shrigannada Higher Primary School
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem' }}>
-                            Student Portal
-                        </Typography>
-                    </Box>
-                </StudentBrand>
-
-                <DrawerHeader>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Badge badgeContent={2} color="error">
-                            <CircleNotificationsIcon sx={{ color: 'rgba(255,255,255,0.8)' }} />
-                        </Badge>
-                    </Box>
-                    <Tooltip title="Close Menu">
-                        <IconButton
-                            onClick={handleMobileDrawerToggle}
-                            sx={{
-                                color: 'rgba(255,255,255,0.95)',
-                                '&:hover': {
-                                    background: 'rgba(255,255,255,0.1)',
-                                    transform: 'rotate(180deg)'
-                                },
-                                transition: 'all 0.3s ease'
-                            }}
-                        >
-                            <ChevronLeftIcon />
-                        </IconButton>
-                    </Tooltip>
-                </DrawerHeader>
-
-                <List sx={{ height: "100%", padding: theme.spacing(1, 0) }}>
-                    {Object.entries(groupedNavItems).map(([category, items]) => (
-                        <React.Fragment key={category}>
-                            <Typography
-                                variant="overline"
-                                sx={{
-                                    color: 'rgba(255,255,255,0.7)',
-                                    fontSize: '0.75rem',
-                                    fontWeight: 700,
-                                    padding: theme.spacing(2, 3, 1, 3),
-                                    letterSpacing: '1px',
-                                    textTransform: 'uppercase'
-                                }}
-                            >
-                                {categoryLabels[category]}
-                            </Typography>
-                            {items.map((navItem, index) => (
-                                <ListItem key={`mobile-${category}-${index}`} disablePadding>
-                                    <StyledListItemButton
-                                        active={activeRoute === navItem.link}
-                                        onClick={() => {
-                                            handleNavigation(navItem.link);
-                                            handleMobileDrawerToggle(); // Close drawer after navigation
-                                        }}
-                                        sx={{ justifyContent: 'initial' }}
-                                    >
-                                        <StyledListItemIcon>
-                                            <navItem.icon />
-                                        </StyledListItemIcon>
-                                        <StyledListItemText primary={navItem.component} />
-                                    </StyledListItemButton>
-                                </ListItem>
-                            ))}
-                            {category !== 'system' && (
-                                <Divider sx={{
-                                    margin: theme.spacing(1.5, 2),
-                                    borderColor: 'rgba(255,255,255,0.2)',
-                                    '&::before, &::after': {
-                                        borderColor: 'rgba(255,255,255,0.2)'
-                                    }
-                                }} />
-                            )}
-                        </React.Fragment>
-                    ))}
-                </List>
-            </Drawer>
-
-            <Box
-                component="main"
-                sx={{
-                    flexGrow: 1,
-                    minHeight: '100vh',
-                    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-                    transition: 'all 0.3s ease',
-                    // Mobile responsive padding
-                    [theme.breakpoints.down('md')]: {
-                        paddingTop: 0,
-                        marginLeft: 0,
-                    },
+              <ListItemIcon sx={{ color: 'rgba(255,255,255,0.9)', minWidth: 40 }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText
+                primary={item.label}
+                primaryTypographyProps={{
+                  fontWeight: 600,
+                  fontSize: '0.95rem',
                 }}
+              />
+            </StyledListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
+
+  return (
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      {/* App Bar */}
+      <AppBar position="fixed">
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {isMobile && (
+              <IconButton
+                color="inherit"
+                edge="start"
+                onClick={() => setMobileDrawerOpen(true)}
+                sx={{
+                  borderRadius: '12px',
+                  '&:hover': {
+                    background: 'rgba(255,255,255,0.2)',
+                    transform: 'scale(1.1)',
+                  }
+                }}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
+            <SchoolIcon sx={{ fontSize: { xs: 28, md: 32 } }} />
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                fontSize: { xs: '1rem', md: '1.3rem' },
+                display: { xs: 'none', sm: 'block' }
+              }}
             >
-                <DrawerHeader />
-                <Box sx={{
-                    padding: theme.spacing(3),
-                    [theme.breakpoints.down('md')]: {
-                        padding: theme.spacing(2, 1),
-                    },
-                    [theme.breakpoints.down('sm')]: {
-                        padding: theme.spacing(1, 0.5),
-                    },
-                }}>
-                    <Outlet />
-                </Box>
-            </Box>
+              Student Portal
+            </Typography>
+          </Box>
+
+          <IconButton
+            color="inherit"
+            sx={{
+              borderRadius: '12px',
+              '&:hover': {
+                background: 'rgba(255,255,255,0.2)',
+              }
+            }}
+          >
+            <Badge badgeContent={3} color="error">
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+
+      {/* Desktop Sidebar */}
+      {!isMobile && (
+        <DesktopDrawer variant="permanent">
+          {drawerContent}
+        </DesktopDrawer>
+      )}
+
+      {/* Mobile Drawer */}
+      <Drawer
+        anchor="left"
+        open={mobileDrawerOpen}
+        onClose={() => setMobileDrawerOpen(false)}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': {
+            width: 280,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: '#ffffff',
+          },
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
+          <IconButton
+            onClick={() => setMobileDrawerOpen(false)}
+            sx={{ color: 'white' }}
+          >
+            <CloseIcon />
+          </IconButton>
         </Box>
-    );
+        {drawerContent}
+      </Drawer>
+
+      {/* Main Content */}
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+          pt: { xs: 8, md: 9 },
+          pb: { xs: 10, md: 3 },
+          px: { xs: 0, md: 3 },
+          transition: 'all 0.3s ease',
+        }}
+      >
+        <Outlet />
+      </Box>
+
+      {/* Mobile Bottom Navigation */}
+      {isMobile && (
+        <Paper
+          sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1200 }}
+          elevation={3}
+        >
+          <MobileBottomNav
+            value={bottomNavValue}
+            onChange={handleBottomNavChange}
+            showLabels
+          >
+            {navItems.map((item) => (
+              <BottomNavigationAction
+                key={item.index}
+                label={item.label}
+                icon={item.icon}
+                value={item.index}
+              />
+            ))}
+          </MobileBottomNav>
+        </Paper>
+      )}
+
+      {/* Floating Notification Button (Mobile Only) */}
+      {isMobile && (
+        <Fab
+          color="secondary"
+          sx={{
+            position: 'fixed',
+            bottom: 85,
+            right: 20,
+            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            boxShadow: '0 8px 25px rgba(240, 147, 251, 0.4)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)',
+              transform: 'scale(1.1)',
+            },
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => navigate('/student/notice')}
+        >
+          <Badge badgeContent={3} color="error">
+            <NotificationsIcon />
+          </Badge>
+        </Fab>
+      )}
+    </Box>
+  );
 }

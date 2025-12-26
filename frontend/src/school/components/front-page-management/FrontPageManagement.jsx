@@ -17,7 +17,10 @@ import {
   Tabs,
   Alert,
   Snackbar,
-  CircularProgress
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -31,7 +34,9 @@ import {
   School as SchoolIcon,
   Palette as ThemeIcon,
   Navigation as NavigationIcon,
-  Slideshow as SliderIcon
+  Slideshow as SliderIcon,
+  Close as CloseIcon,
+  ZoomIn as ZoomInIcon
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import axios from 'axios';
@@ -130,6 +135,8 @@ const FrontPageManagement = () => {
   // Dialog States
   const [openSliderDialog, setOpenSliderDialog] = useState(false);
   const [editingSlider, setEditingSlider] = useState(null);
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   // Fetch front page data on component mount
   useEffect(() => {
@@ -770,18 +777,55 @@ const FrontPageManagement = () => {
                         <VideoIcon sx={{ fontSize: 64 }} />
                       </Box>
                     ) : (
-                      <img
-                        src={slide.url}
-                        alt={slide.title || `Slide ${index + 1}`}
-                        style={{
+                      <Box
+                        sx={{
+                          position: 'relative',
                           width: '100%',
                           height: '100%',
-                          objectFit: 'cover'
+                          cursor: 'pointer',
+                          '&:hover .zoom-icon': {
+                            opacity: 1
+                          }
                         }}
-                        onError={(e) => {
-                          e.target.src = 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=200&fit=crop';
+                        onClick={() => {
+                          setSelectedImage(slide.url);
+                          setImageDialogOpen(true);
                         }}
-                      />
+                      >
+                        <img
+                          src={slide.url}
+                          alt={slide.title || `Slide ${index + 1}`}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                          onError={(e) => {
+                            e.target.src = 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=200&fit=crop';
+                          }}
+                        />
+                        <Box
+                          className="zoom-icon"
+                          sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            opacity: 0,
+                            transition: 'opacity 0.3s ease',
+                            backgroundColor: 'rgba(0,0,0,0.6)',
+                            borderRadius: '50%',
+                            width: 60,
+                            height: 60,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            pointerEvents: 'none'
+                          }}
+                        >
+                          <ZoomInIcon sx={{ color: 'white', fontSize: 32 }} />
+                        </Box>
+                      </Box>
                     )}
                     <Box
                       sx={{
@@ -911,6 +955,83 @@ const FrontPageManagement = () => {
         onSave={handleSaveSlide}
         editingSlider={editingSlider}
       />
+
+      {/* Image Viewer Dialog */}
+      <Dialog
+        open={imageDialogOpen}
+        onClose={() => setImageDialogOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: { xs: 0, md: '20px' },
+            background: 'rgba(0, 0, 0, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8)',
+            maxHeight: { xs: '100vh', md: '90vh' },
+            m: { xs: 0, md: 2 }
+          }
+        }}
+        fullScreen={window.innerWidth < 768}
+      >
+        <DialogTitle sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          pb: 2,
+          color: 'white',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
+          <Typography variant="h6" fontWeight="bold">
+            Slider Image Preview
+          </Typography>
+          <IconButton
+            onClick={() => setImageDialogOpen(false)}
+            sx={{
+              color: 'white',
+              '&:hover': {
+                background: 'rgba(255, 255, 255, 0.1)',
+                transform: 'rotate(90deg)'
+              },
+              transition: 'all 0.3s ease'
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{
+          p: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: { xs: '70vh', md: '500px' },
+          background: 'rgba(0, 0, 0, 0.95)'
+        }}>
+          {selectedImage && (
+            <Box
+              component="img"
+              src={selectedImage}
+              alt="Slider Image"
+              sx={{
+                width: '100%',
+                height: 'auto',
+                maxHeight: { xs: '70vh', md: '80vh' },
+                objectFit: 'contain',
+                cursor: 'zoom-in'
+              }}
+              onClick={(e) => {
+                if (e.currentTarget.style.objectFit === 'contain') {
+                  e.currentTarget.style.objectFit = 'cover';
+                  e.currentTarget.style.cursor = 'zoom-out';
+                } else {
+                  e.currentTarget.style.objectFit = 'contain';
+                  e.currentTarget.style.cursor = 'zoom-in';
+                }
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Snackbar for notifications */}
       <Snackbar

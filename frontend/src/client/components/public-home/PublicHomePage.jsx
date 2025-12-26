@@ -221,7 +221,12 @@ const HeroMedia = styled('img')({
   width: '100%',
   height: '100%',
   objectFit: 'cover',
-  display: 'block'
+  display: 'block',
+  cursor: 'pointer',
+  transition: 'transform 0.3s ease',
+  '&:hover': {
+    transform: 'scale(1.02)'
+  }
 });
 
 const HeroVideo = styled('video')({
@@ -549,6 +554,8 @@ const PublicHomePage = () => {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [visibleSections, setVisibleSections] = useState({});
   const [mapDialogOpen, setMapDialogOpen] = useState(false);
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
   const observerRef = useRef(null);
 
   // Scroll trigger for navbar
@@ -756,6 +763,120 @@ const PublicHomePage = () => {
   return (
     <Box sx={{ width: '100%', overflow: 'hidden', position: 'relative' }}>
 
+      {/* MOBILE-RESPONSIVE HEADER */}
+      <StickyNav scrolled={trigger}>
+        <Container maxWidth="xl">
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            py: { xs: 1.5, md: 2 },
+            gap: 2
+          }}>
+            {/* Logo and School Name */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 2 }, flex: 1 }}>
+              {header?.logo && (
+                <Avatar
+                  src={getImageUrl(header.logo)}
+                  alt={header?.siteName}
+                  sx={{
+                    width: { xs: 40, sm: 50, md: 60 },
+                    height: { xs: 40, sm: 50, md: 60 },
+                    border: '2px solid',
+                    borderColor: header?.primaryColor || '#1e3a8a',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                  }}
+                />
+              )}
+              <Box sx={{ minWidth: 0 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 800,
+                    fontSize: { xs: '0.9rem', sm: '1.1rem', md: '1.3rem' },
+                    color: header?.primaryColor || '#1e3a8a',
+                    lineHeight: 1.2,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: { xs: 'normal', sm: 'nowrap' },
+                    display: '-webkit-box',
+                    WebkitLineClamp: { xs: 2, sm: 'unset' },
+                    WebkitBoxOrient: 'vertical'
+                  }}
+                >
+                  {header?.siteName || 'School Management System'}
+                </Typography>
+                {header?.tagline && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                      fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                      display: { xs: 'none', sm: 'block' }
+                    }}
+                  >
+                    {header.tagline}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+
+            {/* Navigation Buttons */}
+            <Box sx={{ display: 'flex', gap: { xs: 1, md: 2 }, alignItems: 'center', flexShrink: 0 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<PersonIcon sx={{ fontSize: { xs: '1rem', md: '1.2rem' } }} />}
+                onClick={() => navigate('/login')}
+                sx={{
+                  borderColor: header?.primaryColor || '#1e3a8a',
+                  color: header?.primaryColor || '#1e3a8a',
+                  fontWeight: 600,
+                  fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' },
+                  px: { xs: 1, sm: 1.5, md: 2 },
+                  py: { xs: 0.5, md: 0.75 },
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  '&:hover': {
+                    borderColor: header?.primaryColor || '#1e3a8a',
+                    background: `${header?.primaryColor || '#1e3a8a'}15`,
+                    transform: 'translateY(-2px)'
+                  }
+                }}
+              >
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Login</Box>
+                <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>Login</Box>
+              </Button>
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={<LoginIcon sx={{ fontSize: { xs: '1rem', md: '1.2rem' } }} />}
+                onClick={() => navigate('/register')}
+                sx={{
+                  background: `linear-gradient(135deg, ${header?.primaryColor || '#1e3a8a'} 0%, ${header?.secondaryColor || '#0284c7'} 100%)`,
+                  color: 'white',
+                  fontWeight: 600,
+                  fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' },
+                  px: { xs: 1, sm: 1.5, md: 2 },
+                  py: { xs: 0.5, md: 0.75 },
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+                  '&:hover': {
+                    background: `linear-gradient(135deg, ${header?.secondaryColor || '#0284c7'} 0%, ${header?.primaryColor || '#1e3a8a'} 100%)`,
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
+                  }
+                }}
+              >
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Register</Box>
+                <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>Join</Box>
+              </Button>
+            </Box>
+          </Box>
+        </Container>
+      </StickyNav>
+
       {/* SIMPLE PROFESSIONAL SLIDER */}
       {sliders?.length > 0 ? (
         <HeroSection>
@@ -778,6 +899,10 @@ const PublicHomePage = () => {
                   active={currentSlide === index}
                   loading={index === 0 ? "eager" : "lazy"}
                   decoding="async"
+                  onClick={() => {
+                    setSelectedImage(getImageUrl(slide.url));
+                    setImageDialogOpen(true);
+                  }}
                 />
               )}
               {/* Only show overlay and content if title/description exist */}
@@ -1910,6 +2035,83 @@ const PublicHomePage = () => {
       <BackToTop show={showBackToTop} onClick={scrollToTop}>
         <KeyboardArrowUp sx={{ fontSize: '2rem' }} />
       </BackToTop>
+
+      {/* IMAGE VIEWER DIALOG */}
+      <Dialog
+        open={imageDialogOpen}
+        onClose={() => setImageDialogOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: { xs: 0, md: '20px' },
+            background: 'rgba(0, 0, 0, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8)',
+            maxHeight: { xs: '100vh', md: '90vh' },
+            m: { xs: 0, md: 2 }
+          }
+        }}
+        fullScreen={window.innerWidth < 768}
+      >
+        <DialogTitle sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          pb: 2,
+          color: 'white',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
+          <Typography variant="h6" fontWeight="bold">
+            Image Preview
+          </Typography>
+          <IconButton
+            onClick={() => setImageDialogOpen(false)}
+            sx={{
+              color: 'white',
+              '&:hover': {
+                background: 'rgba(255, 255, 255, 0.1)',
+                transform: 'rotate(90deg)'
+              },
+              transition: 'all 0.3s ease'
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{
+          p: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: { xs: '70vh', md: '500px' },
+          background: 'rgba(0, 0, 0, 0.95)'
+        }}>
+          {selectedImage && (
+            <Box
+              component="img"
+              src={selectedImage}
+              alt="Slider Image"
+              sx={{
+                width: '100%',
+                height: 'auto',
+                maxHeight: { xs: '70vh', md: '80vh' },
+                objectFit: 'contain',
+                cursor: 'zoom-in'
+              }}
+              onClick={(e) => {
+                if (e.currentTarget.style.objectFit === 'contain') {
+                  e.currentTarget.style.objectFit = 'cover';
+                  e.currentTarget.style.cursor = 'zoom-out';
+                } else {
+                  e.currentTarget.style.objectFit = 'contain';
+                  e.currentTarget.style.cursor = 'zoom-in';
+                }
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* MAP DIALOG */}
       <Dialog
