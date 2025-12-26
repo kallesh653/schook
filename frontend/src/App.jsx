@@ -53,6 +53,7 @@ import SmsManagement from "./school/components/sms/SmsManagement";
 import SmsToParents from "./school/components/sms/SmsToParents";
 import AcademicYear from "./school/components/academic-year/AcademicYear";
 import AdminManagement from "./school/components/admin-management/AdminManagement";
+import NotificationControl from "./school/components/notifications/NotificationControl";
 import ProtectedRoute from "./guards/ProtectedRoute";
 import { AuthContext, AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "@emotion/react";
@@ -88,6 +89,7 @@ function App() {
               <Route path="sms" element={<SmsManagement />} />
               <Route path="sms-to-parents" element={<SmsToParents />} />
               <Route path="notice" element={<NoticeSchool/>} />
+              <Route path="notifications" element={<NotificationControl />} />
               <Route path="academic-year" element={<AcademicYear />} />
               <Route path="admin-management" element={<AdminManagement />} />
             </Route>

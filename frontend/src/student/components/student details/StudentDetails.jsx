@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { baseUrl } from "../../../environment";
 import { useNavigate } from 'react-router-dom';
 import { useSwipeable } from 'react-swipeable';
+import NotificationPermission from '../notifications/NotificationPermission';
 
 // Icons
 import PersonIcon from '@mui/icons-material/Person';
@@ -320,6 +321,11 @@ export default function StudentDetails(){
             </HeaderCard>
 
             <Container maxWidth="lg" sx={{ px: { xs: 0, md: 3 } }}>
+                {/* Notification Permission Banner */}
+                <Box sx={{ mx: { xs: 2, md: 0 }, mb: 2 }}>
+                    <NotificationPermission />
+                </Box>
+
                 {/* Swipe Hint (Mobile Only) */}
                 {isMobile && (
                     <Box sx={{ textAlign: 'center', py: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
