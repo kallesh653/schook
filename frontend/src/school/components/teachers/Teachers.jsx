@@ -600,7 +600,7 @@ const ActionButton = styled(IconButton)(({ theme, color }) => ({
                     }}
                   >
                     <Typography style={{ marginRight: "50px" }} variant="h4">
-                      teacher Pic
+                      Add Teacher Picture
                     </Typography>
                     <TextField
                       sx={{ marginTop: "10px" }}

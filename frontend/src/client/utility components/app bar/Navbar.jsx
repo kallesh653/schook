@@ -8,7 +8,8 @@ import {
   Dashboard as DashboardIcon,
   School as SchoolIcon,
   GetApp as DownloadIcon,
-  Logout as LogoutIcon
+  Logout as LogoutIcon,
+  Person as PersonIcon
 } from '@mui/icons-material';
 import { baseUrl } from '../../../environment';
 import axios from 'axios';
@@ -226,11 +227,19 @@ const Navbar = () => {
             {/* Not Authenticated */}
             {!authenticated && (
               <>
+                {/* Student Login Button */}
+                <Link to="/student-login" style={{ textDecoration: 'none' }}>
+                  <StyledButton sx={{ background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' }}>
+                    <PersonIcon />
+                    <span style={{ display: { xs: 'none', sm: 'inline' } }}>Student Login</span>
+                  </StyledButton>
+                </Link>
+
                 {headerSettings.showLoginButton && (
                   <Link to="/login" style={{ textDecoration: 'none' }}>
                     <StyledButton>
                       <LoginIcon />
-                      <span style={{ display: { xs: 'none', sm: 'inline' } }}>Login</span>
+                      <span style={{ display: { xs: 'none', sm: 'inline' } }}>Admin Login</span>
                     </StyledButton>
                   </Link>
                 )}

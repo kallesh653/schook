@@ -69,6 +69,9 @@ courseSchema.pre('save', function(next) {
 // Index for faster queries
 courseSchema.index({ school: 1, courseName: 1 });
 
+// Sparse unique index for courseCode per school - allows multiple null/empty values
+courseSchema.index({ courseCode: 1, school: 1 }, { unique: true, sparse: true });
+
 // Explicitly set collection name to 'courses'
 const Course = mongoose.model('Course', courseSchema, 'courses');
 

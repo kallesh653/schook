@@ -48,14 +48,27 @@ export default function Class() {
 
   const handleDelete = (id) => {
     if (confirm("Are you sure you want to delete?")) {
+      // Get authentication token
+      const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+      if (!token) {
+        setMessage("Authentication token not found. Please login again.");
+        setType("error");
+        return;
+      }
+      
       axios
-        .delete(`${baseUrl}/class/delete/${id}`)
+        .delete(`${baseUrl}/class/delete/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
         .then((resp) => {
           setMessage(resp.data.message);
           setType("success");
+          fetchstudentsClass(); // Refresh the class list
         })
         .catch((e) => {
-          setMessage(e.response.data.message);
+          setMessage(e.response?.data?.message || "Error deleting class");
           setType("error");
           console.log("Error, deleting", e);
         });
@@ -64,15 +77,38 @@ export default function Class() {
   const handleEdit = (id) => {
     console.log("Handle  Edit is called", id);
     setEdit(true);
+    
+    // Get authentication token
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    if (!token) {
+      setMessage("Authentication token not found. Please login again.");
+      setType("error");
+      return;
+    }
+    
     axios
-      .get(`${baseUrl}/class/fetch-single/${id}`)
+      .get(`${baseUrl}/class/fetch-single/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
       .then((resp) => {
-        Formik.setFieldValue("class_num", resp.data.data.class_num);
-        Formik.setFieldValue("class_text", resp.data.data.class_text);
-        setEditId(resp.data.data._id);
+        console.log("Class edit data fetched:", resp.data);
+        if (resp.data && resp.data.data) {
+          Formik.setFieldValue("class_num", resp.data.data.class_num);
+          Formik.setFieldValue("class_text", resp.data.data.class_text);
+          setEditId(resp.data.data._id);
+        } else {
+          setMessage("Class data not found");
+          setType("error");
+          setEdit(false);
+        }
       })
       .catch((e) => {
-        console.log("Error  in fetching edit data.");
+        console.log("Error in fetching edit data:", e);
+        setMessage(e.response?.data?.message || "Error fetching class data");
+        setType("error");
+        setEdit(false);
       });
   };
 
@@ -97,38 +133,68 @@ export default function Class() {
     initialValues: initialValues,
     validationSchema: classSchema,
     onSubmit: (values) => {
+      // Get authentication token
+      const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+      if (!token) {
+        setMessage("Authentication token not found. Please login again.");
+        setType("error");
+        return;
+      }
+      
       if (isEdit) {
         console.log("edit id", editId);
         axios
           .patch(`${baseUrl}/class/update/${editId}`, {
             ...values,
+          }, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
           })
           .then((resp) => {
             console.log("Edit submit", resp);
             setMessage(resp.data.message);
             setType("success");
             cancelEdit();
+            fetchstudentsClass(); // Refresh the class list
           })
           .catch((e) => {
-            setMessage(e.response.data.message);
+            setMessage(e.response?.data?.message || "Error updating class");
             setType("error");
             console.log("Error, edit casting submit", e);
           });
       } else {
+        // Check for duplicate class before creating
+        const isDuplicate = studentClass.some(
+          existingClass => 
+            existingClass.class_num === parseInt(values.class_num) && 
+            existingClass.class_text.toLowerCase() === values.class_text.toLowerCase()
+        );
+        
+        if (isDuplicate) {
+          setMessage("This class already exists! Class number and text combination must be unique.");
+          setType("error");
+          return;
+        }
       
-          axios
-            .post(`${baseUrl}/class/create`,{...values})
-            .then((resp) => {
-              console.log("Response after submitting admin casting", resp);
-              setMessage(resp.data.message);
-              setType("success");
-            })
-            .catch((e) => {
-              setMessage(e.response.data.message);
-              setType("error");
-              console.log("Error, response admin casting calls", e);
-            });
-          Formik.resetForm();
+        axios
+          .post(`${baseUrl}/class/create`,{...values}, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          })
+          .then((resp) => {
+            console.log("Response after submitting admin casting", resp);
+            setMessage(resp.data.message);
+            setType("success");
+            fetchstudentsClass(); // Refresh the class list
+          })
+          .catch((e) => {
+            setMessage(e.response?.data?.message || "Error creating class");
+            setType("error");
+            console.log("Error, response admin casting calls", e);
+          });
+        Formik.resetForm();
         
       }
     },

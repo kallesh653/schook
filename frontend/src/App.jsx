@@ -45,8 +45,6 @@ import NoticeSchool from "./school/components/notice/NoticeSchool";
 import NoticeTeacher from "./teacher/components/notice/Notice";
 import NoticeStudent from "./student/components/notice/NoticeStudent";
 import PublicHomePage from "./client/components/public-home/PublicHomePage";
-import SimpleHome from "./client/components/home/SimpleHome";
-import AdvancedHome from "./client/components/home/AdvancedHome";
 import ProtectedWebsiteBuilder from "./website-builder/ProtectedWebsiteBuilder";
 import TransportFees from "./school/components/transport/TransportFees";
 import MarkSheetGenerator from "./school/components/marksheet/MarkSheetGenerator";
@@ -120,9 +118,10 @@ function App() {
             {/* Standalone Website Builder with Login Protection */}
             <Route path="/website-builder" element={<ProtectedWebsiteBuilder />} />
 
+            {/* Public routes with Client wrapper (includes Navbar) */}
             <Route path="/" element={<Client />}>
               <Route index element={<Navigate to="/home" replace />} />
-              <Route path="home" element={<AdvancedHome />} />
+              <Route path="home" element={<PublicHomePage />} />
               <Route path="contact" element={<Contact />} />
               <Route path="login" element={<Login />} />
               <Route path="student-login" element={<StudentLogin />} />

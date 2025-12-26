@@ -175,15 +175,32 @@ export default function Students() {
   };
 
   const handleDelete = (id) => {
-    if (confirm("Are you sure you want to delete?")) {
+    if (confirm("Are you sure you want to delete this student?")) {
+      const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+      if (!token) {
+        setMessage('Authentication token not found. Please login again.');
+        setType('error');
+        return;
+      }
+
       axios
-        .delete(`${baseUrl}/student/delete/${id}`)
+        .delete(`${baseUrl}/student/delete/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
         .then((resp) => {
-          setMessage(resp.data.message);
+          setMessage(resp.data.message || 'Student deleted successfully');
           setType("success");
+          // Refresh student data
+          fetchStudents();
         })
         .catch((e) => {
-          setMessage(e.response.data.message);
+          console.error('Error deleting student:', e);
+          const errorMsg = e.response?.data?.message || 
+                         e.response?.data?.error || 
+                         'Error deleting student';
+          setMessage(errorMsg);
           setType("error");
         });
     }
@@ -191,27 +208,62 @@ export default function Students() {
 
   const handleEdit = (id) => {
     setEdit(true);
+    
+    // Get token for authentication
+    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+    if (!token) {
+      setMessage('Authentication token not found. Please login again.');
+      setType('error');
+      return;
+    }
+
     axios
-      .get(`${baseUrl}/student/fetch-single/${id}`)
+      .get(`${baseUrl}/student/fetch-single/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
       .then((resp) => {
         const data = resp.data.data;
+        if (!data) {
+          setMessage('Student data not found');
+          setType('error');
+          return;
+        }
+
+        // Set all form values including missing fields
         Formik.setValues({
-          email: data.email,
-          name: data.name,
-          student_class: data.student_class._id,
-          course: data.course?._id || "",
-          gender: data.gender,
-          age: data.age,
-          guardian: data.guardian,
-          guardian_phone: data.guardian_phone,
-          aadhaar_number: data.aadhaar_number || "",
-          password: data.password,
-          transport_fees: data.transport_fees?._id || "",
+          email: data.email || '',
+          name: data.name || '',
+          student_class: data.student_class?._id || '',
+          course: data.course?._id || '',
+          gender: data.gender || '',
+          date_of_birth: data.date_of_birth ? new Date(data.date_of_birth).toISOString().split('T')[0] : '',
+          age: data.age || '',
+          guardian: data.guardian || '',
+          guardian_phone: data.guardian_phone || '',
+          aadhaar_number: data.aadhaar_number || '',
+          roll_number: data.roll_number || '',
+          school_name: data.school_name || '',
+          school_id: data.school_id || '',
+          established_year: data.established_year || '',
+          password: data.password || '',
+          transport_fees: data.transport_fees?._id || '',
+          total_fees: data.fees?.total_fees || '',
+          advance_fees: data.fees?.advance_fees || '',
+          date_of_admission: data.date_of_admission ? new Date(data.date_of_admission).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
         });
-        setImageUrl(data.image);
+        
+        // Set image URL if available
+        setImageUrl(data.image || data.student_image || null);
         setEditId(data._id);
+        setFile(null); // Clear any previous file selection
       })
-      .catch(() => console.log("Error in fetching edit data."));
+      .catch((error) => {
+        console.error('Error fetching student data:', error);
+        setMessage('Error fetching student data');
+        setType('error');
+      });
   };
 
   const cancelEdit = () => {
@@ -296,21 +348,48 @@ export default function Students() {
     onSubmit: (values) => {
       if (isEdit) {
         const fd = new FormData();
-        Object.keys(values).forEach((key) => fd.append(key, values[key]));
+        
+        // Add all form values to FormData
+        Object.keys(values).forEach((key) => {
+          if (values[key] !== null && values[key] !== undefined && values[key] !== '') {
+            fd.append(key, values[key]);
+          }
+        });
+        
+        // Add image if provided
         if (file) {
           fd.append("image", file, file.name);
         }
 
+        // Get token for authentication
+        const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+        if (!token) {
+          setMessage('Authentication token not found. Please login again.');
+          setType('error');
+          return;
+        }
+
         axios
-          .patch(`${baseUrl}/student/update/${editId}`, fd)
+          .patch(`${baseUrl}/student/update/${editId}`, fd, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data'
+            }
+          })
           .then((resp) => {
-            setMessage(resp.data.message);
+            setMessage(resp.data.message || 'Student updated successfully');
             setType("success");
             handleClearFile();
             cancelEdit();
+            // Refresh student data
+            fetchStudents();
           })
           .catch((e) => {
-            setMessage(e.response.data.message);
+            console.error('Error updating student:', e);
+            const errorMsg = e.response?.data?.message || 
+                           e.response?.data?.error || 
+                           'Error updating student';
+            setMessage(errorMsg);
             setType("error");
           });
       } else {

@@ -52,14 +52,37 @@ import {
     const handleEdit = (id) => {
       console.log("Handle  Edit is called", id);
       setEdit(true);
-      axios.get(`${baseUrl}/subject/fetch-single/${id}`)
+      
+      // Get authentication token
+      const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+      if (!token) {
+        setMessage("Authentication token not found. Please login again.");
+        setType("error");
+        return;
+      }
+      
+      axios.get(`${baseUrl}/subject/fetch-single/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
         .then((resp) => {
-          Formik.setFieldValue("subject_name", resp.data.data.subject_name);
-          Formik.setFieldValue("subject_codename", resp.data.data.subject_codename);
-          setEditId(resp.data.data._id);
+          console.log("Subject edit data fetched:", resp.data);
+          if (resp.data && resp.data.data) {
+            Formik.setFieldValue("subject_name", resp.data.data.subject_name);
+            Formik.setFieldValue("subject_codename", resp.data.data.subject_codename);
+            setEditId(resp.data.data._id);
+          } else {
+            setMessage("Subject data not found");
+            setType("error");
+            setEdit(false);
+          }
         })
         .catch((e) => {
-          console.log("Error  in fetching edit data.");
+          console.log("Error in fetching edit data:", e);
+          setMessage(e.response?.data?.message || "Error fetching subject data");
+          setType("error");
+          setEdit(false);
         });
     };
   
@@ -84,34 +107,52 @@ import {
       initialValues: initialValues,
       validationSchema: subjectSchema,
       onSubmit: (values) => {
+        // Get authentication token
+        const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+        if (!token) {
+          setMessage("Authentication token not found. Please login again.");
+          setType("error");
+          return;
+        }
+        
         if (isEdit) {
           console.log("edit id", editId);
           axios
             .patch(`${baseUrl}/subject/update/${editId}`, {
               ...values,
+            }, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
             })
             .then((resp) => {
               console.log("Edit submit", resp);
               setMessage(resp.data.message);
               setType("success");
               cancelEdit();
+              fetchstudentssubject(); // Refresh the subject list
             })
             .catch((e) => {
-              setMessage(e.response.data.message);
+              setMessage(e.response?.data?.message || "Error updating subject");
               setType("error");
               console.log("Error, edit casting submit", e);
             });
         } else {
         
             axios
-              .post(`${baseUrl}/subject/create`,{...values})
+              .post(`${baseUrl}/subject/create`,{...values}, {
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              })
               .then((resp) => {
                 console.log("Response after submitting admin casting", resp);
                 setMessage(resp.data.message);
                 setType("success");
+                fetchstudentssubject(); // Refresh the subject list
               })
               .catch((e) => {
-                setMessage(e.response.data.message);
+                setMessage(e.response?.data?.message || "Error creating subject");
                 setType("error");
                 console.log("Error, response admin casting calls", e);
               });

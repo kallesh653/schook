@@ -73,26 +73,14 @@ const glow = keyframes`
   100% { box-shadow: 0 0 5px rgba(102, 126, 234, 0.3); }
 `;
 
-const scrollNews = keyframes`
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
-`;
-
-const wiggle = keyframes`
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-10deg); }
-  50% { transform: rotate(10deg); }
-  75% { transform: rotate(-10deg); }
-`;
-
 const shimmer = keyframes`
   0% { background-position: -1000px 0; }
   100% { background-position: 1000px 0; }
 `;
 
-const bounce = keyframes`
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+const wiggle = keyframes`
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
 `;
 
 const openedMixin = (theme) => ({
@@ -209,30 +197,6 @@ const StyledListItemText = styled(ListItemText)(({ theme }) => ({
         textShadow: '0 1px 3px rgba(0,0,0,0.3)'
     }
 }));
-
-// Beautiful Alert Banner styled component
-const AlertBanner = styled(Box)({
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: 'white',
-    padding: '10px 0',
-    overflow: 'hidden',
-    position: 'relative',
-    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
-    borderBottom: '2px solid rgba(255, 255, 255, 0.3)'
-});
-
-const AlertContent = styled(Box)({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    gap: '40px',
-    animation: `${scrollNews} 35s linear infinite`,
-    whiteSpace: 'nowrap',
-    fontSize: '15px',
-    fontWeight: 600,
-    position: 'relative',
-    zIndex: 1
-});
 
 const AppBar = styled(MuiAppBar, {
     shouldForwardProp: (prop) => prop !== 'open',
@@ -587,114 +551,7 @@ export default function School() {
                     </Box>
                 </Toolbar>
 
-                {/* Beautiful Alert Message Banner */}
-                <AlertBanner>
-                    <Box sx={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
-                        <AlertContent>
-                            <Box sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '10px',
-                                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                                padding: '6px 18px',
-                                borderRadius: '20px',
-                                border: '1px solid rgba(255, 255, 255, 0.3)',
-                                backdropFilter: 'blur(10px)'
-                            }}>
-                                <CircleNotificationsIcon sx={{
-                                    fontSize: 22,
-                                    color: '#FFD700',
-                                    animation: `${wiggle} 2s ease-in-out infinite`
-                                }} />
-                                <Typography sx={{
-                                    fontSize: '14px',
-                                    fontWeight: 'bold',
-                                    color: '#FFD700',
-                                    letterSpacing: '1px'
-                                }}>
-                                    ANNOUNCEMENTS
-                                </Typography>
-                            </Box>
 
-                            {[
-                                '📢 Welcome to the new academic year 2024-2025!',
-                                '🎓 Staff meeting scheduled for tomorrow at 10:00 AM',
-                                '📊 Monthly attendance reports are now available',
-                                '✨ New features added to the system - Check them out!',
-                                '🏆 Congratulations on achieving 95% attendance rate!',
-                                '📝 Grade submission deadline: End of this week',
-                                '👨‍🏫 Teacher training workshop on Friday'
-                            ].map((msg, idx) => (
-                                <React.Fragment key={idx}>
-                                    <Box sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '8px',
-                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                                        padding: '6px 18px',
-                                        borderRadius: '20px',
-                                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                                        backdropFilter: 'blur(10px)'
-                                    }}>
-                                        <Typography sx={{
-                                            fontSize: '14px',
-                                            fontWeight: 600,
-                                            color: 'white'
-                                        }}>
-                                            {msg}
-                                        </Typography>
-                                    </Box>
-                                    <Box sx={{
-                                        fontSize: '20px',
-                                        animation: `${bounce} 1.5s ease-in-out infinite`,
-                                        animationDelay: `${idx * 0.2}s`
-                                    }}>
-                                        ⭐
-                                    </Box>
-                                </React.Fragment>
-                            ))}
-
-                            {/* Duplicate for seamless loop */}
-                            {[
-                                '📢 Welcome to the new academic year 2024-2025!',
-                                '🎓 Staff meeting scheduled for tomorrow at 10:00 AM',
-                                '📊 Monthly attendance reports are now available',
-                                '✨ New features added to the system - Check them out!',
-                                '🏆 Congratulations on achieving 95% attendance rate!',
-                                '📝 Grade submission deadline: End of this week',
-                                '👨‍🏫 Teacher training workshop on Friday'
-                            ].map((msg, idx) => (
-                                <React.Fragment key={`dup-${idx}`}>
-                                    <Box sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '8px',
-                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                                        padding: '6px 18px',
-                                        borderRadius: '20px',
-                                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                                        backdropFilter: 'blur(10px)'
-                                    }}>
-                                        <Typography sx={{
-                                            fontSize: '14px',
-                                            fontWeight: 600,
-                                            color: 'white'
-                                        }}>
-                                            {msg}
-                                        </Typography>
-                                    </Box>
-                                    <Box sx={{
-                                        fontSize: '20px',
-                                        animation: `${bounce} 1.5s ease-in-out infinite`,
-                                        animationDelay: `${idx * 0.2}s`
-                                    }}>
-                                        ⭐
-                                    </Box>
-                                </React.Fragment>
-                            ))}
-                        </AlertContent>
-                    </Box>
-                </AlertBanner>
             </AppBar>
             
             {/* Desktop Drawer */}

@@ -153,17 +153,39 @@ const Courses = () => {
                 return;
             }
 
-            const token = localStorage.getItem('token');
+            // Get token from both storage options
+            const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+            if (!token) {
+                showSnackbar('Authentication token not found. Please login again.', 'error');
+                return;
+            }
+
             const config = {
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
+            };
+
+            // Prepare course data - ensure all required fields are included
+            const courseData = {
+                courseName: currentCourse.courseName.trim(),
+                courseCode: currentCourse.courseCode?.trim() || '',
+                description: currentCourse.description?.trim() || '',
+                duration: currentCourse.duration?.trim() || '',
+                fees: Number(currentCourse.fees) || 0,
+                eligibility: currentCourse.eligibility?.trim() || '',
+                totalSeats: Number(currentCourse.totalSeats) || 0,
+                availableSeats: Number(currentCourse.availableSeats) || Number(currentCourse.totalSeats) || 0,
+                startDate: currentCourse.startDate || null,
+                endDate: currentCourse.endDate || null,
+                status: currentCourse.status || 'Active'
             };
 
             if (editMode) {
                 const response = await axios.put(
                     `${baseUrl}/course/${currentCourse._id}`,
-                    currentCourse,
+                    courseData,
                     config
                 );
                 if (response.data.success) {
@@ -174,7 +196,7 @@ const Courses = () => {
             } else {
                 const response = await axios.post(
                     `${baseUrl}/course/create`,
-                    currentCourse,
+                    courseData,
                     config
                 );
                 if (response.data.success) {
@@ -185,10 +207,11 @@ const Courses = () => {
             }
         } catch (error) {
             console.error('Error saving course:', error);
-            showSnackbar(
-                error.response?.data?.message || 'Error saving course',
-                'error'
-            );
+            const errorMessage = error.response?.data?.message || 
+                               error.response?.data?.error || 
+                               error.message || 
+                               'Error saving course';
+            showSnackbar(errorMessage, 'error');
         }
     };
 

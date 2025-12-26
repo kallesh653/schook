@@ -31,7 +31,7 @@ module.exports = {
     getSubjectWithId: async(req, res)=>{
         const id = req.params.id;
         const schoolId = req.user.schoolId;
-        Subject.findOne({_id:id, school:schoolId}).populate("student_class").then(resp=>{
+        Subject.findOne({_id:id, school:schoolId}).then(resp=>{
             if(resp){
                 res.status(200).json({success:true, data:resp})
             }else {

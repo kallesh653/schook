@@ -44,7 +44,10 @@ import {
   Palette,
   Psychology,
   Close as CloseIcon,
-  Map as MapIcon
+  Map as MapIcon,
+  Person as PersonIcon,
+  Login as LoginIcon,
+  WhatsApp
 } from '@mui/icons-material';
 import { styled, keyframes } from '@mui/material/styles';
 import axios from 'axios';
@@ -56,6 +59,7 @@ import AlertBanner from './AlertBanner';
 const getImageUrl = (url) => {
   if (!url) return '';
   if (url.startsWith('http')) return url;
+  if (url.startsWith('data:')) return url; // Handle base64 images
   const cleanBaseUrl = baseUrl.replace('/api', '');
   return cleanBaseUrl + url;
 };
@@ -152,30 +156,20 @@ const bounce = keyframes`
   50% { transform: translateY(-10px); }
 `;
 
-// ========== GLASS MORPHISM TOP BAR ==========
+const scrollLeft = keyframes`
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+`;
+
+// ========== PROFESSIONAL TOP BAR (IIT Style) ==========
 const TopBar = styled(Box)(({ bgcolor }) => ({
-  background: `linear-gradient(135deg,
-    ${bgcolor || 'rgba(30, 58, 138, 0.95)'} 0%,
-    rgba(124, 58, 237, 0.95) 100%)`,
-  backdropFilter: 'blur(20px)',
-  WebkitBackdropFilter: 'blur(20px)',
+  background: bgcolor || '#1e3a8a',
   color: 'white',
-  padding: '14px 0',
+  padding: '12px 0',
   width: '100%',
   position: 'relative',
-  overflow: 'hidden',
-  boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: '-100%',
-    width: '100%',
-    height: '100%',
-    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
-    animation: `${shimmer} 3s infinite`
-  }
+  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+  borderBottom: '2px solid #0284c7'
 }));
 
 // ========== STUNNING STICKY NAV ==========
@@ -197,15 +191,19 @@ const StickyNav = styled(Box)(({ scrolled }) => ({
   transform: scrolled ? 'translateY(0)' : 'translateY(0)'
 }));
 
-// ========== STUNNING FULL-SCREEN SLIDER ==========
+// ========== SIMPLE PROFESSIONAL SLIDER ==========
 const HeroSection = styled(Box)({
   position: 'relative',
-  height: '100vh',
+  height: '500px',
   width: '100%',
   overflow: 'hidden',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center'
+  background: '#f8f9fa',
+  '@media (max-width: 900px)': {
+    height: '400px'
+  },
+  '@media (max-width: 600px)': {
+    height: '300px'
+  }
 });
 
 const HeroSlide = styled(Box)(({ active }) => ({
@@ -219,34 +217,28 @@ const HeroSlide = styled(Box)(({ active }) => ({
   zIndex: active ? 1 : 0
 }));
 
-const HeroMedia = styled('img')(({ active }) => ({
+const HeroMedia = styled('img')({
   width: '100%',
   height: '100%',
   objectFit: 'cover',
-  animation: active ? `${kenBurns} 20s ease-out forwards` : 'none',
-  transform: 'scale(1)',
-  transformOrigin: 'center center',
-  willChange: active ? 'transform' : 'auto' // Performance optimization
-}));
+  display: 'block'
+});
 
 const HeroVideo = styled('video')({
   width: '100%',
   height: '100%',
   objectFit: 'cover',
-  transform: 'scale(1.1)',
-  willChange: 'transform' // Performance optimization
+  display: 'block'
 });
 
-// Beautiful gradient overlay at BOTTOM only
+// Simple overlay for text readability
 const HeroOverlay = styled(Box)(({ hastext }) => ({
   position: 'absolute',
   bottom: 0,
   left: 0,
   width: '100%',
-  height: hastext ? '50%' : '30%',
-  background: hastext
-    ? 'linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(30, 58, 138, 0.4) 50%, transparent 100%)'
-    : 'linear-gradient(to top, rgba(0, 0, 0, 0.3) 0%, transparent 100%)',
+  height: hastext ? '40%' : '0%',
+  background: hastext ? 'linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 100%)' : 'transparent',
   zIndex: 2,
   pointerEvents: 'none'
 }));
@@ -265,67 +257,52 @@ const HeroContent = styled(Box)({
   animation: `${fadeInUp} 1.2s cubic-bezier(0.4, 0, 0.2, 1)`
 });
 
-// ========== ELEGANT NAVIGATION ARROWS ==========
+// ========== SIMPLE NAVIGATION ARROWS ==========
 const NavArrow = styled(IconButton)({
   position: 'absolute',
   top: '50%',
   transform: 'translateY(-50%)',
   zIndex: 3,
-  background: 'rgba(255, 255, 255, 0.15)',
-  backdropFilter: 'blur(10px)',
-  WebkitBackdropFilter: 'blur(10px)',
-  color: 'white',
-  width: '70px',
-  height: '70px',
-  border: '2px solid rgba(255, 255, 255, 0.3)',
-  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+  background: 'rgba(255, 255, 255, 0.8)',
+  color: '#1e3a8a',
+  width: '45px',
+  height: '45px',
+  transition: 'all 0.3s ease',
   '&:hover': {
-    background: 'rgba(255, 255, 255, 0.3)',
-    transform: 'translateY(-50%) scale(1.1)',
-    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
-    borderColor: 'rgba(255, 255, 255, 0.6)'
+    background: 'rgba(255, 255, 255, 0.95)',
+    transform: 'translateY(-50%) scale(1.05)'
   },
   '& svg': {
-    fontSize: '2.5rem'
+    fontSize: '1.5rem'
   }
 });
 
-// ========== ANIMATED DOT INDICATORS ==========
+// ========== SIMPLE DOT INDICATORS ==========
 const SliderDot = styled(Box)(({ active }) => ({
-  width: active ? '50px' : '15px',
-  height: '15px',
-  borderRadius: '10px',
-  background: active
-    ? 'linear-gradient(135deg, #fff 0%, #f59e0b 100%)'
-    : 'rgba(255, 255, 255, 0.4)',
+  width: active ? '30px' : '10px',
+  height: '10px',
+  borderRadius: '5px',
+  background: active ? '#0284c7' : 'rgba(255, 255, 255, 0.6)',
   cursor: 'pointer',
-  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-  border: active ? '2px solid rgba(255, 255, 255, 0.8)' : '2px solid transparent',
-  boxShadow: active ? '0 4px 15px rgba(245, 158, 11, 0.5)' : 'none',
+  transition: 'all 0.3s ease',
   '&:hover': {
-    background: active
-      ? 'linear-gradient(135deg, #fff 0%, #f59e0b 100%)'
-      : 'rgba(255, 255, 255, 0.7)',
-    transform: 'scale(1.2)'
+    background: active ? '#0284c7' : 'rgba(255, 255, 255, 0.9)'
   }
 }));
 
-// ========== 3D STAT CARDS WITH FLIP EFFECT ==========
+// ========== SIMPLE STAT CARDS ==========
 const StatCard = styled(Paper)({
-  padding: '50px 30px',
+  padding: '20px 15px',
   textAlign: 'center',
-  background: 'linear-gradient(135deg, #1e3a8a 0%, #7c3aed 50%, #06b6d4 100%)',
-  backgroundSize: '200% 200%',
-  animation: `${gradientShift} 5s ease infinite`,
+  background: '#1e3a8a',
   color: 'white',
-  borderRadius: '24px',
-  position: 'relative',
-  overflow: 'hidden',
-  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-  cursor: 'pointer',
-  transformStyle: 'preserve-3d',
-  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.2), 0 0 40px rgba(124, 58, 237, 0.2)',
-  '&::before': {
+  borderRadius: '8px',
+  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+  },
+  '&::before_DISABLED': {
     content: '""',
     position: 'absolute',
     top: '-50%',
@@ -519,6 +496,26 @@ const BackToTop = styled(IconButton)(({ show }) => ({
   }
 }));
 
+// ========== WHATSAPP FLOATING BUTTON ==========
+const WhatsAppButton = styled(IconButton)({
+  position: 'fixed',
+  bottom: '40px',
+  left: '40px',
+  zIndex: 1000,
+  width: '60px',
+  height: '60px',
+  background: '#25D366',
+  color: 'white',
+  boxShadow: '0 8px 25px rgba(37, 211, 102, 0.4)',
+  transition: 'all 0.3s ease',
+  animation: `${pulse} 2s ease-in-out infinite`,
+  '&:hover': {
+    background: '#20BA5A',
+    transform: 'scale(1.1)',
+    boxShadow: '0 12px 35px rgba(37, 211, 102, 0.6)'
+  }
+});
+
 // ========== SCROLL PROGRESS BAR ==========
 const ProgressBar = styled(Box)(({ progress }) => ({
   position: 'fixed',
@@ -596,9 +593,9 @@ const PublicHomePage = () => {
   }, []);
 
   useEffect(() => {
-    if (content?.sliders?.length > 0) {
+    if (content?.slider?.slides?.length > 0) {
       const interval = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % content.sliders.length);
+        setCurrentSlide((prev) => (prev + 1) % content.slider.slides.length);
       }, 7000); // Slower transition for Ken Burns effect
       return () => clearInterval(interval);
     }
@@ -617,8 +614,11 @@ const PublicHomePage = () => {
   const fetchContent = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${baseUrl}/home-page-content/public`);
+      const response = await axios.get(`${baseUrl}/public-home/data`);
       const homeData = response.data.data;
+      console.log('📊 Home Page Data:', homeData);
+      console.log('📸 Slider Data:', homeData?.slider);
+      console.log('🖼️ Slides:', homeData?.slider?.slides);
       setContent(homeData);
     } catch (error) {
       console.error('Error fetching home page:', error);
@@ -726,208 +726,44 @@ const PublicHomePage = () => {
     );
   }
 
-  const { header, sliders = [], statistics = [], about, programs = [], gallery = [], testimonials, sectionVisibility, alertBanner } = content;
+  const { header, slider, statistics, about, programs, gallery, testimonials, announcements, achievements, features, sectionVisibility, alertBanner, socialMedia } = content;
+  const sliders = slider?.slides || [];
   const testimonialsArray = testimonials?.items || [];
+  const statisticsArray = statistics?.stats || [];
+  const featuresArray = features?.items || [];
+  const achievementsArray = achievements?.items || [];
+  const announcementsArray = announcements?.items || [];
+
+  // WhatsApp number from backend
+  const whatsappNumber = socialMedia?.whatsapp || '';
+
+  // Debug: Log slider information
+  console.log('🔍 Slider Debug:');
+  console.log('  - slider?.showSlider:', slider?.showSlider);
+  console.log('  - sliders?.length:', sliders?.length);
+  console.log('  - Condition met:', slider?.showSlider && sliders?.length > 0);
+  if (sliders.length > 0) {
+    console.log('  - First slide:', sliders[0]);
+    console.log('  - First slide URL:', getImageUrl(sliders[0]?.url));
+    console.log('  - Image URL construction test:', {
+      baseUrl,
+      cleanedBase: baseUrl.replace('/api', ''),
+      slideUrl: sliders[0]?.url,
+      finalUrl: getImageUrl(sliders[0]?.url)
+    });
+  }
 
   return (
     <Box sx={{ width: '100%', overflow: 'hidden', position: 'relative' }}>
-      {/* Scroll Progress Bar */}
-      <ProgressBar progress={scrollProgress} />
 
-      {/* Alert/Announcement Banner */}
-      {alertBanner?.show && alertBanner?.message && (
-        <AlertBanner
-          show={alertBanner.show}
-          message={alertBanner.message}
-          type={alertBanner.type || 'info'}
-          dismissible={alertBanner.dismissible !== false}
-          autoHide={alertBanner.autoHide || false}
-          autoHideDelay={alertBanner.autoHideDelay || 5000}
-          link={alertBanner.link}
-          linkText={alertBanner.linkText || 'Learn More'}
-        />
-      )}
-
-      {/* Glass Morphism Top Bar */}
-      {header && (
-        <TopBar bgcolor={header.primaryColor}>
-          <Container maxWidth="xl">
-            <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
-              <Box display="flex" gap={3} alignItems="center" flexWrap="wrap">
-                {header.contactPhone && (
-                  <Box display="flex" alignItems="center" gap={1} sx={{ transition: 'all 0.3s ease', '&:hover': { transform: 'translateY(-2px)' } }}>
-                    <Phone fontSize="small" sx={{ animation: `${pulse} 2s ease-in-out infinite` }} />
-                    <Typography variant="body2" fontWeight={500}>{header.contactPhone}</Typography>
-                  </Box>
-                )}
-                {header.contactEmail && (
-                  <Box display="flex" alignItems="center" gap={1} sx={{ transition: 'all 0.3s ease', '&:hover': { transform: 'translateY(-2px)' } }}>
-                    <Email fontSize="small" sx={{ animation: `${pulse} 2s ease-in-out infinite` }} />
-                    <Typography variant="body2" fontWeight={500}>{header.contactEmail}</Typography>
-                  </Box>
-                )}
-                {header.address && (
-                  <Box display="flex" alignItems="center" gap={1} sx={{ transition: 'all 0.3s ease', '&:hover': { transform: 'translateY(-2px)' } }}>
-                    <LocationOn fontSize="small" sx={{ animation: `${pulse} 2s ease-in-out infinite` }} />
-                    <Typography variant="body2" fontWeight={500}>{header.address}</Typography>
-                    {header?.mapLocation?.showMap && (
-                      <IconButton
-                        onClick={() => setMapDialogOpen(true)}
-                        size="small"
-                        sx={{
-                          color: 'white',
-                          ml: 0.5,
-                          background: 'rgba(255, 255, 255, 0.15)',
-                          backdropFilter: 'blur(10px)',
-                          width: 24,
-                          height: 24,
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            background: 'rgba(255, 255, 255, 0.25)',
-                            transform: 'scale(1.15)',
-                            boxShadow: '0 4px 15px rgba(255, 255, 255, 0.3)'
-                          }
-                        }}
-                      >
-                        <MapIcon sx={{ fontSize: 14 }} />
-                      </IconButton>
-                    )}
-                  </Box>
-                )}
-              </Box>
-              <Box display="flex" gap={1}>
-                {header.socialMedia && Object.entries(header.socialMedia).map(([platform, url]) =>
-                  url ? (
-                    <IconButton
-                      key={platform}
-                      size="small"
-                      sx={{
-                        color: 'white',
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          transform: 'translateY(-5px) scale(1.2)',
-                          filter: 'drop-shadow(0 5px 15px rgba(255, 255, 255, 0.5))'
-                        }
-                      }}
-                      component="a"
-                      href={url}
-                      target="_blank"
-                    >
-                      {getSocialIcon(platform)}
-                    </IconButton>
-                  ) : null
-                )}
-              </Box>
-            </Box>
-          </Container>
-        </TopBar>
-      )}
-
-      {/* Stunning Sticky Navigation */}
-      {header && (
-        <StickyNav scrolled={trigger}>
-          <Container maxWidth="xl">
-            <Box display="flex" justifyContent="space-between" alignItems="center" py={2.5}>
-              <Box display="flex" alignItems="center" gap={2}>
-                {header.logo && (
-                  <Avatar
-                    src={getImageUrl(header.logo)}
-                    alt={header.schoolName}
-                    imgProps={{ loading: 'eager', decoding: 'async' }}
-                    sx={{
-                      width: 75,
-                      height: 75,
-                      border: `4px solid ${header.primaryColor}`,
-                      boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
-                      transition: 'all 0.4s ease',
-                      animation: `${glow} 3s ease-in-out infinite`,
-                      '&:hover': {
-                        transform: 'scale(1.1) rotate(5deg)',
-                        boxShadow: '0 12px 35px rgba(124, 58, 237, 0.4)'
-                      }
-                    }}
-                  />
-                )}
-                <Box>
-                  <Typography
-                    variant="h4"
-                    fontWeight="bold"
-                    sx={{
-                      background: `linear-gradient(135deg, ${header.primaryColor} 0%, #7c3aed 100%)`,
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        transform: 'translateX(5px)'
-                      }
-                    }}
-                  >
-                    {header.schoolName || 'School'}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" fontWeight={500}>
-                    {header.tagline || 'Excellence in Education'}
-                  </Typography>
-                </Box>
-              </Box>
-              <Box display="flex" gap={2}>
-                <Button
-                  variant="outlined"
-                  size="large"
-                  onClick={() => navigate('/login')}
-                  sx={{
-                    borderColor: header.primaryColor,
-                    color: header.primaryColor,
-                    borderWidth: '2px',
-                    borderRadius: '12px',
-                    fontWeight: 600,
-                    px: 3,
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      borderWidth: '2px',
-                      borderColor: header.primaryColor,
-                      background: `${header.primaryColor}15`,
-                      transform: 'translateY(-3px)',
-                      boxShadow: '0 8px 20px rgba(0, 0, 0, 0.15)'
-                    }
-                  }}
-                >
-                  Login
-                </Button>
-                <Button
-                  variant="contained"
-                  size="large"
-                  onClick={() => scrollToSection('contact')}
-                  sx={{
-                    background: `linear-gradient(135deg, ${header.primaryColor} 0%, #7c3aed 100%)`,
-                    borderRadius: '12px',
-                    fontWeight: 600,
-                    px: 3,
-                    boxShadow: '0 8px 25px rgba(124, 58, 237, 0.3)',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      background: `linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%)`,
-                      transform: 'translateY(-3px)',
-                      boxShadow: '0 12px 35px rgba(124, 58, 237, 0.5)'
-                    }
-                  }}
-                >
-                  Contact Us
-                </Button>
-              </Box>
-            </Box>
-          </Container>
-        </StickyNav>
-      )}
-
-      {/* STUNNING FULL-SCREEN SLIDER */}
-      {sectionVisibility?.showSlider && sliders?.length > 0 ? (
+      {/* SIMPLE PROFESSIONAL SLIDER */}
+      {sliders?.length > 0 ? (
         <HeroSection>
           {sliders.map((slide, index) => (
             <HeroSlide key={index} active={currentSlide === index}>
-              {slide.mediaType === 'video' ? (
+              {slide.type === 'video' ? (
                 <HeroVideo
-                  src={getImageUrl(slide.mediaUrl)}
+                  src={getImageUrl(slide.url)}
                   autoPlay
                   loop
                   muted
@@ -937,7 +773,7 @@ const PublicHomePage = () => {
                 />
               ) : (
                 <HeroMedia
-                  src={getImageUrl(slide.mediaUrl)}
+                  src={getImageUrl(slide.url)}
                   alt={slide.title}
                   active={currentSlide === index}
                   loading={index === 0 ? "eager" : "lazy"}
@@ -1097,49 +933,507 @@ const PublicHomePage = () => {
         </HeroSection>
       )}
 
-      {/* 3D STATISTICS CARDS */}
-      {sectionVisibility?.showStatistics && statistics?.length > 0 && (
+      {/* MOVING NEWS TICKER */}
+      {announcements?.showSection && announcementsArray?.filter(item => item.published)?.length > 0 && (
+        <Box sx={{
+          background: '#0284c7',
+          color: 'white',
+          py: 1.5,
+          overflow: 'hidden',
+          borderTop: '2px solid #1e3a8a',
+          borderBottom: '2px solid #1e3a8a'
+        }}>
+          <Container maxWidth="xl">
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="body2" sx={{ fontWeight: '700', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+                📢 LATEST NEWS:
+              </Typography>
+              <Box sx={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+                <Box sx={{
+                  display: 'flex',
+                  gap: 4,
+                  animation: `${scrollLeft} 30s linear infinite`,
+                  whiteSpace: 'nowrap'
+                }}>
+                  {announcementsArray.filter(item => item.published).map((news, index) => (
+                    <Typography key={index} variant="body2" sx={{ fontSize: '0.85rem' }}>
+                      {news.title} • {new Date(news.date).toLocaleDateString()}
+                    </Typography>
+                  ))}
+                  {announcementsArray.filter(item => item.published).map((news, index) => (
+                    <Typography key={`dup-${index}`} variant="body2" sx={{ fontSize: '0.85rem' }}>
+                      {news.title} • {new Date(news.date).toLocaleDateString()}
+                    </Typography>
+                  ))}
+                </Box>
+              </Box>
+            </Box>
+          </Container>
+        </Box>
+      )}
+
+      {/* STATISTICS CARDS */}
+      {statistics?.showSection && statisticsArray?.length > 0 && (
         <Box
           sx={{
-            py: 8,
-            mt: -10,
+            py: 2,
             position: 'relative',
-            zIndex: 10,
             animation: visibleSections['statistics'] ? `${fadeInUp} 1s ease-out` : 'none'
           }}
           id="statistics"
           data-animate="true"
         >
           <Container maxWidth="xl">
-            <Grid container spacing={4}>
-              {statistics.map((stat, index) => {
+            <Grid container spacing={2}>
+              {statisticsArray.map((stat, index) => {
                 const icons = [
-                  <Groups sx={{ fontSize: '3rem' }} />,
-                  <MenuBook sx={{ fontSize: '3rem' }} />,
-                  <EmojiEvents sx={{ fontSize: '3rem' }} />,
-                  <Star sx={{ fontSize: '3rem' }} />
+                  <Groups sx={{ fontSize: '1.5rem' }} />,
+                  <MenuBook sx={{ fontSize: '1.5rem' }} />,
+                  <EmojiEvents sx={{ fontSize: '1.5rem' }} />,
+                  <Star sx={{ fontSize: '1.5rem' }} />
                 ];
                 return (
-                  <Grid item xs={12} sm={6} md={3} key={index}>
-                    <StatCard
-                      elevation={10}
-                      sx={{
-                        animationDelay: `${index * 0.1}s`
-                      }}
-                    >
-                      <StatIcon>
+                  <Grid item xs={6} sm={3} key={index}>
+                    <StatCard elevation={1}>
+                      <Box sx={{ fontSize: '1.5rem', mb: 0.5, opacity: 0.9 }}>
                         {icons[index % icons.length]}
-                      </StatIcon>
-                      <Typography variant="h2" fontWeight="bold" sx={{ fontSize: '4rem', mb: 1 }}>
+                      </Box>
+                      <Typography variant="h4" fontWeight="700" sx={{ fontSize: '1.8rem', mb: 0.3 }}>
                         {stat.value}{stat.suffix || ''}
                       </Typography>
-                      <Typography variant="h6" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                      <Typography variant="body2" sx={{ fontSize: '0.75rem', opacity: 0.85 }}>
                         {stat.label}
                       </Typography>
                     </StatCard>
                   </Grid>
                 );
               })}
+            </Grid>
+          </Container>
+        </Box>
+      )}
+
+      {/* ADMISSION SECTION - MOST IMPORTANT */}
+      <Box sx={{
+        py: 6,
+        background: 'linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%)',
+        color: 'white',
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: -100,
+          right: -100,
+          width: 300,
+          height: 300,
+          background: 'rgba(255,255,255,0.05)',
+          borderRadius: '50%'
+        }
+      }}>
+        <Container maxWidth="lg">
+          <Box textAlign="center">
+            <Box sx={{ fontSize: '4rem', mb: 2 }}>🎓</Box>
+            <Typography variant="h3" fontWeight="700" sx={{ mb: 2 }}>
+              Admissions Open
+            </Typography>
+            <Typography variant="h6" sx={{ mb: 4, opacity: 0.95, maxWidth: '700px', mx: 'auto' }}>
+              Join our community of learners and unlock your child's potential. Limited seats available for the upcoming academic year.
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Button
+                variant="contained"
+                size="large"
+                onClick={() => navigate('/register')}
+                sx={{
+                  background: 'white',
+                  color: '#1e3a8a',
+                  px: 4,
+                  py: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: '700',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+                  '&:hover': {
+                    background: '#f8f9fa',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
+                  }
+                }}
+              >
+                Apply Now
+              </Button>
+              <Button
+                variant="outlined"
+                size="large"
+                onClick={() => navigate('/contact')}
+                sx={{
+                  borderColor: 'white',
+                  color: 'white',
+                  px: 4,
+                  py: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: '700',
+                  borderRadius: '8px',
+                  borderWidth: '2px',
+                  '&:hover': {
+                    borderColor: 'white',
+                    background: 'rgba(255,255,255,0.1)',
+                    borderWidth: '2px',
+                    transform: 'translateY(-2px)'
+                  }
+                }}
+              >
+                Contact Us
+              </Button>
+            </Box>
+          </Box>
+        </Container>
+      </Box>
+
+      {/* FEATURES SECTION - MODERN & BEAUTIFUL */}
+      {features?.showSection && featuresArray?.length > 0 && (
+        <Box sx={{ py: 6, background: 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)' }}>
+          <Container maxWidth="xl">
+            <Typography
+              variant="h4"
+              align="center"
+              fontWeight="700"
+              sx={{
+                mb: 1,
+                color: '#1e3a8a',
+                position: 'relative',
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: -10,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '60px',
+                  height: '4px',
+                  background: 'linear-gradient(90deg, #0284c7, #1e3a8a)',
+                  borderRadius: '2px'
+                }
+              }}
+            >
+              {features.sectionTitle || 'Why Choose Us'}
+            </Typography>
+            <Typography variant="body1" align="center" sx={{ mb: 4, color: '#6b7280', maxWidth: '600px', mx: 'auto' }}>
+              Excellence in education with modern facilities and experienced faculty
+            </Typography>
+            <Grid container spacing={3}>
+              {featuresArray.slice(0, 4).map((feature, index) => (
+                <Grid item xs={12} sm={6} md={3} key={index}>
+                  <Box
+                    sx={{
+                      textAlign: 'center',
+                      p: 3,
+                      background: 'white',
+                      borderRadius: '16px',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                      transition: 'all 0.3s ease',
+                      height: '100%',
+                      '&:hover': {
+                        transform: 'translateY(-8px)',
+                        boxShadow: '0 12px 40px rgba(0,0,0,0.12)'
+                      }
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        fontSize: '3rem',
+                        mb: 1.5,
+                        color: '#0284c7',
+                        display: 'inline-block',
+                        p: 2,
+                        background: 'linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%)',
+                        borderRadius: '50%'
+                      }}
+                    >
+                      {feature.icon === 'students' && <Groups />}
+                      {feature.icon === 'teachers' && <MenuBook />}
+                      {feature.icon === 'classes' && <School />}
+                      {feature.icon === 'exams' && <EmojiEvents />}
+                    </Box>
+                    <Typography variant="h6" fontWeight="600" sx={{ mb: 1, color: '#1e3a8a' }}>
+                      {feature.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {feature.description}
+                    </Typography>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          </Container>
+        </Box>
+      )}
+
+      {/* SCHOOL FACILITIES - SPORTS & CLASSROOMS */}
+      <Box sx={{ py: 6, background: '#ffffff' }}>
+        <Container maxWidth="xl">
+          <Typography
+            variant="h4"
+            align="center"
+            fontWeight="700"
+            sx={{
+              mb: 1,
+              color: '#1e3a8a',
+              position: 'relative',
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                bottom: -10,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '60px',
+                height: '4px',
+                background: 'linear-gradient(90deg, #0284c7, #1e3a8a)',
+                borderRadius: '2px'
+              }
+            }}
+          >
+            Our Facilities
+          </Typography>
+          <Typography variant="body1" align="center" sx={{ mb: 4, color: '#6b7280' }}>
+            State-of-the-art infrastructure for holistic development
+          </Typography>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={4}>
+              <Box sx={{
+                p: 3,
+                background: 'linear-gradient(135deg, #e0f2fe 0%, #ffffff 100%)',
+                borderRadius: '12px',
+                border: '2px solid #0284c7',
+                transition: 'all 0.3s ease',
+                height: '100%',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 8px 30px rgba(2,132,199,0.2)'
+                }
+              }}>
+                <Box sx={{ fontSize: '3rem', mb: 1.5, textAlign: 'center' }}>🏀</Box>
+                <Typography variant="h6" fontWeight="700" sx={{ mb: 1, color: '#1e3a8a', textAlign: 'center' }}>
+                  Sports Complex
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+                  Basketball, Football, Cricket grounds, Indoor badminton and table tennis facilities
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Box sx={{
+                p: 3,
+                background: 'linear-gradient(135deg, #e0f2fe 0%, #ffffff 100%)',
+                borderRadius: '12px',
+                border: '2px solid #0284c7',
+                transition: 'all 0.3s ease',
+                height: '100%',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 8px 30px rgba(2,132,199,0.2)'
+                }
+              }}>
+                <Box sx={{ fontSize: '3rem', mb: 1.5, textAlign: 'center' }}>💻</Box>
+                <Typography variant="h6" fontWeight="700" sx={{ mb: 1, color: '#1e3a8a', textAlign: 'center' }}>
+                  Smart Classrooms
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+                  Digital boards, projectors, AC rooms with modern teaching aids and interactive learning
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Box sx={{
+                p: 3,
+                background: 'linear-gradient(135deg, #e0f2fe 0%, #ffffff 100%)',
+                borderRadius: '12px',
+                border: '2px solid #0284c7',
+                transition: 'all 0.3s ease',
+                height: '100%',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 8px 30px rgba(2,132,199,0.2)'
+                }
+              }}>
+                <Box sx={{ fontSize: '3rem', mb: 1.5, textAlign: 'center' }}>🔬</Box>
+                <Typography variant="h6" fontWeight="700" sx={{ mb: 1, color: '#1e3a8a', textAlign: 'center' }}>
+                  Science Labs
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+                  Physics, Chemistry, Biology and Computer labs with latest equipment and safety standards
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* ACHIEVEMENTS SECTION - MODERN GRADIENT CARDS */}
+      {achievements?.showSection && achievementsArray?.length > 0 && (
+        <Box sx={{ py: 6, background: '#ffffff' }}>
+          <Container maxWidth="xl">
+            <Typography
+              variant="h4"
+              align="center"
+              fontWeight="700"
+              sx={{
+                mb: 1,
+                color: '#1e3a8a',
+                position: 'relative',
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: -10,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '60px',
+                  height: '4px',
+                  background: 'linear-gradient(90deg, #0284c7, #1e3a8a)',
+                  borderRadius: '2px'
+                }
+              }}
+            >
+              {achievements.sectionTitle || 'Our Achievements'}
+            </Typography>
+            <Typography variant="body1" align="center" sx={{ mb: 4, color: '#6b7280' }}>
+              Celebrating excellence and success
+            </Typography>
+            <Grid container spacing={3}>
+              {achievementsArray.slice(0, 3).map((achievement, index) => (
+                <Grid item xs={12} md={4} key={index}>
+                  <Box
+                    sx={{
+                      p: 3,
+                      background: 'linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%)',
+                      borderRadius: '12px',
+                      color: 'white',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      transition: 'all 0.3s ease',
+                      height: '100%',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 12px 40px rgba(30,58,138,0.3)'
+                      },
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: -50,
+                        right: -50,
+                        width: 100,
+                        height: 100,
+                        background: 'rgba(255,255,255,0.1)',
+                        borderRadius: '50%'
+                      }
+                    }}
+                  >
+                    <Box sx={{ fontSize: '2.5rem', mb: 1 }}>
+                      <EmojiEvents />
+                    </Box>
+                    <Typography variant="h6" fontWeight="700" sx={{ mb: 0.5 }}>
+                      {achievement.title}
+                    </Typography>
+                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                      {achievement.year}
+                    </Typography>
+                    {achievement.description && (
+                      <Typography variant="caption" sx={{ mt: 1, display: 'block', opacity: 0.8 }}>
+                        {achievement.description}
+                      </Typography>
+                    )}
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          </Container>
+        </Box>
+      )}
+
+      {/* NEWS & EVENTS SECTION - MODERN CARDS WITH IMAGES */}
+      {announcements?.showSection && announcementsArray?.length > 0 && (
+        <Box sx={{ py: 6, background: 'linear-gradient(135deg, #f8f9fa 0%, #e5e7eb 100%)' }}>
+          <Container maxWidth="xl">
+            <Typography
+              variant="h4"
+              align="center"
+              fontWeight="700"
+              sx={{
+                mb: 1,
+                color: '#1e3a8a',
+                position: 'relative',
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: -10,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '60px',
+                  height: '4px',
+                  background: 'linear-gradient(90deg, #0284c7, #1e3a8a)',
+                  borderRadius: '2px'
+                }
+              }}
+            >
+              {announcements.sectionTitle || 'Latest News & Events'}
+            </Typography>
+            <Typography variant="body1" align="center" sx={{ mb: 4, color: '#6b7280' }}>
+              Stay updated with our latest activities and announcements
+            </Typography>
+            <Grid container spacing={3}>
+              {announcementsArray.filter(item => item.published).slice(0, 3).map((announcement, index) => (
+                <Grid item xs={12} md={4} key={index}>
+                  <Box
+                    sx={{
+                      background: 'white',
+                      borderRadius: '16px',
+                      overflow: 'hidden',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                      transition: 'all 0.3s ease',
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      '&:hover': {
+                        transform: 'translateY(-8px)',
+                        boxShadow: '0 12px 40px rgba(0,0,0,0.15)'
+                      }
+                    }}
+                  >
+                    {announcement.image && (
+                      <Box
+                        component="img"
+                        src={getImageUrl(announcement.image)}
+                        alt={announcement.title}
+                        sx={{
+                          width: '100%',
+                          height: 200,
+                          objectFit: 'cover'
+                        }}
+                      />
+                    )}
+                    <Box sx={{ p: 2.5, flexGrow: 1 }}>
+                      <Typography variant="h6" fontWeight="600" sx={{ mb: 1, color: '#1e3a8a', lineHeight: 1.4 }}>
+                        {announcement.title}
+                      </Typography>
+                      {announcement.description && (
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, lineHeight: 1.6 }}>
+                          {announcement.description.substring(0, 100)}{announcement.description.length > 100 ? '...' : ''}
+                        </Typography>
+                      )}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#0284c7' }}>
+                        <Box sx={{ fontSize: '1rem' }}>📅</Box>
+                        <Typography variant="caption" sx={{ fontWeight: 500 }}>
+                          {announcement.date ? new Date(announcement.date).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          }) : ''}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Grid>
+              ))}
             </Grid>
           </Container>
         </Box>
@@ -1602,235 +1896,15 @@ const PublicHomePage = () => {
         </Box>
       )}
 
-      {/* STUNNING FOOTER WITH WAVE */}
-      <Box
-        id="contact"
-        sx={{
-          position: 'relative',
-          background: `linear-gradient(135deg, ${header?.primaryColor || '#1e3a8a'} 0%, #7c3aed 50%, #06b6d4 100%)`,
-          backgroundSize: '200% 200%',
-          animation: `${gradientShift} 10s ease infinite`,
-          color: 'white',
-          py: 10,
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            background: 'radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%)',
-            animation: `${float} 15s ease-in-out infinite`
-          }
-        }}
-      >
-        {/* Wave Divider */}
-        <WaveDivider viewBox="0 0 1200 120" preserveAspectRatio="none">
-          <path
-            d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"
-            fill="white"
-          />
-        </WaveDivider>
-
-        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
-          <Grid container spacing={6}>
-            <Grid item xs={12} md={4}>
-              <Box display="flex" alignItems="center" gap={2} mb={3}>
-                {header?.logo && (
-                  <Avatar
-                    src={getImageUrl(header.logo)}
-                    imgProps={{ loading: 'lazy', decoding: 'async' }}
-                    sx={{
-                      width: 70,
-                      height: 70,
-                      border: '3px solid white',
-                      boxShadow: '0 8px 25px rgba(0, 0, 0, 0.2)'
-                    }}
-                  />
-                )}
-                <Typography variant="h4" fontWeight="bold">
-                  {header?.schoolName || 'Our School'}
-                </Typography>
-              </Box>
-              <Typography variant="body1" sx={{ mb: 2, fontSize: '1.1rem', fontWeight: 500 }}>
-                {header?.tagline || 'Excellence in Education'}
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9, lineHeight: 1.8 }}>
-                Empowering students to achieve their full potential through quality education and holistic development.
-              </Typography>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ mb: 3 }}>
-                Contact Information
-              </Typography>
-              {header?.contactPhone && (
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  gap={2}
-                  mb={2.5}
-                  sx={{
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateX(10px)'
-                    }
-                  }}
-                >
-                  <Phone sx={{ fontSize: 24 }} />
-                  <Typography variant="body1" fontSize="1.05rem">{header.contactPhone}</Typography>
-                </Box>
-              )}
-              {header?.contactEmail && (
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  gap={2}
-                  mb={2.5}
-                  sx={{
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateX(10px)'
-                    }
-                  }}
-                >
-                  <Email sx={{ fontSize: 24 }} />
-                  <Typography variant="body1" fontSize="1.05rem">{header.contactEmail}</Typography>
-                </Box>
-              )}
-              {header?.address && (
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  gap={2}
-                  sx={{
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateX(10px)'
-                    }
-                  }}
-                >
-                  <LocationOn sx={{ fontSize: 24 }} />
-                  <Typography variant="body1" fontSize="1.05rem">{header.address}</Typography>
-                  {header?.mapLocation?.showMap && (
-                    <IconButton
-                      onClick={() => setMapDialogOpen(true)}
-                      sx={{
-                        color: 'white',
-                        bgcolor: 'rgba(255, 255, 255, 0.15)',
-                        backdropFilter: 'blur(10px)',
-                        width: 40,
-                        height: 40,
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          bgcolor: 'rgba(255, 255, 255, 0.25)',
-                          transform: 'scale(1.1)',
-                          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)'
-                        }
-                      }}
-                    >
-                      <MapIcon fontSize="small" />
-                    </IconButton>
-                  )}
-                </Box>
-              )}
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ mb: 3 }}>
-                Quick Links
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                <Button
-                  sx={{
-                    color: 'white',
-                    justifyContent: 'flex-start',
-                    fontSize: '1.05rem',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateX(10px)',
-                      background: 'rgba(255, 255, 255, 0.1)'
-                    }
-                  }}
-                  onClick={() => navigate('/login')}
-                >
-                  Admin Login
-                </Button>
-                <Button
-                  sx={{
-                    color: 'white',
-                    justifyContent: 'flex-start',
-                    fontSize: '1.05rem',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateX(10px)',
-                      background: 'rgba(255, 255, 255, 0.1)'
-                    }
-                  }}
-                  onClick={() => navigate('/student-login')}
-                >
-                  Student Portal
-                </Button>
-                <Button
-                  sx={{
-                    color: 'white',
-                    justifyContent: 'flex-start',
-                    fontSize: '1.05rem',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateX(10px)',
-                      background: 'rgba(255, 255, 255, 0.1)'
-                    }
-                  }}
-                  onClick={() => scrollToSection('contact')}
-                >
-                  Contact Us
-                </Button>
-              </Box>
-
-              {header?.socialMedia && (
-                <Box display="flex" gap={2} mt={4}>
-                  {Object.entries(header.socialMedia).map(([platform, url]) =>
-                    url ? (
-                      <IconButton
-                        key={platform}
-                        sx={{
-                          color: 'white',
-                          bgcolor: 'rgba(255, 255, 255, 0.15)',
-                          backdropFilter: 'blur(10px)',
-                          width: 50,
-                          height: 50,
-                          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                          '&:hover': {
-                            bgcolor: 'rgba(255, 255, 255, 0.25)',
-                            transform: 'translateY(-8px) scale(1.15)',
-                            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)'
-                          }
-                        }}
-                        component="a"
-                        href={url}
-                        target="_blank"
-                      >
-                        {getSocialIcon(platform)}
-                      </IconButton>
-                    ) : null
-                  )}
-                </Box>
-              )}
-            </Grid>
-          </Grid>
-
-          <Box sx={{ mt: 8, pt: 4, borderTop: '2px solid rgba(255, 255, 255, 0.2)', textAlign: 'center' }}>
-            <Typography variant="h6" sx={{ mb: 1.5, fontWeight: 600 }}>
-              © {new Date().getFullYear()} {header?.schoolName || 'School Management System'}. All rights reserved.
-            </Typography>
-            <Typography variant="body1" sx={{ opacity: 0.9 }}>
-              Crafted with care for education excellence
-            </Typography>
-          </Box>
-        </Container>
-      </Box>
+      {/* WHATSAPP FLOATING BUTTON */}
+      {whatsappNumber && (
+        <WhatsAppButton
+          onClick={() => window.open(`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`, '_blank')}
+          title="Chat with us on WhatsApp"
+        >
+          <WhatsApp sx={{ fontSize: '2rem' }} />
+        </WhatsAppButton>
+      )}
 
       {/* BACK TO TOP BUTTON */}
       <BackToTop show={showBackToTop} onClick={scrollToTop}>
@@ -1949,6 +2023,166 @@ const PublicHomePage = () => {
           )}
         </DialogActions>
       </Dialog>
+
+      {/* CONTACT & LOCATION SECTION */}
+      {content?.contact?.showSection && (
+        <Box sx={{ py: 6, background: 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)' }}>
+          <Container maxWidth="xl">
+            <Typography
+              variant="h4"
+              align="center"
+              fontWeight="700"
+              sx={{
+                mb: 1,
+                color: '#1e3a8a',
+                position: 'relative',
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: -10,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '60px',
+                  height: '4px',
+                  background: 'linear-gradient(90deg, #0284c7, #1e3a8a)',
+                  borderRadius: '2px'
+                }
+              }}
+            >
+              Get In Touch
+            </Typography>
+            <Typography variant="body1" align="center" sx={{ mb: 4, color: '#6b7280' }}>
+              Visit us or reach out for any inquiries
+            </Typography>
+            <Grid container spacing={4} alignItems="center">
+              <Grid item xs={12} md={6}>
+                <Box sx={{
+                  p: 4,
+                  background: 'white',
+                  borderRadius: '16px',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+                }}>
+                  {content.contact.phone && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                      <Box sx={{
+                        p: 1.5,
+                        background: 'linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%)',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <Phone sx={{ color: '#0284c7', fontSize: '1.5rem' }} />
+                      </Box>
+                      <Box>
+                        <Typography variant="body2" color="text.secondary">Phone</Typography>
+                        <Typography variant="h6" fontWeight="600" sx={{ color: '#1e3a8a' }}>
+                          {content.contact.phone}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )}
+                  {content.contact.email && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                      <Box sx={{
+                        p: 1.5,
+                        background: 'linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%)',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <Email sx={{ color: '#0284c7', fontSize: '1.5rem' }} />
+                      </Box>
+                      <Box>
+                        <Typography variant="body2" color="text.secondary">Email</Typography>
+                        <Typography variant="h6" fontWeight="600" sx={{ color: '#1e3a8a' }}>
+                          {content.contact.email}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )}
+                  {content.contact.address && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box sx={{
+                        p: 1.5,
+                        background: 'linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%)',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <LocationOn sx={{ color: '#0284c7', fontSize: '1.5rem' }} />
+                      </Box>
+                      <Box>
+                        <Typography variant="body2" color="text.secondary">Address</Typography>
+                        <Typography variant="h6" fontWeight="600" sx={{ color: '#1e3a8a' }}>
+                          {content.contact.address}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )}
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={() => setMapDialogOpen(true)}
+                    sx={{
+                      mt: 3,
+                      py: 1.5,
+                      background: 'linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%)',
+                      color: 'white',
+                      fontWeight: '700',
+                      borderRadius: '8px',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #0284c7 0%, #1e3a8a 100%)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 20px rgba(30,58,138,0.3)'
+                      }
+                    }}
+                  >
+                    View on Map 📍
+                  </Button>
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box sx={{
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                  height: '350px'
+                }}>
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.1!2d-73.98!3d40.75!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDDCsDQ1JzAwLjAiTiA3M8KwNTgnNDguMCJX!5e0!3m2!1sen!2sus!4v1234567890"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen=""
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="School Location"
+                  />
+                </Box>
+              </Grid>
+            </Grid>
+          </Container>
+        </Box>
+      )}
+
+      {/* TINY FOOTER */}
+      <Box
+        component="footer"
+        sx={{
+          background: '#1e3a8a',
+          color: 'white',
+          py: 0.5,
+          mt: 3,
+          textAlign: 'center'
+        }}
+      >
+        <Typography variant="caption" sx={{ fontSize: '0.7rem', opacity: 0.6 }}>
+          © {new Date().getFullYear()} {header?.siteName || 'School'}
+        </Typography>
+      </Box>
     </Box>
   );
 };
