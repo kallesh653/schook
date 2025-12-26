@@ -68,38 +68,28 @@ const MobileCard = styled(Card)(({ theme }) => ({
   },
 }));
 
-// Gradient Header Card
+// Header Card
 const HeaderCard = styled(Card)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  background: '#1976d2',
   color: 'white',
   borderRadius: '0 0 32px 32px',
-  boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
   padding: theme.spacing(3),
   marginBottom: theme.spacing(2),
   position: 'relative',
   overflow: 'hidden',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: '-50%',
-    right: '-50%',
-    width: '200%',
-    height: '200%',
-    background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
-    animation: `${pulse} 3s infinite`,
-  },
 }));
 
 // Quick Action Button
-const QuickActionCard = styled(Card)(({ theme, gradient }) => ({
+const QuickActionCard = styled(Card)(({ theme, bgcolor }) => ({
   borderRadius: '20px',
   padding: theme.spacing(2),
   textAlign: 'center',
-  background: gradient || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  background: bgcolor || '#1976d2',
   color: 'white',
   cursor: 'pointer',
   transition: 'all 0.3s ease',
-  boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
   minHeight: '100px',
   display: 'flex',
   flexDirection: 'column',
@@ -110,7 +100,7 @@ const QuickActionCard = styled(Card)(({ theme, gradient }) => ({
   },
   '&:hover': {
     transform: 'translateY(-4px)',
-    boxShadow: '0 8px 30px rgba(0,0,0,0.25)',
+    boxShadow: '0 6px 20px rgba(0,0,0,0.2)',
   },
 }));
 
@@ -118,8 +108,8 @@ const QuickActionCard = styled(Card)(({ theme, gradient }) => ({
 const InfoCard = styled(Card)(({ theme }) => ({
   borderRadius: '16px',
   padding: theme.spacing(2),
-  background: 'linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%)',
-  border: '2px solid #f0f2f5',
+  background: '#ffffff',
+  border: '2px solid #e0e0e0',
   transition: 'all 0.3s ease',
   '&:hover': {
     borderColor: '#667eea',
@@ -251,10 +241,10 @@ export default function StudentDetails(){
     }
 
     const quickActions = [
-        { label: "Schedule", icon: <CalendarMonthIcon sx={{ fontSize: 40 }} />, route: "/student/periods", gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" },
-        { label: "Attendance", icon: <AssignmentIcon sx={{ fontSize: 40 }} />, route: "/student/attendance", gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)" },
-        { label: "Exams", icon: <GradeIcon sx={{ fontSize: 40 }} />, route: "/student/examinations", gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)" },
-        { label: "Notices", icon: <AnnouncementIcon sx={{ fontSize: 40 }} />, route: "/student/notice", gradient: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)" },
+        { label: "Schedule", icon: <CalendarMonthIcon sx={{ fontSize: 40 }} />, route: "/student/periods", bgcolor: "#1976d2" },
+        { label: "Attendance", icon: <AssignmentIcon sx={{ fontSize: 40 }} />, route: "/student/attendance", bgcolor: "#388e3c" },
+        { label: "Exams", icon: <GradeIcon sx={{ fontSize: 40 }} />, route: "/student/examinations", bgcolor: "#f57c00" },
+        { label: "Notices", icon: <AnnouncementIcon sx={{ fontSize: 40 }} />, route: "/student/notice", bgcolor: "#d32f2f" },
     ];
 
     return(
@@ -349,7 +339,7 @@ export default function StudentDetails(){
                         {quickActions.map((action, index) => (
                             <Grid item xs={6} sm={3} key={index}>
                                 <QuickActionCard
-                                    gradient={action.gradient}
+                                    bgcolor={action.bgcolor}
                                     onClick={() => navigate(action.route)}
                                     sx={{ animation: `${fadeIn} ${0.3 + index * 0.1}s ease-out` }}
                                 >

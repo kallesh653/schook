@@ -59,12 +59,12 @@ const MobileCard = styled(Card)(({ theme }) => ({
   },
 }));
 
-const StatsCard = styled(Card)(({ theme, gradient }) => ({
-  background: gradient || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+const StatsCard = styled(Card)(({ theme, bgcolor }) => ({
+  background: bgcolor || '#1976d2',
   borderRadius: '20px',
   padding: theme.spacing(2.5),
   color: 'white',
-  boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
   animation: `${slideIn} 0.6s ease-out`,
   minHeight: '120px',
   display: 'flex',
@@ -206,7 +206,7 @@ const AttendanceStudent = () => {
   return (
     <Container maxWidth="lg" sx={{ mt: { xs: 1, md: 3 }, mb: { xs: 10, md: 4 }, px: { xs: 2, md: 3 } }}>
       {/* Header Card */}
-      <MobileCard sx={{ mb: 3, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+      <MobileCard sx={{ mb: 3, background: '#1976d2', color: 'white' }}>
         <CardContent sx={{ p: { xs: 2, md: 3 } }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
             <Avatar
@@ -245,7 +245,7 @@ const AttendanceStudent = () => {
       {/* Stats Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={6} md={3}>
-          <StatsCard gradient="linear-gradient(135deg, #4caf50 0%, #81c784 100%)">
+          <StatsCard bgcolor="#388e3c">
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
               <CheckCircleIcon sx={{ fontSize: { xs: 32, md: 40 }, opacity: 0.9 }} />
             </Box>
@@ -259,7 +259,7 @@ const AttendanceStudent = () => {
         </Grid>
 
         <Grid item xs={6} md={3}>
-          <StatsCard gradient="linear-gradient(135deg, #f44336 0%, #e57373 100%)">
+          <StatsCard bgcolor="#d32f2f">
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
               <CancelIcon sx={{ fontSize: { xs: 32, md: 40 }, opacity: 0.9 }} />
             </Box>
@@ -273,7 +273,7 @@ const AttendanceStudent = () => {
         </Grid>
 
         <Grid item xs={6} md={3}>
-          <StatsCard gradient="linear-gradient(135deg, #2196f3 0%, #64b5f6 100%)">
+          <StatsCard bgcolor="#1976d2">
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
               <AssessmentIcon sx={{ fontSize: { xs: 32, md: 40 }, opacity: 0.9 }} />
             </Box>
@@ -287,7 +287,7 @@ const AttendanceStudent = () => {
         </Grid>
 
         <Grid item xs={6} md={3}>
-          <StatsCard gradient="linear-gradient(135deg, #ff9800 0%, #ffb74d 100%)">
+          <StatsCard bgcolor="#f57c00">
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
               <TrendingUpIcon sx={{ fontSize: { xs: 32, md: 40 }, opacity: 0.9 }} />
             </Box>
@@ -303,7 +303,7 @@ const AttendanceStudent = () => {
 
       {/* Chart */}
       <ChartContainer>
-        <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#667eea' }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#1976d2' }}>
           Attendance Distribution
         </Typography>
         <Box sx={{ maxWidth: { xs: '100%', md: '400px' }, mx: 'auto', py: 2 }}>
@@ -314,7 +314,7 @@ const AttendanceStudent = () => {
       {/* Attendance Records */}
       <MobileCard>
         <CardContent sx={{ p: { xs: 2, md: 3 } }}>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#667eea' }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#1976d2' }}>
             Attendance Records
           </Typography>
 
@@ -385,11 +385,9 @@ const AttendanceStudent = () => {
               sx={{
                 height: 10,
                 borderRadius: 5,
-                bgcolor: 'rgba(102, 126, 234, 0.1)',
+                bgcolor: '#e0e0e0',
                 '& .MuiLinearProgress-bar': {
-                  background: attendancePercentage >= 75
-                    ? 'linear-gradient(90deg, #4caf50 0%, #81c784 100%)'
-                    : 'linear-gradient(90deg, #ff9800 0%, #ffb74d 100%)',
+                  background: attendancePercentage >= 75 ? '#388e3c' : '#f57c00',
                   borderRadius: 5,
                 },
               }}

@@ -161,18 +161,7 @@ const scrollLeft = keyframes`
   100% { transform: translateX(-100%); }
 `;
 
-// ========== PROFESSIONAL TOP BAR (IIT Style) ==========
-const TopBar = styled(Box)(({ bgcolor }) => ({
-  background: bgcolor || '#1e3a8a',
-  color: 'white',
-  padding: '12px 0',
-  width: '100%',
-  position: 'relative',
-  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-  borderBottom: '2px solid #0284c7'
-}));
-
-// ========== STUNNING STICKY NAV ==========
+// ========== STICKY NAV ==========
 const StickyNav = styled(Box)(({ scrolled }) => ({
   background: scrolled
     ? 'rgba(255, 255, 255, 0.95)'

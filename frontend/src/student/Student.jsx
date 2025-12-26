@@ -58,9 +58,8 @@ const pulse = keyframes`
 
 // Mobile App Bar
 const AppBar = styled(MuiAppBar)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  boxShadow: '0 4px 20px rgba(102, 126, 234, 0.3)',
-  backdropFilter: 'blur(20px)',
+  background: '#1976d2',
+  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
   [theme.breakpoints.up('md')]: {
     marginLeft: 280,
     width: 'calc(100% - 280px)',
@@ -75,9 +74,9 @@ const MobileBottomNav = styled(BottomNavigation)(({ theme }) => ({
   right: 0,
   zIndex: 1200,
   height: 70,
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  boxShadow: '0 -4px 20px rgba(102, 126, 234, 0.3)',
-  borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+  background: '#1976d2',
+  boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.15)',
+  borderTop: '1px solid rgba(0, 0, 0, 0.1)',
   '& .MuiBottomNavigationAction-root': {
     color: 'rgba(255, 255, 255, 0.6)',
     minWidth: 'auto',
@@ -113,9 +112,9 @@ const DesktopDrawer = styled(Drawer)(({ theme }) => ({
   flexShrink: 0,
   '& .MuiDrawer-paper': {
     width: 280,
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    background: '#1976d2',
     color: '#ffffff',
-    boxShadow: '4px 0 20px rgba(102, 126, 234, 0.3)',
+    boxShadow: '2px 0 8px rgba(0, 0, 0, 0.15)',
     border: 'none',
   },
 }));
@@ -123,9 +122,8 @@ const DesktopDrawer = styled(Drawer)(({ theme }) => ({
 // Profile Header
 const ProfileHeader = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
-  background: 'rgba(255, 255, 255, 0.15)',
-  backdropFilter: 'blur(15px)',
-  borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+  background: 'rgba(0, 0, 0, 0.1)',
+  borderBottom: '1px solid rgba(255, 255, 255, 0.15)',
   animation: `${fadeIn} 0.6s ease-out`,
   textAlign: 'center',
 }));
@@ -200,10 +198,10 @@ export default function Student() {
             height: 80,
             margin: '0 auto',
             mb: 2,
-            background: 'linear-gradient(45deg, #FFD700 30%, #FFA500 90%)',
+            background: '#0d47a1',
             fontSize: '2rem',
             animation: `${pulse} 2s infinite`,
-            border: '3px solid rgba(255,255,255,0.3)'
+            border: '3px solid rgba(255,255,255,0.2)'
           }}
         >
           🎓
@@ -329,7 +327,7 @@ export default function Student() {
           display: { xs: 'block', md: 'none' },
           '& .MuiDrawer-paper': {
             width: 280,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: '#1976d2',
             color: '#ffffff',
           },
         }}
@@ -387,22 +385,22 @@ export default function Student() {
       {/* Floating Notification Button (Mobile Only) */}
       {isMobile && (
         <Fab
-          color="secondary"
           sx={{
             position: 'fixed',
             bottom: 85,
             right: 20,
-            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-            boxShadow: '0 8px 25px rgba(240, 147, 251, 0.4)',
+            background: '#d32f2f',
+            color: 'white',
+            boxShadow: '0 4px 12px rgba(211, 47, 47, 0.4)',
             '&:hover': {
-              background: 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)',
-              transform: 'scale(1.1)',
+              background: '#c62828',
+              transform: 'scale(1.05)',
             },
             transition: 'all 0.3s ease',
           }}
           onClick={() => navigate('/student/notice')}
         >
-          <Badge badgeContent={3} color="error">
+          <Badge badgeContent={3} color="error" sx={{ '& .MuiBadge-badge': { bgcolor: '#fff', color: '#d32f2f' } }}>
             <NotificationsIcon />
           </Badge>
         </Fab>
