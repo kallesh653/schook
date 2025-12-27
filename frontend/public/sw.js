@@ -1,4 +1,4 @@
-// School Management System - Unified Service Worker v3.0
+// School Management System - Unified Service Worker v3.1
 // Handles both PWA functionality AND Firebase Cloud Messaging
 
 // Import Firebase scripts for push notifications
@@ -21,8 +21,8 @@ firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
 // PWA Cache names
-const CACHE_NAME = 'school-erp-v3.0';
-const RUNTIME_CACHE = 'school-erp-runtime-v3.0';
+const CACHE_NAME = 'school-erp-v3.1';
+const RUNTIME_CACHE = 'school-erp-runtime-v3.1';
 
 const PRECACHE_URLS = [
   '/',
@@ -33,7 +33,7 @@ const PRECACHE_URLS = [
 
 // Install event - cache essential files
 self.addEventListener('install', (event) => {
-  console.log('🔧 Service Worker: Installing v3.0 with Firebase Messaging...');
+  console.log('🔧 Service Worker: Installing v3.1 with Firebase Messaging...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -215,4 +215,4 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-console.log('📱 School Management Unified Service Worker v3.0 loaded (PWA + Firebase Messaging)');
+console.log('📱 School Management Unified Service Worker v3.1 loaded (PWA + Firebase Messaging)');
