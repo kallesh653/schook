@@ -89,8 +89,93 @@ const StyledButton = styled(Box)({
     boxShadow: '0 6px 20px rgba(102, 126, 234, 0.6)'
   },
   '@media (max-width: 600px)': {
+    padding: '6px 12px',
+    fontSize: '0.75rem',
+    gap: '4px'
+  }
+});
+
+const LoginButton = styled(Box)({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '10px 24px',
+  borderRadius: '25px',
+  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+  color: 'white',
+  fontWeight: 700,
+  fontSize: '0.95rem',
+  cursor: 'pointer',
+  transition: 'all 0.3s ease',
+  boxShadow: '0 4px 15px rgba(16, 185, 129, 0.4)',
+  '&:hover': {
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 6px 20px rgba(16, 185, 129, 0.6)'
+  },
+  '@media (max-width: 600px)': {
     padding: '8px 16px',
-    fontSize: '0.85rem'
+    fontSize: '0.8rem',
+    gap: '4px',
+    '& svg': {
+      fontSize: '1rem'
+    }
+  }
+});
+
+const StudentLoginButton = styled(Box)({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '10px 24px',
+  borderRadius: '25px',
+  background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+  color: 'white',
+  fontWeight: 700,
+  fontSize: '0.95rem',
+  cursor: 'pointer',
+  transition: 'all 0.3s ease',
+  boxShadow: '0 4px 15px rgba(2, 132, 199, 0.4)',
+  '&:hover': {
+    background: 'linear-gradient(135deg, #0369a1 0%, #075985 100%)',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 6px 20px rgba(2, 132, 199, 0.6)'
+  },
+  '@media (max-width: 600px)': {
+    padding: '8px 16px',
+    fontSize: '0.8rem',
+    gap: '4px',
+    '& svg': {
+      fontSize: '1rem'
+    }
+  }
+});
+
+const RegisterButton = styled(Box)({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '10px 24px',
+  borderRadius: '25px',
+  background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+  color: 'white',
+  fontWeight: 700,
+  fontSize: '0.95rem',
+  cursor: 'pointer',
+  transition: 'all 0.3s ease',
+  boxShadow: '0 4px 15px rgba(245, 158, 11, 0.4)',
+  '&:hover': {
+    background: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 6px 20px rgba(245, 158, 11, 0.6)'
+  },
+  '@media (max-width: 600px)': {
+    padding: '8px 16px',
+    fontSize: '0.8rem',
+    gap: '4px',
+    '& svg': {
+      fontSize: '1rem'
+    }
   }
 });
 
@@ -406,28 +491,30 @@ const Navbar = () => {
               <>
                 {/* Student Login Button */}
                 <Link to="/student-login" style={{ textDecoration: 'none' }}>
-                  <StyledButton sx={{ background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' }}>
+                  <StudentLoginButton>
                     <PersonIcon />
-                    <span style={{ display: { xs: 'none', sm: 'inline' } }}>Student Login</span>
-                  </StyledButton>
+                    <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Student Login</Box>
+                  </StudentLoginButton>
                 </Link>
 
                 {headerSettings.showLoginButton && (
                   <Link to="/login" style={{ textDecoration: 'none' }}>
-                    <StyledButton>
+                    <LoginButton>
                       <LoginIcon />
-                      <span style={{ display: { xs: 'none', sm: 'inline' } }}>Admin Login</span>
-                    </StyledButton>
+                      <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Admin Login</Box>
+                    </LoginButton>
                   </Link>
                 )}
 
                 {headerSettings.showRegisterButton && (
-                  <Link to="/register" style={{ textDecoration: 'none', display: { xs: 'none', md: 'block' } }}>
-                    <StyledButton>
-                      <PersonAddIcon />
-                      Register
-                    </StyledButton>
-                  </Link>
+                  <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                    <Link to="/register" style={{ textDecoration: 'none' }}>
+                      <RegisterButton>
+                        <PersonAddIcon />
+                        Register
+                      </RegisterButton>
+                    </Link>
+                  </Box>
                 )}
               </>
             )}
