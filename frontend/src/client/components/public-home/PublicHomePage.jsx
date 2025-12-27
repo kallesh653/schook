@@ -900,7 +900,23 @@ const PublicHomePage = () => {
                 <Button
                   variant="contained"
                   size="small"
-                  startIcon={<CloudUpload sx={{ fontSize: { xs: '1rem', md: '1.2rem' } }} />}
+                  startIcon={
+                    <Box
+                      component="img"
+                      src={header?.logo || '/school-logo.png'}
+                      alt="School Logo"
+                      sx={{
+                        width: { xs: 18, md: 22 },
+                        height: { xs: 18, md: 22 },
+                        objectFit: 'contain',
+                        borderRadius: '4px'
+                      }}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = '/school-logo.png';
+                      }}
+                    />
+                  }
                   onClick={handleInstallClick}
                   sx={{
                     background: `linear-gradient(135deg, ${header?.primaryColor || '#1e3a8a'} 0%, ${header?.secondaryColor || '#0284c7'} 100%)`,

@@ -19,7 +19,6 @@ import {
 } from '@mui/icons-material';
 import { styled, keyframes } from '@mui/material/styles';
 import notificationService from '../../../services/notificationService';
-import AnimatedEducationLogo from '../../../components/AnimatedEducationLogo';
 
 const pulse = keyframes`
   0%, 100% { transform: scale(1); }
@@ -215,7 +214,7 @@ const NotificationPermission = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
                 <Box sx={{ transform: 'scale(0.9)' }}>
-                  <AnimatedEducationLogo />
+                  <NotificationsActiveIcon sx={{ fontSize: 48, color: 'white' }} />
                 </Box>
 
                 <Box sx={{ flex: 1 }}>

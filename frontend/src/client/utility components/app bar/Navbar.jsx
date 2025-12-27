@@ -401,7 +401,21 @@ const Navbar = () => {
                 sx={{ display: { xs: 'none', sm: 'flex' } }}
                 title="Install app to your device"
               >
-                <DownloadIcon />
+                <Box
+                  component="img"
+                  src={schoolLogo}
+                  alt="School Logo"
+                  sx={{
+                    width: 24,
+                    height: 24,
+                    objectFit: 'contain',
+                    borderRadius: '4px'
+                  }}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/school-logo.png';
+                  }}
+                />
                 Download App
               </DownloadAppButton>
             )}
