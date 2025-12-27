@@ -177,81 +177,82 @@ const Navbar = () => {
     checkAuth();
   }, []);
 
-  // PWA Install Handler - Enhanced
+  // PWA Install Handler
   useEffect(() => {
+    console.log('[NAVBAR] PWA install handler initializing');
+
     // Check if app is already installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
                         window.navigator.standalone ||
                         document.referrer.includes('android-app://');
 
     if (isStandalone) {
-      console.log('✅ App is already installed - hiding install button');
+      console.log('[NAVBAR] App already installed');
       setShowInstallButton(false);
       return;
     }
 
-    // Show install button immediately for all users (not installed)
-    console.log('📱 Showing Download App button');
+    // Show install button (not installed)
     setShowInstallButton(true);
 
-    const handleBeforeInstallPrompt = (e) => {
-      console.log('✅ beforeinstallprompt event fired - Native prompt available');
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setShowInstallButton(true);
+    // Use the global prompt if available
+    if (window.deferredPrompt) {
+      setDeferredPrompt(window.deferredPrompt);
+      console.log('[NAVBAR] Using global deferred prompt');
+    }
+
+    // Listen for when prompt becomes available
+    const handlePWAInstallable = () => {
+      console.log('[NAVBAR] PWA became installable');
+      setDeferredPrompt(window.deferredPrompt);
     };
 
-    const handleAppInstalled = () => {
-      console.log('✅ PWA installed successfully');
+    // Listen for installation complete
+    const handlePWAInstalled = () => {
+      console.log('[NAVBAR] PWA installed - hiding button');
       setShowInstallButton(false);
       setDeferredPrompt(null);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
+    window.addEventListener('pwa-installable', handlePWAInstallable);
+    window.addEventListener('pwa-installed', handlePWAInstalled);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener('pwa-installable', handlePWAInstallable);
+      window.removeEventListener('pwa-installed', handlePWAInstalled);
     };
   }, []);
 
   const handleInstallClick = async () => {
-    console.log('📱 Download App button clicked');
-    console.log('Deferred prompt available:', !!deferredPrompt);
+    console.log('[NAVBAR] Install button clicked');
 
-    if (!deferredPrompt) {
-      // No native prompt available - show browser-specific instructions
-      console.log('ℹ️ Showing manual installation instructions');
+    const prompt = deferredPrompt || window.deferredPrompt;
+
+    if (!prompt) {
+      console.warn('[NAVBAR] No install prompt available - showing instructions');
+      console.warn('Make sure app is served over HTTPS for native installation');
       setShowInstallDialog(true);
       return;
     }
 
     try {
-      console.log('🚀 Triggering native PWA install prompt...');
+      console.log('[NAVBAR] Triggering native installation prompt');
 
-      // Show the native install prompt
-      const promptResult = await deferredPrompt.prompt();
-      console.log('✅ Native prompt shown:', promptResult);
+      // Show native browser install dialog
+      await prompt.prompt();
 
-      // Wait for user's response
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`📊 User response: ${outcome}`);
+      // Wait for user response
+      const { outcome } = await prompt.userChoice;
+      console.log(`[NAVBAR] User ${outcome} installation`);
 
       if (outcome === 'accepted') {
-        console.log('✅ User accepted installation - App will install shortly');
+        // Installation accepted - hide button
         setShowInstallButton(false);
-      } else {
-        console.log('❌ User dismissed installation');
-        // Still show manual instructions as fallback
-        setShowInstallDialog(true);
+        window.deferredPrompt = null;
+        setDeferredPrompt(null);
       }
-
-      // Clear the deferred prompt
-      setDeferredPrompt(null);
     } catch (error) {
-      console.error('❌ Error during PWA installation:', error);
-      // Fallback to manual instructions
+      console.error('[NAVBAR] Installation error:', error);
       setShowInstallDialog(true);
     }
   };
