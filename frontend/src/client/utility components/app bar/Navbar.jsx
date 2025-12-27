@@ -126,14 +126,6 @@ const DashboardButton = styled(StyledButton)({
   }
 });
 
-const DownloadAppButton = styled(StyledButton)({
-  background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-  boxShadow: '0 4px 15px rgba(245, 87, 108, 0.4)',
-  '&:hover': {
-    boxShadow: '0 6px 20px rgba(245, 87, 108, 0.6)'
-  }
-});
-
 const Navbar = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
