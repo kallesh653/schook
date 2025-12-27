@@ -9,13 +9,7 @@ import {
   Menu,
   MenuItem,
   Typography,
-  Dialog,
-  DialogContent,
-  DialogActions,
-  Button,
-  List,
-  ListItem,
-  ListItemText
+  Button
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
@@ -23,15 +17,12 @@ import {
   Login as LoginIcon,
   PersonAdd as PersonAddIcon,
   Dashboard as DashboardIcon,
-  School as SchoolIcon,
   GetApp as DownloadIcon,
   Logout as LogoutIcon,
-  Person as PersonIcon,
-  Close as CloseIcon
+  Person as PersonIcon
 } from '@mui/icons-material';
 import { baseUrl } from '../../../environment';
 import axios from 'axios';
-import AnimatedEducationLogo from '../../../components/AnimatedEducationLogo';
 
 // Styled Components
 const StyledAppBar = styled(AppBar)(({ headerBgColor }) => ({
@@ -218,7 +209,6 @@ const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [showInstallDialog, setShowInstallDialog] = useState(false);
 
   // Header settings
   const [headerSettings, setHeaderSettings] = useState({
@@ -278,7 +268,7 @@ const Navbar = () => {
     checkAuth();
   }, []);
 
-  // PWA Install Handler
+  // PWA Install Handler - ONLY show button when prompt is available
   useEffect(() => {
     console.log('[NAVBAR] PWA install handler initializing');
 
@@ -293,24 +283,26 @@ const Navbar = () => {
       return;
     }
 
-    // Show install button (not installed)
-    setShowInstallButton(true);
-
-    // Use the global prompt if available
+    // ONLY show button if we have a valid prompt
     if (window.deferredPrompt) {
       setDeferredPrompt(window.deferredPrompt);
-      console.log('[NAVBAR] Using global deferred prompt');
+      setShowInstallButton(true);
+      console.log('[NAVBAR] ✅ Install prompt available - showing button');
+    } else {
+      setShowInstallButton(false);
+      console.log('[NAVBAR] ⏳ Waiting for install prompt...');
     }
 
     // Listen for when prompt becomes available
     const handlePWAInstallable = () => {
-      console.log('[NAVBAR] PWA became installable');
+      console.log('[NAVBAR] ✅ PWA became installable - showing button');
       setDeferredPrompt(window.deferredPrompt);
+      setShowInstallButton(true);
     };
 
     // Listen for installation complete
     const handlePWAInstalled = () => {
-      console.log('[NAVBAR] PWA installed - hiding button');
+      console.log('[NAVBAR] 🎉 PWA installed - hiding button');
       setShowInstallButton(false);
       setDeferredPrompt(null);
     };
@@ -330,103 +322,31 @@ const Navbar = () => {
     const prompt = deferredPrompt || window.deferredPrompt;
 
     if (!prompt) {
-      console.error('[NAVBAR] ❌ NO INSTALL PROMPT AVAILABLE');
-      console.error('Possible reasons:');
-      console.error('1. App not served over HTTPS');
-      console.error('2. Service worker not registered');
-      console.error('3. App already installed');
-      console.error('4. Browser does not support PWA');
-
-      // Show instructions only if really needed
-      setShowInstallDialog(true);
+      console.error('[NAVBAR] ❌ NO INSTALL PROMPT - Button should not be visible');
       return;
     }
 
     try {
-      console.log('[NAVBAR] ✅ Prompt available - triggering native install');
+      console.log('[NAVBAR] ✅ Triggering NATIVE installation dialog...');
 
       // Trigger the native browser installation dialog
       await prompt.prompt();
 
       // Wait for user's choice
       const { outcome } = await prompt.userChoice;
-      console.log(`[NAVBAR] 📊 User ${outcome} the installation`);
+      console.log(`[NAVBAR] 📊 User ${outcome} installation`);
 
       if (outcome === 'accepted') {
-        console.log('[NAVBAR] 🎉 Installation accepted!');
+        console.log('[NAVBAR] 🎉 App installation accepted!');
         setShowInstallButton(false);
         window.deferredPrompt = null;
         setDeferredPrompt(null);
-      } else {
-        console.log('[NAVBAR] ❌ User declined installation');
       }
     } catch (error) {
-      console.error('[NAVBAR] ❌ Installation error:', error.message);
-      console.error('Full error:', error);
+      console.error('[NAVBAR] ❌ Installation error:', error);
     }
   };
 
-  const getBrowserInstructions = () => {
-    const userAgent = navigator.userAgent.toLowerCase();
-
-    if (userAgent.includes('chrome') && !userAgent.includes('edge')) {
-      if (/android/i.test(userAgent)) {
-        return {
-          browser: 'Chrome (Android)',
-          icon: '📱',
-          steps: [
-            'Tap the menu button (⋮) in the top right corner',
-            'Select "Add to Home screen" or "Install app"',
-            'Tap "Add" to confirm installation',
-            'The app icon will appear on your home screen'
-          ]
-        };
-      }
-      return {
-        browser: 'Chrome (Desktop)',
-        icon: '💻',
-        steps: [
-          'Look for the install icon (⊕) in the address bar',
-          'Or click the menu (⋮) → "Install School Management System"',
-          'Click "Install" to confirm',
-          'The app will open in a new window'
-        ]
-      };
-    } else if (userAgent.includes('safari') && /iphone|ipad/i.test(userAgent)) {
-      return {
-        browser: 'Safari (iOS)',
-        icon: '🍎',
-        steps: [
-          'Tap the Share button (⎙) at the bottom',
-          'Scroll down and tap "Add to Home Screen"',
-          'Tap "Add" in the top right',
-          'The app icon will appear on your home screen'
-        ]
-      };
-    } else if (userAgent.includes('edge')) {
-      return {
-        browser: 'Microsoft Edge',
-        icon: '🌐',
-        steps: [
-          'Click the menu (...) in the top right',
-          'Go to Apps → "Install this site as an app"',
-          'Click "Install" to confirm',
-          'The app will open in a new window'
-        ]
-      };
-    }
-
-    return {
-      browser: 'Your Browser',
-      icon: '🌐',
-      steps: [
-        'Chrome (Desktop): Click install icon in address bar',
-        'Chrome (Mobile): Menu → "Add to Home screen"',
-        'Safari (iOS): Share → "Add to Home Screen"',
-        'Edge: Menu → Apps → "Install app"'
-      ]
-    };
-  };
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -580,97 +500,6 @@ const Navbar = () => {
           </Box>
         </Toolbar>
       </Container>
-
-      {/* Professional Install Instructions Dialog */}
-      <Dialog
-        open={showInstallDialog}
-        onClose={() => setShowInstallDialog(false)}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: '20px',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white'
-          }
-        }}
-      >
-        <DialogContent sx={{ pt: 4, pb: 3 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-            {/* Animated Logo */}
-            <AnimatedEducationLogo />
-
-            {/* Title */}
-            <Typography variant="h5" fontWeight="700" textAlign="center">
-              Install School Management App
-            </Typography>
-
-            {/* Browser-specific instructions */}
-            {(() => {
-              const instructions = getBrowserInstructions();
-              return (
-                <>
-                  <Typography variant="h6" fontWeight="600" textAlign="center">
-                    {instructions.icon} {instructions.browser}
-                  </Typography>
-
-                  <List sx={{ width: '100%', bgcolor: 'rgba(255,255,255,0.1)', borderRadius: '12px', p: 2 }}>
-                    {instructions.steps.map((step, index) => (
-                      <ListItem key={index} sx={{ py: 1 }}>
-                        <Box
-                          sx={{
-                            minWidth: 32,
-                            height: 32,
-                            borderRadius: '50%',
-                            bgcolor: 'rgba(255,255,255,0.2)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            mr: 2,
-                            fontWeight: 700
-                          }}
-                        >
-                          {index + 1}
-                        </Box>
-                        <ListItemText
-                          primary={step}
-                          primaryTypographyProps={{
-                            sx: { color: 'white', fontSize: '0.95rem' }
-                          }}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-
-                  <Typography variant="body2" textAlign="center" sx={{ opacity: 0.9, mt: 1 }}>
-                    💡 Installed apps load faster and work offline!
-                  </Typography>
-                </>
-              );
-            })()}
-          </Box>
-        </DialogContent>
-
-        <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
-          <Button
-            onClick={() => setShowInstallDialog(false)}
-            variant="contained"
-            sx={{
-              bgcolor: 'white',
-              color: '#667eea',
-              fontWeight: 700,
-              px: 4,
-              py: 1.5,
-              borderRadius: '12px',
-              '&:hover': {
-                bgcolor: 'rgba(255,255,255,0.9)'
-              }
-            }}
-          >
-            Got it!
-          </Button>
-        </DialogActions>
-      </Dialog>
     </StyledAppBar>
   );
 };
