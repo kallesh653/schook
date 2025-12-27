@@ -122,8 +122,7 @@ function App() {
 
             {/* Public routes with Client wrapper (includes Navbar) */}
             <Route path="/" element={<Client />}>
-              <Route index element={<Navigate to="/home" replace />} />
-              <Route path="home" element={<PublicHomePage />} />
+              <Route index element={<PublicHomePage />} />
               <Route path="contact" element={<Contact />} />
               <Route path="login" element={<Login />} />
               <Route path="student-login" element={<StudentLogin />} />

@@ -15,14 +15,13 @@ export default function Client() {
     <>
       {!isHomePage && <Navbar />}
       <Box
-        // className="container-hero"
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "90vh",
-          backgroundColor: "#fefefe",
-
+          display: isHomePage ? "block" : "flex",
+          justifyContent: isHomePage ? "normal" : "center",
+          alignItems: isHomePage ? "normal" : "center",
+          minHeight: isHomePage ? "auto" : "90vh",
+          backgroundColor: isHomePage ? "transparent" : "#fefefe",
+          width: "100%",
         }}
         component={"div"}
       >
