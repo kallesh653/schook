@@ -48,6 +48,7 @@ import PublicHomePage from "./client/components/public-home/PublicHomePage";
 import ProtectedWebsiteBuilder from "./website-builder/ProtectedWebsiteBuilder";
 import TransportFees from "./school/components/transport/TransportFees";
 import MarkSheetGenerator from "./school/components/marksheet/MarkSheetGenerator";
+import PWAInstallBanner from "./components/PWAInstallBanner";
 import FinalMarkSheet from "./school/components/marksheet/FinalMarkSheet";
 import SmsManagement from "./school/components/sms/SmsManagement";
 import SmsToParents from "./school/components/sms/SmsToParents";
@@ -133,8 +134,9 @@ function App() {
           </Routes>
         </BrowserRouter>
         </ThemeProvider>
-      
-      
+
+        {/* PWA Install Banner - Shows automatically when installable */}
+        <PWAInstallBanner />
       </>
     );
   

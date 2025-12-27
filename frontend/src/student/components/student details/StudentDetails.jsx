@@ -255,7 +255,7 @@ export default function StudentDetails(){
                 <Box sx={{ position: 'relative', zIndex: 1 }}>
                     <Box sx={{ textAlign: 'center', mb: 2 }}>
                         <Avatar
-                            src={student?.student_image ? `/images/uploaded/student/${student.student_image}` : undefined}
+                            src={student?.student_image ? `${baseUrl.replace('/api', '')}/uploads/student/${student.student_image}` : undefined}
                             sx={{
                                 width: { xs: 90, md: 110 },
                                 height: { xs: 90, md: 110 },

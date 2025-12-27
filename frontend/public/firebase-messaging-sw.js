@@ -26,8 +26,8 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification?.title || 'School Management';
   const notificationOptions = {
     body: payload.notification?.body || 'You have a new notification',
-    icon: payload.notification?.icon || '/logo.png',
-    badge: '/logo.png',
+    icon: payload.notification?.icon || '/school-logo.png',
+    badge: '/school-logo.png',
     tag: payload.data?.type || 'general',
     data: payload.data,
     requireInteraction: true,

@@ -1,5 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Container, Box, IconButton, Avatar, Menu, MenuItem, Typography } from '@mui/material';
+import {
+  AppBar,
+  Toolbar,
+  Container,
+  Box,
+  IconButton,
+  Avatar,
+  Menu,
+  MenuItem,
+  Typography,
+  Dialog,
+  DialogContent,
+  DialogActions,
+  Button,
+  List,
+  ListItem,
+  ListItemText
+} from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import {
@@ -9,10 +26,12 @@ import {
   School as SchoolIcon,
   GetApp as DownloadIcon,
   Logout as LogoutIcon,
-  Person as PersonIcon
+  Person as PersonIcon,
+  Close as CloseIcon
 } from '@mui/icons-material';
 import { baseUrl } from '../../../environment';
 import axios from 'axios';
+import AnimatedEducationLogo from '../../../components/AnimatedEducationLogo';
 
 // Styled Components
 const StyledAppBar = styled(AppBar)(({ headerBgColor }) => ({
@@ -83,6 +102,14 @@ const DashboardButton = styled(StyledButton)({
   }
 });
 
+const DownloadAppButton = styled(StyledButton)({
+  background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+  boxShadow: '0 4px 15px rgba(245, 87, 108, 0.4)',
+  '&:hover': {
+    boxShadow: '0 6px 20px rgba(245, 87, 108, 0.6)'
+  }
+});
+
 const Navbar = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -90,6 +117,7 @@ const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallDialog, setShowInstallDialog] = useState(false);
 
   // Header settings
   const [headerSettings, setHeaderSettings] = useState({
@@ -102,8 +130,8 @@ const Navbar = () => {
     textColor: '#333'
   });
 
-  const [schoolLogo, setSchoolLogo] = useState('');
-  const [schoolName, setSchoolName] = useState('GenTime School');
+  const [schoolLogo, setSchoolLogo] = useState('/school-logo.png');
+  const [schoolName, setSchoolName] = useState('School Management');
 
   // Fetch public home page data
   useEffect(() => {
@@ -113,12 +141,14 @@ const Navbar = () => {
         if (response.data.success) {
           const data = response.data.data;
           if (data.header) {
-            setSchoolName(data.header.siteName || 'GenTime School');
-            setSchoolLogo(data.header.logo || '');
+            setSchoolName(data.header.siteName || 'School Management');
+            setSchoolLogo(data.header.logo || '/school-logo.png');
           }
         }
       } catch (error) {
         console.error('Error fetching public data:', error);
+        // Use default logo if API fails
+        setSchoolLogo('/school-logo.png');
       }
     };
 
@@ -147,30 +177,135 @@ const Navbar = () => {
     checkAuth();
   }, []);
 
-  // PWA Install Handler
+  // PWA Install Handler - Enhanced
   useEffect(() => {
+    // Check if app is already installed
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                        window.navigator.standalone ||
+                        document.referrer.includes('android-app://');
+
+    if (isStandalone) {
+      console.log('App is already installed');
+      setShowInstallButton(false);
+      return;
+    }
+
     const handleBeforeInstallPrompt = (e) => {
+      console.log('✅ beforeinstallprompt event fired - PWA is installable');
       e.preventDefault();
       setDeferredPrompt(e);
       setShowInstallButton(true);
     };
 
+    const handleAppInstalled = () => {
+      console.log('✅ PWA installed successfully');
+      setShowInstallButton(false);
+      setDeferredPrompt(null);
+    };
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    // Show button by default (will work even if event hasn't fired yet)
+    setTimeout(() => {
+      if (!isStandalone) {
+        setShowInstallButton(true);
+      }
+    }, 2000);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
   const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
+    if (!deferredPrompt) {
+      // Show professional dialog with browser-specific instructions
+      setShowInstallDialog(true);
+      return;
+    }
+
+    try {
+      console.log('🚀 Triggering native install prompt...');
+      const promptResult = await deferredPrompt.prompt();
+      console.log('Prompt shown:', promptResult);
+
       const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User response: ${outcome}`);
+
       if (outcome === 'accepted') {
+        console.log('✅ User accepted - App will install');
         setShowInstallButton(false);
+      } else {
+        console.log('❌ User dismissed the install');
       }
       setDeferredPrompt(null);
+    } catch (error) {
+      console.error('❌ Error during installation:', error);
     }
+  };
+
+  const getBrowserInstructions = () => {
+    const userAgent = navigator.userAgent.toLowerCase();
+
+    if (userAgent.includes('chrome') && !userAgent.includes('edge')) {
+      if (/android/i.test(userAgent)) {
+        return {
+          browser: 'Chrome (Android)',
+          icon: '📱',
+          steps: [
+            'Tap the menu button (⋮) in the top right corner',
+            'Select "Add to Home screen" or "Install app"',
+            'Tap "Add" to confirm installation',
+            'The app icon will appear on your home screen'
+          ]
+        };
+      }
+      return {
+        browser: 'Chrome (Desktop)',
+        icon: '💻',
+        steps: [
+          'Look for the install icon (⊕) in the address bar',
+          'Or click the menu (⋮) → "Install School Management System"',
+          'Click "Install" to confirm',
+          'The app will open in a new window'
+        ]
+      };
+    } else if (userAgent.includes('safari') && /iphone|ipad/i.test(userAgent)) {
+      return {
+        browser: 'Safari (iOS)',
+        icon: '🍎',
+        steps: [
+          'Tap the Share button (⎙) at the bottom',
+          'Scroll down and tap "Add to Home Screen"',
+          'Tap "Add" in the top right',
+          'The app icon will appear on your home screen'
+        ]
+      };
+    } else if (userAgent.includes('edge')) {
+      return {
+        browser: 'Microsoft Edge',
+        icon: '🌐',
+        steps: [
+          'Click the menu (...) in the top right',
+          'Go to Apps → "Install this site as an app"',
+          'Click "Install" to confirm',
+          'The app will open in a new window'
+        ]
+      };
+    }
+
+    return {
+      browser: 'Your Browser',
+      icon: '🌐',
+      steps: [
+        'Chrome (Desktop): Click install icon in address bar',
+        'Chrome (Mobile): Menu → "Add to Home screen"',
+        'Safari (iOS): Share → "Add to Home Screen"',
+        'Edge: Menu → Apps → "Install app"'
+      ]
+    };
   };
 
   const handleMenuOpen = (event) => {
@@ -199,11 +334,14 @@ const Navbar = () => {
           {/* Logo and Brand - Always visible */}
           <Link to="/" style={{ textDecoration: 'none', flexGrow: { xs: 1, md: 0 } }}>
             <LogoContainer>
-              {schoolLogo ? (
-                <Logo src={schoolLogo} alt={schoolName} />
-              ) : (
-                <SchoolIcon sx={{ fontSize: 50, color: headerSettings.textColor || '#667eea' }} />
-              )}
+              <Logo
+                src={schoolLogo}
+                alt={schoolName}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/school-logo.png';
+                }}
+              />
               <BrandText textColor={headerSettings.textColor}>
                 {schoolName}
               </BrandText>
@@ -216,12 +354,16 @@ const Navbar = () => {
           {/* Right Side Buttons */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
 
-            {/* Download App Button */}
+            {/* Download App Button - Always visible when not installed */}
             {showInstallButton && headerSettings.showDownloadButton && (
-              <StyledButton onClick={handleInstallClick} sx={{ display: { xs: 'none', sm: 'flex' } }}>
+              <DownloadAppButton
+                onClick={handleInstallClick}
+                sx={{ display: { xs: 'none', sm: 'flex' } }}
+                title="Install app to your device"
+              >
                 <DownloadIcon />
                 Download App
-              </StyledButton>
+              </DownloadAppButton>
             )}
 
             {/* Not Authenticated */}
@@ -316,6 +458,97 @@ const Navbar = () => {
           </Box>
         </Toolbar>
       </Container>
+
+      {/* Professional Install Instructions Dialog */}
+      <Dialog
+        open={showInstallDialog}
+        onClose={() => setShowInstallDialog(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white'
+          }
+        }}
+      >
+        <DialogContent sx={{ pt: 4, pb: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+            {/* Animated Logo */}
+            <AnimatedEducationLogo />
+
+            {/* Title */}
+            <Typography variant="h5" fontWeight="700" textAlign="center">
+              Install School Management App
+            </Typography>
+
+            {/* Browser-specific instructions */}
+            {(() => {
+              const instructions = getBrowserInstructions();
+              return (
+                <>
+                  <Typography variant="h6" fontWeight="600" textAlign="center">
+                    {instructions.icon} {instructions.browser}
+                  </Typography>
+
+                  <List sx={{ width: '100%', bgcolor: 'rgba(255,255,255,0.1)', borderRadius: '12px', p: 2 }}>
+                    {instructions.steps.map((step, index) => (
+                      <ListItem key={index} sx={{ py: 1 }}>
+                        <Box
+                          sx={{
+                            minWidth: 32,
+                            height: 32,
+                            borderRadius: '50%',
+                            bgcolor: 'rgba(255,255,255,0.2)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            mr: 2,
+                            fontWeight: 700
+                          }}
+                        >
+                          {index + 1}
+                        </Box>
+                        <ListItemText
+                          primary={step}
+                          primaryTypographyProps={{
+                            sx: { color: 'white', fontSize: '0.95rem' }
+                          }}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+
+                  <Typography variant="body2" textAlign="center" sx={{ opacity: 0.9, mt: 1 }}>
+                    💡 Installed apps load faster and work offline!
+                  </Typography>
+                </>
+              );
+            })()}
+          </Box>
+        </DialogContent>
+
+        <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
+          <Button
+            onClick={() => setShowInstallDialog(false)}
+            variant="contained"
+            sx={{
+              bgcolor: 'white',
+              color: '#667eea',
+              fontWeight: 700,
+              px: 4,
+              py: 1.5,
+              borderRadius: '12px',
+              '&:hover': {
+                bgcolor: 'rgba(255,255,255,0.9)'
+              }
+            }}
+          >
+            Got it!
+          </Button>
+        </DialogActions>
+      </Dialog>
     </StyledAppBar>
   );
 };

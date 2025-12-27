@@ -48,9 +48,16 @@ class NotificationService {
     }
 
     try {
-      // Register service worker
-      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-      console.log('Service Worker registered:', registration);
+      // Use existing service worker registration (unified PWA + FCM service worker)
+      // The main service worker (/sw.js) is already registered in main.jsx
+      const registration = await navigator.serviceWorker.getRegistration();
+
+      if (!registration) {
+        console.error('❌ No service worker registration found');
+        return null;
+      }
+
+      console.log('✅ Using existing Service Worker registration for FCM:', registration.scope);
 
       // Wait for service worker to be ready
       await navigator.serviceWorker.ready;
@@ -62,15 +69,15 @@ class NotificationService {
       });
 
       if (token) {
-        console.log('FCM Token:', token);
+        console.log('✅ FCM Token obtained:', token.substring(0, 20) + '...');
         this.fcmToken = token;
         return token;
       } else {
-        console.log('No registration token available');
+        console.log('⚠️ No FCM registration token available. Check Firebase configuration.');
         return null;
       }
     } catch (error) {
-      console.error('Error getting FCM token:', error);
+      console.error('❌ Error getting FCM token:', error);
       return null;
     }
   }
@@ -138,8 +145,8 @@ class NotificationService {
       const notificationTitle = payload.notification?.title || 'School Management';
       const notificationOptions = {
         body: payload.notification?.body || 'You have a new notification',
-        icon: payload.notification?.icon || '/logo.png',
-        badge: '/logo.png',
+        icon: payload.notification?.icon || '/school-logo.png',
+        badge: '/school-logo.png',
         tag: payload.data?.type || 'general',
         data: payload.data,
         requireInteraction: true

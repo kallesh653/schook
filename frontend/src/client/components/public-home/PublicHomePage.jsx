@@ -547,6 +547,10 @@ const PublicHomePage = () => {
   const [mapDialogOpen, setMapDialogOpen] = useState(false);
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
+  const [installDialogOpen, setInstallDialogOpen] = useState(false);
+  const [installInstructions, setInstallInstructions] = useState('');
   const observerRef = useRef(null);
 
   // Scroll trigger for navbar
@@ -581,9 +585,34 @@ const PublicHomePage = () => {
       setShowBackToTop(window.scrollY > 500);
     };
 
+    // PWA Install Handler
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                        window.navigator.standalone ||
+                        document.referrer.includes('android-app://');
+
+    if (!isStandalone) {
+      setShowInstallButton(true);
+    }
+
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallButton(true);
+    };
+
+    const handleAppInstalled = () => {
+      setShowInstallButton(false);
+      setDeferredPrompt(null);
+    };
+
     window.addEventListener('scroll', handleScroll);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
       if (observerRef.current) {
         observerRef.current.disconnect();
       }
@@ -645,6 +674,57 @@ const PublicHomePage = () => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) {
+      // If no prompt available, show browser-specific instructions
+      const userAgent = navigator.userAgent.toLowerCase();
+      let instructions = '';
+
+      if (userAgent.includes('chrome') && !userAgent.includes('edge')) {
+        if (/android/i.test(userAgent)) {
+          instructions = '📱 To install on Android Chrome:\n\n1. Tap the menu (⋮) in the top right\n2. Select "Add to Home screen" or "Install app"\n3. Tap "Add" to confirm\n\nThe app will appear on your home screen!';
+        } else {
+          instructions = '💻 To install on Desktop Chrome:\n\n1. Look for the install icon (⊕) in the address bar\n2. Click it and select "Install"\n\nOR\n\n1. Click menu (⋮) in the top right\n2. Select "Install School Management System"\n\nThe app will open in its own window!';
+        }
+      } else if (userAgent.includes('safari') && /iphone|ipad/i.test(userAgent)) {
+        instructions = '📱 To install on iPhone/iPad:\n\n1. Tap the Share button (⎙) at the bottom\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" in the top right\n\nThe app icon will appear on your home screen!';
+      } else if (userAgent.includes('edge')) {
+        instructions = '💻 To install on Microsoft Edge:\n\n1. Click the menu (...) in the top right\n2. Go to Apps → "Install this site as an app"\n3. Click "Install"\n\nThe app will open in its own window!';
+      } else {
+        instructions = '📱 Installation Instructions:\n\n🔵 Chrome (Desktop):\n• Click install icon in address bar\n\n🔵 Chrome (Mobile):\n• Menu → "Add to Home screen"\n\n🍎 Safari (iOS):\n• Share → "Add to Home Screen"\n\n🔷 Edge:\n• Menu → Apps → "Install app"\n\n✨ Once installed, the app will work offline and load faster!';
+      }
+
+      setInstallInstructions(instructions);
+      setInstallDialogOpen(true);
+      return;
+    }
+
+    try {
+      // Show the install prompt
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+
+      if (outcome === 'accepted') {
+        console.log('✅ User accepted the install prompt');
+        setShowInstallButton(false);
+
+        // Show success message
+        setInstallInstructions('🎉 App installed successfully!\n\nYou can now access the School Management System from your home screen or app drawer.');
+        setInstallDialogOpen(true);
+
+        // Hide dialog after 3 seconds
+        setTimeout(() => {
+          setInstallDialogOpen(false);
+        }, 3000);
+      }
+      setDeferredPrompt(null);
+    } catch (error) {
+      console.error('Error during app installation:', error);
+      setInstallInstructions('⚠️ Installation Error\n\nUnable to install the app at this time.\n\nPlease try:\n1. Refreshing the page\n2. Using a different browser (Chrome recommended)\n3. Ensuring you have a stable internet connection\n\nIf the issue persists, you can still use the website normally in your browser.');
+      setInstallDialogOpen(true);
     }
   };
 
@@ -841,31 +921,33 @@ const PublicHomePage = () => {
                 <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Student Login</Box>
                 <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>Login</Box>
               </Button>
-              <Button
-                variant="contained"
-                size="small"
-                startIcon={<CloudUpload sx={{ fontSize: { xs: '1rem', md: '1.2rem' } }} />}
-                onClick={() => window.open('https://schoolm.gentime.in', '_blank')}
-                sx={{
-                  background: `linear-gradient(135deg, ${header?.primaryColor || '#1e3a8a'} 0%, ${header?.secondaryColor || '#0284c7'} 100%)`,
-                  color: 'white',
-                  fontWeight: 600,
-                  fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' },
-                  px: { xs: 1, sm: 1.5, md: 2 },
-                  py: { xs: 0.5, md: 0.75 },
-                  borderRadius: '8px',
-                  textTransform: 'none',
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-                  '&:hover': {
-                    background: `linear-gradient(135deg, ${header?.secondaryColor || '#0284c7'} 0%, ${header?.primaryColor || '#1e3a8a'} 100%)`,
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
-                  }
-                }}
-              >
-                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Download</Box>
-                <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>App</Box>
-              </Button>
+              {showInstallButton && (
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<CloudUpload sx={{ fontSize: { xs: '1rem', md: '1.2rem' } }} />}
+                  onClick={handleInstallClick}
+                  sx={{
+                    background: `linear-gradient(135deg, ${header?.primaryColor || '#1e3a8a'} 0%, ${header?.secondaryColor || '#0284c7'} 100%)`,
+                    color: 'white',
+                    fontWeight: 600,
+                    fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' },
+                    px: { xs: 1, sm: 1.5, md: 2 },
+                    py: { xs: 0.5, md: 0.75 },
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+                    '&:hover': {
+                      background: `linear-gradient(135deg, ${header?.secondaryColor || '#0284c7'} 0%, ${header?.primaryColor || '#1e3a8a'} 100%)`,
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
+                    }
+                  }}
+                >
+                  <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Download App</Box>
+                  <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>App</Box>
+                </Button>
+              )}
             </Box>
           </Box>
         </Container>
@@ -2217,6 +2299,88 @@ const PublicHomePage = () => {
               </Typography>
             </Box>
           )}
+        </DialogActions>
+      </Dialog>
+
+      {/* INSTALL APP INSTRUCTIONS DIALOG */}
+      <Dialog
+        open={installDialogOpen}
+        onClose={() => setInstallDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '24px',
+            background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+            m: 2
+          }
+        }}
+      >
+        <DialogTitle sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          pb: 2,
+          borderBottom: '2px solid rgba(102, 126, 234, 0.1)'
+        }}>
+          <Box display="flex" alignItems="center" gap={1.5}>
+            <CloudUpload sx={{ fontSize: 32, color: header?.primaryColor || '#667eea' }} />
+            <Typography variant="h5" fontWeight="bold" sx={{ color: '#1a1a1a' }}>
+              Install App
+            </Typography>
+          </Box>
+          <IconButton
+            onClick={() => setInstallDialogOpen(false)}
+            sx={{
+              color: 'text.secondary',
+              '&:hover': {
+                background: 'rgba(0, 0, 0, 0.05)',
+                transform: 'rotate(90deg)'
+              },
+              transition: 'all 0.3s ease'
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 3, pb: 2 }}>
+          <Typography
+            variant="body1"
+            sx={{
+              whiteSpace: 'pre-line',
+              color: '#333',
+              lineHeight: 1.8,
+              fontSize: '0.95rem'
+            }}
+          >
+            {installInstructions}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, pt: 1 }}>
+          <Button
+            onClick={() => setInstallDialogOpen(false)}
+            variant="contained"
+            fullWidth
+            sx={{
+              background: `linear-gradient(135deg, ${header?.primaryColor || '#667eea'} 0%, ${header?.secondaryColor || '#764ba2'} 100%)`,
+              color: 'white',
+              py: 1.5,
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              borderRadius: '12px',
+              textTransform: 'none',
+              boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
+              '&:hover': {
+                background: `linear-gradient(135deg, ${header?.secondaryColor || '#764ba2'} 0%, ${header?.primaryColor || '#667eea'} 100%)`,
+                transform: 'translateY(-2px)',
+                boxShadow: '0 12px 35px rgba(102, 126, 234, 0.4)'
+              },
+              transition: 'all 0.3s ease'
+            }}
+          >
+            Got it!
+          </Button>
         </DialogActions>
       </Dialog>
 

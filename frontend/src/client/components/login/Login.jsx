@@ -107,8 +107,11 @@ export default function Login() {
 
  {message && <CustomizedSnackbars reset={resetMessage} type={type} message={message}/>}
    
-<Box component={'div'} className="login-content"> 
+<Box component={'div'} className="login-content">
         <Box className="login-header" component={'div'}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                <img src="/school-logo.png" alt="School Logo" style={{ height: '100px', width: '100px', objectFit: 'contain' }} />
+            </Box>
             <Typography variant="h2" className="login-title">Welcome Back</Typography>
             <Typography variant="body1" className="login-subtitle">Sign in to your account</Typography>
         </Box>

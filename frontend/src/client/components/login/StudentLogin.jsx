@@ -77,6 +77,9 @@ export default function StudentLogin() {
 
             <Box component={'div'} className="login-content">
                 <Box className="login-header" component={'div'}>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                        <img src="/school-logo.png" alt="School Logo" style={{ height: '100px', width: '100px', objectFit: 'contain' }} />
+                    </Box>
                     <Typography variant="h2" className="login-title" sx={{
                         background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
                         WebkitBackgroundClip: 'text',

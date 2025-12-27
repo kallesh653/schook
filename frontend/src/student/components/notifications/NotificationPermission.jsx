@@ -19,6 +19,7 @@ import {
 } from '@mui/icons-material';
 import { styled, keyframes } from '@mui/material/styles';
 import notificationService from '../../../services/notificationService';
+import AnimatedEducationLogo from '../../../components/AnimatedEducationLogo';
 
 const pulse = keyframes`
   0%, 100% { transform: scale(1); }
@@ -117,10 +118,88 @@ const NotificationPermission = () => {
   }
 
   if (permissionStatus === 'denied') {
+    const getBrowserInstructions = () => {
+      const userAgent = navigator.userAgent.toLowerCase();
+      if (userAgent.includes('chrome') && !userAgent.includes('edge')) {
+        return {
+          browser: 'Chrome',
+          steps: [
+            'Click the lock icon (🔒) or info icon (ⓘ) in the address bar',
+            'Find "Notifications" in the permissions list',
+            'Change it from "Block" to "Allow"',
+            'Refresh the page'
+          ]
+        };
+      } else if (userAgent.includes('firefox')) {
+        return {
+          browser: 'Firefox',
+          steps: [
+            'Click the lock icon (🔒) in the address bar',
+            'Click "Connection secure" or "Permissions"',
+            'Find "Receive Notifications"',
+            'Remove the block and refresh the page'
+          ]
+        };
+      } else if (userAgent.includes('safari')) {
+        return {
+          browser: 'Safari',
+          steps: [
+            'Go to Safari → Settings → Websites → Notifications',
+            'Find this website in the list',
+            'Change to "Allow"',
+            'Refresh the page'
+          ]
+        };
+      } else if (userAgent.includes('edge')) {
+        return {
+          browser: 'Edge',
+          steps: [
+            'Click the lock icon (🔒) in the address bar',
+            'Click "Permissions for this site"',
+            'Find "Notifications" and change to "Allow"',
+            'Refresh the page'
+          ]
+        };
+      }
+      return {
+        browser: 'your browser',
+        steps: [
+          'Click the lock or info icon in the address bar',
+          'Look for notification permissions',
+          'Change from "Block" to "Allow"',
+          'Refresh the page'
+        ]
+      };
+    };
+
+    const instructions = getBrowserInstructions();
+
     return (
-      <Alert severity="warning" sx={{ mb: 2 }}>
-        Notifications are blocked. Please enable them in your browser settings to receive updates.
-      </Alert>
+      <Card sx={{ mb: 2, background: 'linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%)', border: '2px solid #ff9800' }}>
+        <CardContent>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+            <NotificationsIcon sx={{ fontSize: 40, color: '#ff9800', mt: 0.5 }} />
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#d84315', mb: 1 }}>
+                Notifications Blocked
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#5d4037', mb: 2 }}>
+                You previously blocked notifications. To receive important updates about attendance, marks, and notices, please enable them:
+              </Typography>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#d84315', mb: 1 }}>
+                📱 How to enable in {instructions.browser}:
+              </Typography>
+              <Box component="ol" sx={{ pl: 2, m: 0 }}>
+                {instructions.steps.map((step, index) => (
+                  <Typography component="li" key={index} variant="body2" sx={{ color: '#5d4037', mb: 0.5 }}>
+                    {step}
+                  </Typography>
+                ))}
+              </Box>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -135,16 +214,9 @@ const NotificationPermission = () => {
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
-                <Avatar
-                  sx={{
-                    width: { xs: 50, md: 60 },
-                    height: { xs: 50, md: 60 },
-                    bgcolor: 'rgba(255,255,255,0.2)',
-                    animation: `${pulse} 2s infinite`
-                  }}
-                >
-                  <NotificationsActiveIcon sx={{ fontSize: { xs: 28, md: 32 } }} />
-                </Avatar>
+                <Box sx={{ transform: 'scale(0.9)' }}>
+                  <AnimatedEducationLogo />
+                </Box>
 
                 <Box sx={{ flex: 1 }}>
                   <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: '1rem', md: '1.25rem' } }}>

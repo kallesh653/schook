@@ -1,33 +1,44 @@
 {
-  "name": "GenTime - School Management System",
-  "short_name": "GenTime",
-  "description": "Modern school management system for managing students, teachers, classes, attendance, and more",
+  "name": "School Management System - Complete ERP Solution",
+  "short_name": "School ERP",
+  "description": "Professional school management system for managing students, teachers, classes, attendance, examinations, results, and more. Install for offline access and faster performance.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#667eea",
-  "orientation": "portrait-primary",
+  "orientation": "any",
+  "dir": "ltr",
+  "lang": "en",
   "icons": [
     {
-      "src": "/gentime-logo.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ],
-  "categories": ["education", "productivity"],
-  "screenshots": [
-    {
-      "src": "/screenshot-wide.png",
-      "sizes": "1280x720",
+      "src": "/school-logo.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "form_factor": "wide"
+      "purpose": "any"
     },
     {
-      "src": "/screenshot-narrow.png",
-      "sizes": "750x1334",
+      "src": "/school-logo.png",
+      "sizes": "192x192",
       "type": "image/png",
-      "form_factor": "narrow"
+      "purpose": "any"
+    },
+    {
+      "src": "/school-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/school-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     }
-  ]
+  ],
+  "categories": ["education", "productivity", "business"],
+  "screenshots": [],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "iarc_rating_id": ""
 }

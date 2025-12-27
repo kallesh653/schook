@@ -35,6 +35,7 @@ import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import RecentActorsIcon from '@mui/icons-material/RecentActors';
 import ExplicitIcon from '@mui/icons-material/Explicit';
 import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import WebIcon from '@mui/icons-material/Web';
@@ -339,6 +340,7 @@ export default function School() {
             { link: "/school/marksheets", component: "Mark Sheet Generator", icon: GradingIcon, category: "academic", permission: null},
             { link: "/school/final-marksheet", component: "Final Mark Sheet", icon: GradingIcon, category: "academic", permission: null},
             {link:"/school/notice", component:"Notices", icon:CircleNotificationsIcon, category: "communication", permission: null},
+            {link:"/school/notifications", component:"Push Notifications", icon:NotificationsActiveIcon, category: "communication", permission: null},
             {link:"/school/sms", component:"SMS Management", icon:SmsIcon, category: "communication", permission: null},
             {link:"/school/sms-to-parents", component:"SMS to Parents", icon:SmsIcon, category: "communication", permission: null},
         ];

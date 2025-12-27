@@ -32,6 +32,7 @@ import CakeIcon from '@mui/icons-material/Cake';
 import WcIcon from '@mui/icons-material/Wc';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CloseIcon from '@mui/icons-material/Close';
+import NotificationPermission from '../notifications/NotificationPermission';
 
 // Animations
 const fadeIn = keyframes`
@@ -299,6 +300,9 @@ export default function StudentApp() {
 
     return (
         <Container maxWidth="lg" sx={{ py: 3 }}>
+            {/* Push Notification Permission */}
+            <NotificationPermission />
+
             {/* Profile Header Card */}
             <ProfileCard elevation={0}>
                 <Grid container spacing={3} alignItems="center">

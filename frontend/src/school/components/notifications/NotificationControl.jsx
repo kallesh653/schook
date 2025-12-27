@@ -176,14 +176,17 @@ const NotificationControl = () => {
   const fetchStudents = async () => {
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const response = await axios.get(`${baseUrl}/student/fetch-all`, {
+      const response = await axios.get(`${baseUrl}/student/fetch-all?limit=1000&status=Active`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.success) {
-        setStudents(response.data.data);
+        const studentsData = response.data.data || [];
+        console.log('Fetched students:', studentsData.length);
+        setStudents(studentsData);
       }
     } catch (error) {
       console.error('Error fetching students:', error);
+      setStudents([]);
     }
   };
 
@@ -204,14 +207,15 @@ const NotificationControl = () => {
   const fetchNotificationHistory = async () => {
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const response = await axios.get(`${baseUrl}/notification/history`, {
+      const response = await axios.get(`${baseUrl}/notification/history?limit=50`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.success) {
-        setNotificationHistory(response.data.data);
+        setNotificationHistory(response.data.data?.notifications || []);
       }
     } catch (error) {
       console.error('Error fetching notification history:', error);
+      setNotificationHistory([]);
     }
   };
 
@@ -255,10 +259,29 @@ const NotificationControl = () => {
       );
 
       if (response.data.success) {
+        const data = response.data.data;
+        const successCount = data?.successCount || 0;
+        const totalStudents = data?.totalStudents || 0;
+        const studentsWithTokens = data?.studentsWithTokens || 0;
+        const warning = data?.warning || response.data.message;
+
+        let message = '';
+        let severity = 'success';
+
+        if (successCount > 0) {
+          message = `✅ Push notification sent to ${successCount} student(s)!`;
+        } else if (studentsWithTokens === 0 && totalStudents > 0) {
+          message = `⚠️ Notification saved for ${totalStudents} student(s), but no push sent. Students need to login to the app and enable notifications first.`;
+          severity = 'warning';
+        } else {
+          message = warning || 'Notification processed';
+          severity = 'info';
+        }
+
         setSnackbar({
           open: true,
-          message: `Notification sent successfully to ${response.data.count} student(s)`,
-          severity: 'success'
+          message,
+          severity
         });
 
         // Reset form
@@ -284,7 +307,7 @@ const NotificationControl = () => {
   };
 
   const filteredStudents = selectedClass
-    ? students.filter(s => s.class?._id === selectedClass)
+    ? students.filter(s => s.student_class?._id === selectedClass)
     : students;
 
   return (
@@ -314,6 +337,20 @@ const NotificationControl = () => {
           </Box>
         </CardContent>
       </HeaderCard>
+
+      {/* Info Banner */}
+      <Alert severity="info" sx={{ mb: 3, borderRadius: '16px' }}>
+        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+          📱 How Push Notifications Work
+        </Typography>
+        <Typography variant="caption" sx={{ display: 'block' }}>
+          • Students must login to the mobile app and grant notification permissions
+          <br />
+          • Notifications are saved to history even if students haven't enabled push yet
+          <br />
+          • Push alerts are sent only to students who have enabled notifications
+        </Typography>
+      </Alert>
 
       {/* Tabs */}
       <Paper sx={{ borderRadius: '16px', mb: 3 }}>
@@ -428,7 +465,10 @@ const NotificationControl = () => {
                     <Autocomplete
                       multiple
                       options={filteredStudents}
-                      getOptionLabel={(option) => `${option.name} - ${option.class?.class_text || 'N/A'}`}
+                      getOptionLabel={(option) => {
+                        const className = option.student_class?.class_text || option.class_name || 'N/A';
+                        return `${option.name} - ${className} ${option.roll_number ? `(Roll: ${option.roll_number})` : ''}`;
+                      }}
                       value={selectedStudents}
                       onChange={(e, newValue) => setSelectedStudents(newValue)}
                       renderInput={(params) => (
@@ -436,18 +476,20 @@ const NotificationControl = () => {
                           {...params}
                           label="Select Students"
                           placeholder="Search students..."
+                          helperText={`${students.length} students available`}
                         />
                       )}
                       renderTags={(value, getTagProps) =>
                         value.map((option, index) => (
                           <Chip
                             key={index}
-                            label={option.name}
+                            label={`${option.name} (${option.roll_number || 'N/A'})`}
                             {...getTagProps({ index })}
                             size="small"
                           />
                         ))
                       }
+                      noOptionsText="No students found"
                     />
                   </>
                 )}
@@ -499,9 +541,21 @@ const NotificationControl = () => {
                 <Box sx={{ mb: 2 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2" color="text.secondary">
-                      Selected
+                      Push Enabled
                     </Typography>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: '#4caf50' }}>
+                      {students.filter(s => s.fcmToken).length}
+                    </Typography>
+                  </Box>
+                  <Divider />
+                </Box>
+
+                <Box sx={{ mb: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Selected
+                    </Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#667eea' }}>
                       {sendToAll ? 'All' : selectedStudents.length}
                     </Typography>
                   </Box>
@@ -511,7 +565,7 @@ const NotificationControl = () => {
                 <Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2" color="text.secondary">
-                      Total Sent Today
+                      Sent Today
                     </Typography>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: '#ff9800' }}>
                       {notificationHistory.filter(n => {
