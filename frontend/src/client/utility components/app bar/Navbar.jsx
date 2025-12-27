@@ -94,6 +94,30 @@ const StyledButton = styled(Box)({
   }
 });
 
+const DownloadAppButton = styled(Button)({
+  background: 'linear-gradient(135deg, #ff3838 0%, #ff1744 100%)',
+  color: 'white',
+  fontWeight: 700,
+  padding: '12px 24px',
+  borderRadius: '12px',
+  textTransform: 'none',
+  fontSize: '0.95rem',
+  boxShadow: '0 4px 20px rgba(255, 23, 68, 0.5)',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    background: 'linear-gradient(135deg, #ff1744 0%, #d50000 100%)',
+    transform: 'translateY(-3px)',
+    boxShadow: '0 8px 30px rgba(255, 23, 68, 0.6)',
+  },
+  '@media (max-width: 600px)': {
+    padding: '10px 20px',
+    fontSize: '0.85rem'
+  }
+});
+
 const DashboardButton = styled(StyledButton)({
   background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
   boxShadow: '0 4px 15px rgba(67, 233, 123, 0.4)',
@@ -224,36 +248,44 @@ const Navbar = () => {
   }, []);
 
   const handleInstallClick = async () => {
-    console.log('[NAVBAR] Install button clicked');
+    console.log('[NAVBAR] 🔘 Download App button clicked');
 
     const prompt = deferredPrompt || window.deferredPrompt;
 
     if (!prompt) {
-      console.warn('[NAVBAR] No install prompt available - showing instructions');
-      console.warn('Make sure app is served over HTTPS for native installation');
+      console.error('[NAVBAR] ❌ NO INSTALL PROMPT AVAILABLE');
+      console.error('Possible reasons:');
+      console.error('1. App not served over HTTPS');
+      console.error('2. Service worker not registered');
+      console.error('3. App already installed');
+      console.error('4. Browser does not support PWA');
+
+      // Show instructions only if really needed
       setShowInstallDialog(true);
       return;
     }
 
     try {
-      console.log('[NAVBAR] Triggering native installation prompt');
+      console.log('[NAVBAR] ✅ Prompt available - triggering native install');
 
-      // Show native browser install dialog
+      // Trigger the native browser installation dialog
       await prompt.prompt();
 
-      // Wait for user response
+      // Wait for user's choice
       const { outcome } = await prompt.userChoice;
-      console.log(`[NAVBAR] User ${outcome} installation`);
+      console.log(`[NAVBAR] 📊 User ${outcome} the installation`);
 
       if (outcome === 'accepted') {
-        // Installation accepted - hide button
+        console.log('[NAVBAR] 🎉 Installation accepted!');
         setShowInstallButton(false);
         window.deferredPrompt = null;
         setDeferredPrompt(null);
+      } else {
+        console.log('[NAVBAR] ❌ User declined installation');
       }
     } catch (error) {
-      console.error('[NAVBAR] Installation error:', error);
-      setShowInstallDialog(true);
+      console.error('[NAVBAR] ❌ Installation error:', error.message);
+      console.error('Full error:', error);
     }
   };
 
