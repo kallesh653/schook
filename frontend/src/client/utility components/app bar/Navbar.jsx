@@ -493,7 +493,7 @@ const Navbar = () => {
                 <Link to="/student-login" style={{ textDecoration: 'none' }}>
                   <StudentLoginButton>
                     <PersonIcon />
-                    <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Student Login</Box>
+                    <Typography component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Student Login</Typography>
                   </StudentLoginButton>
                 </Link>
 
@@ -501,7 +501,7 @@ const Navbar = () => {
                   <Link to="/login" style={{ textDecoration: 'none' }}>
                     <LoginButton>
                       <LoginIcon />
-                      <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Admin Login</Box>
+                      <Typography component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Admin Login</Typography>
                     </LoginButton>
                   </Link>
                 )}
